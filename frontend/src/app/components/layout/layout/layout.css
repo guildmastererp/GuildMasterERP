@@ -1,0 +1,4 @@
+.navbar { background: #333; color: white; padding: 1rem; }
+.navbar ul { display: flex; list-style: none; gap: 20px; }
+.navbar a { color: white; text-decoration: none; }
+.content { padding: 20px; text-align: center; }

@@ -2,28 +2,33 @@
 
 namespace App\Models;
 
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable;
 
     /**
-     * Los atributos que se pueden rellenar de forma masiva.
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
      */
     protected $fillable = [
-        'battletag',
+        'name',
         'email',
         'password',
-        'role_id',
+        'battletag',
+        'nombre_main',
     ];
 
     /**
-     * Los atributos que deben ocultarse en las respuestas JSON (seguridad).
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -31,29 +36,12 @@ class User extends Authenticatable
     ];
 
     /**
-     * Los atributos que se castean automáticamente.
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-
-    /**
-     * RELACIÓN: Un usuario pertenece a un único Rol.
-     */
-    public function role(): BelongsTo
-    {
-        return $this->belongsTo(Role::class);
-    }
-
-    /**
-     * RELACIÓN: Un usuario puede tener muchos personajes en la hermandad.
-     */
-    public function characters(): HasMany
-    {
-        return $this->hasMany(Character::class);
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 }

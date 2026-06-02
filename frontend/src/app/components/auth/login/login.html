@@ -1,0 +1,33 @@
+<div class="login-container">
+  <div class="login-card">
+    <h2 class="title">GuildMasterERP</h2>
+    <p class="subtitle">Inicia sesión en tu cuenta</p>
+
+    <form (ngSubmit)="iniciarSesion()" #loginForm="ngForm">
+      
+      <div class="form-group">
+        <label for="email">Correo Electrónico</label>
+        <input type="email" id="email" name="email" [(ngModel)]="email" required placeholder="tu@correo.com">
+      </div>
+
+      <div class="form-group">
+        <label for="pass">Contraseña</label>
+        <input type="password" id="pass" name="pass" [(ngModel)]="pass" required placeholder="Tu contraseña">
+      </div>
+
+      <div class="alert error" *ngIf="errorBackend">
+        {{ errorBackend }}
+      </div>
+
+      <div class="actions">
+        <button type="submit" class="btn-primary" [disabled]="!loginForm.form.valid || cargando">
+          <span *ngIf="!cargando">Entrar</span>
+          <span *ngIf="cargando">Conectando...</span>
+        </button>
+        
+        <button type="button" class="btn-secondary" (click)="abrirRegistro()">¿No tienes cuenta? Regístrate aquí</button>
+      </div>
+
+    </form>
+  </div>
+</div>
