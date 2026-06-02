@@ -78,11 +78,11 @@ export class Registro {
       nombreMain: this.nombreExtraido
     };
 
-    this.authService.registrarUsuario(datosRegistro).subscribe({
+this.authService.registrarUsuario(datosRegistro).subscribe({
       next: (res: any) => {
         this.cargando = false;
-        // Si se crea la cuenta con éxito, entramos directamente al ERP
-        this.router.navigate(['/comunidad/perfil']);
+        // Al terminar de crear la cuenta, al principal
+        this.router.navigate(['/principal']);
       },
       error: (err: any) => {
         this.cargando = false;

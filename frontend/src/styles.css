@@ -1,138 +1,40 @@
-html, body, app-root {
-  margin: 0 !important;
-  padding: 0 !important;
-  width: 100%;
+/*GUÍA DE ESTILOS */
+
+/* TIPOGRAFÍAS */
+@import url('https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;700&display=swap');
+
+@font-face {
+  font-family: 'Morpheus';
+  src: url('/fonts/MORPHEUS.TTF') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* COLORES */
+:root {
+  --azul-oscuro: #1d264e;       
+  --amarillo-dorado: #C7A938;   
+  --blanco: #ffffff;            
+  --gris-pestanas: #f4f4f4;     
+  --rojo-cerrar: #ff4d4d;       
+  --rojo-cerrar-hover: #c9302c; 
+  --azul-claro: #4d4f58;
+}
+
+/* ESTILOS BASE*/
+body, html {
+  margin: 0;
+  padding: 0;
   height: 100%;
-  overflow: hidden;
-  background-color: #ffffff;
-}
-
-/* ESTILOS DEL MÓDULO DE AUTENTICACIÓN */
-.auth-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100vw;
-  background-image: url('/images/background.jpg'); /* O el fondo que uses */
-  background-size: cover;
-  background-position: center;
-}
-
-.auth-box {
-  background-color: rgba(255, 255, 255, 0.95);
-  padding: 40px;
-  border-radius: 8px;
-  width: 450px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  text-align: center;
-  border: 2px solid #1B2140;
-}
-
-.auth-logo {
-  width: 120px;
-  margin-bottom: 20px;
-}
-
-.auth-box h2 {
-  color: #1B2140;
-  margin-bottom: 10px;
-}
-
-.subtitle {
-  color: #7f8c8d;
-  font-size: 14px;
-  margin-bottom: 25px;
-}
-
-.form-group {
-  text-align: left;
-  margin-bottom: 20px;
-}
-
-.form-group label {
-  display: block;
-  font-weight: bold;
-  color: #1B2140;
-  margin-bottom: 5px;
-  font-size: 13px;
-}
-
-.help-text {
-  font-size: 11px;
-  color: #95a5a6;
-  margin: 0 0 10px 0;
-}
-
-.auth-input {
   width: 100%;
-  padding: 12px;
-  border: 1px solid #bdc3c7;
-  border-radius: 4px;
-  box-sizing: border-box;
-  font-family: inherit;
+  background-color: var(--blanco);
+  font-family: 'Comfortaa', sans-serif;
 }
 
-.highlight-box {
-  background-color: #f8f9fa;
-  padding: 15px;
-  border: 1px dashed #C7A938;
-  border-radius: 4px;
+button, input, select, textarea {
+  font-family: 'Comfortaa', sans-serif;
 }
 
-.error-msg {
-  color: #c0392b;
-  font-size: 12px;
-  margin-top: 8px;
-  font-weight: bold;
-}
-
-.success-box {
-  background-color: #d4edda;
-  color: #155724;
-  padding: 15px;
-  border-radius: 4px;
-  margin-bottom: 20px;
-  text-align: left;
-  font-size: 13px;
-}
-
-.auth-buttons {
-  display: flex;
-  gap: 15px;
-  margin-top: 30px;
-}
-
-.btn-primary, .btn-secondary {
-  flex: 1;
-  padding: 12px;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn-primary {
-  background-color: #1B2140;
-  color: #C7A938;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #2c3e50;
-}
-
-.btn-primary:disabled {
-  background-color: #bdc3c7;
-  color: #7f8c8d;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: #ecf0f1;
-  color: #1B2140;
-}
-
-.btn-secondary:hover {
-  background-color: #bdc3c7;
+h1, h2, h3, h4, h5, h6, .window-title, .ribbon-tabs button, .empty-state h1 {
+  font-family: 'Morpheus', serif !important;
 }

@@ -1,5 +1,54 @@
-<div class="erp-container">
-  <main class="erp-content">
-    <router-outlet></router-outlet> 
+<div class="erp-window">
+  <div class="window-header">
+    <div class="window-logo">
+      <img src="/images/miniLogo.png" alt="GM Mini Logo" class="header-mini-logo">
+    </div>
+    <div class="window-title">GUILD MASTER ERP</div>
+    <div class="window-controls">
+      <span>—</span><span>□</span><span>X</span>
+    </div>
+  </div>
+
+  <div class="ribbon-menu">
+    <div class="ribbon-tabs">
+      <button 
+        *ngFor="let categoria of objectKeys(menus)" 
+        (click)="menuActivo = categoria"
+        [class.active]="menuActivo === categoria">
+        {{ categoria }}
+      </button>
+    </div>
+
+    <div class="ribbon-content">
+      <div class="ribbon-btn" *ngFor="let btn of menus[menuActivo]" (click)="abrirSeccion(btn)">
+        <div class="btn-icon">
+          <img [src]="btn.icono" alt="{{ btn.nombre }}" class="btn-image">
+        </div>
+        <span class="btn-text">{{ btn.nombre }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="open-tabs-bar" *ngIf="pestanasAbiertas.length > 0">
+    <div 
+      class="open-tab" 
+      *ngFor="let pestana of pestanasAbiertas; let i = index"
+      [class.active]="rutaActiva === pestana.ruta"
+      (click)="navegarA(pestana.ruta)">
+      {{ pestana.nombre }}
+      <span class="close-btn" (click)="cerrarPestana(i, $event)">✖</span>
+    </div>
+  </div>
+
+  <main class="main-content">
+    
+    <div class="empty-state" *ngIf="pestanasAbiertas.length === 0">
+      <img src="/images/logo.png" alt="GuildMaster ERP Logo">
+    </div>
+
+    <div class="router-wrapper" [style.display]="pestanasAbiertas.length > 0 ? 'block' : 'none'">
+      <router-outlet></router-outlet>
+    </div>
+    
   </main>
 </div>

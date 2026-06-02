@@ -1,4 +1,270 @@
-.navbar { background: #333; color: white; padding: 1rem; }
-.navbar ul { display: flex; list-style: none; gap: 20px; }
-.navbar a { color: white; text-decoration: none; }
-.content { padding: 20px; text-align: center; }
+/* #region ESTRUCTURA PRINCIPAL DEL FRAMEWORK */
+
+/* Contenedor principal estilo Ventana de Escritorio */
+.erp-window {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  background-color: var(--blanco);
+  overflow: hidden;
+  border: 2px solid var(--azul-oscuro);
+  box-sizing: border-box;
+}
+
+/* #endregion */
+
+/* #region CABECERA DE LA VENTANA (WINDOW HEADER) */
+
+.window-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: var(--azul-oscuro);
+  color: var(--blanco);
+  padding: 0px 15px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.window-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.header-mini-logo {
+  height: 30px;
+  width: auto;
+  display: block;
+  object-fit: contain;
+}
+
+.window-title {
+  color: var(--amarillo-dorado);
+  font-size: 1.2rem;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+/* #region BOTONES DE CONTROL (MINIMIZAR, MAXIMIZAR, CERRAR) */
+
+.window-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.window-controls span {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 28px;
+  height: 24px;
+  margin-left: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: 'Comfortaa', sans-serif;
+  font-size: 0.8rem;
+  color: var(--blanco);
+  transition: all 0.2s ease-in-out;
+}
+
+.window-controls span:hover {
+  background-color: var(--amarillo-dorado);
+  color: var(--azul-oscuro);
+}
+
+.window-controls span:last-child:hover {
+  background-color: var(--rojo-cerrar-hover);
+  color: var(--blanco);
+}
+
+/* #endregion */
+
+/* #endregion */
+
+/* #region NAVEGACIÓN SUPERIOR (MENÚ RIBBON) */
+
+.ribbon-menu {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 4px solid var(--amarillo-dorado);
+}
+
+/* #region CATEGORÍAS DEL RIBBON (TABS) */
+
+.ribbon-tabs {
+  display: flex;
+  background-color: var(--blanco);
+  border-bottom: 1px solid var(--azul-claro);
+}
+
+.ribbon-tabs button {
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--azul-claro);
+  padding: 8px 20px;
+  font-size: 1.1rem;
+  color: var(--azul-claro);
+  cursor: pointer;
+}
+
+.ribbon-tabs button.active {
+  background-color: var(--azul-claro);
+  color: var(--amarillo-dorado);
+}
+
+/* #endregion */
+
+/* #region BOTONES DE ACCIÓN INTERNOS (CONTENT) */
+
+.ribbon-content {
+  display: flex;
+  padding: 5px;
+  background-color: var(--azul-claro);
+  gap: 25px;
+  min-height: 80px;
+  max-height: 80px;
+  padding-bottom: 10px;
+  color: var(--blanco);
+}
+
+.ribbon-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  width: 100px;
+  color: var(--blanco);
+}
+
+.ribbon-btn:hover .btn-icon {
+  transform: scale(1.05);
+}
+
+.btn-icon {
+  width: 70px;
+  height: 70px;
+  background-color: transparent;
+  color: var(--amarillo-dorado);
+  border: none;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 1.5rem;
+  margin-bottom: 5px;
+  transition: transform 0.2s;
+  color: var(--blanco);
+}
+
+.btn-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; 
+  border-radius: 50%; 
+  display: block;
+}
+
+.btn-text {
+  font-size: 0.8rem;
+  font-weight: bold;
+  text-align: center;
+  color: var(--blanco);
+}
+
+/* #endregion */
+
+/* #endregion */
+
+/* #region GESTIÓN DE VISTAS (BARRA DE PESTAÑAS INFERIORES) */
+
+.open-tabs-bar {
+  display: flex;
+  background-color: var(--gris-pestanas);
+  border-bottom: 2px solid var(--azul-oscuro);
+  padding-top: 5px;
+  padding-left: 5px;
+  gap: 2px;
+}
+
+.open-tab {
+  background-color: var(--blanco);
+  border: 2px solid var(--azul-oscuro);
+  border-bottom: none;
+  padding: 8px 15px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--azul-oscuro);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.open-tab.active {
+  background-color: var(--azul-oscuro);
+  color: var(--amarillo-dorado);
+}
+
+.close-btn {
+  font-size: 0.8rem;
+  color: var(--rojo-cerrar);
+  font-weight: bold;
+}
+
+.open-tab.active .close-btn {
+  color: var(--amarillo-dorado);
+}
+
+/* #endregion */
+
+/* #region ÁREA DE CONTENIDO CENTRAL (WORKSPACE) */
+
+.main-content {
+  flex-grow: 1;
+  background-color: var(--blanco);
+  position: relative;
+  overflow-y: auto;
+}
+
+/* #region ESTADO VACÍO / PANTALLA DE BIENVENIDA (EMPTY STATE) */
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  text-align: center;
+  color: var(--azul-oscuro);
+}
+
+.empty-state h1 {
+  font-size: 2.5rem;
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  margin-bottom: 30px;
+}
+
+.empty-state img {
+  max-width: 500px;
+  opacity: 0.9;
+}
+
+/* #endregion */
+
+/* #region CONTENEDOR DINÁMICO DE RUTAS (ROUTER ROUTER-OUTLET) */
+
+.router-wrapper {
+  padding: 20px;
+  height: 100%;
+}
+
+/* #endregion */
+
+/* #endregion */

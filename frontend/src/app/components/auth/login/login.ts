@@ -29,11 +29,11 @@ export class Login {
       contrasenya: this.pass
     };
 
-    this.authService.login(credenciales).subscribe({
+this.authService.login(credenciales).subscribe({
       next: (res: any) => {
         this.cargando = false;
-        // Si el login es correcto, entramos al ERP
-        this.router.navigate(['/comunidad/perfil']);
+        // Ahora entra a la vista principal para ver el logo
+        this.router.navigate(['/principal']); 
       },
       error: (err: any) => {
         this.cargando = false;
@@ -44,7 +44,6 @@ export class Login {
   }
 
   abrirRegistro() {
-    // Redirige a la vista de creación de cuenta
-    this.router.navigate(['/autentificacion/registro']);
+    this.router.navigate(['/registro']);
   }
 }
