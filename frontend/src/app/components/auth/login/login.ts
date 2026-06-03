@@ -1,49 +1,85 @@
+// #region IMPORTS
 import { Component } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../services/auth';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+// #endregion
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.html',
-  styleUrls: ['./login.css'],
+  styleUrls: ['./login.css'], // Asumo que usas los mismos estilos base que en el registro
   standalone: false
 })
 export class Login {
+
+  // #region PROPIEDADES
   email: string = '';
   pass: string = '';
-  
   cargando: boolean = false;
   errorBackend: string = '';
+  // #endregion
 
+  // #region CONSTRUCTOR
   constructor(
-    private authService: AuthService,
+    private http: HttpClient,
     private router: Router
   ) {}
+  // #endregion
 
+  // #region MÉTODOS
   iniciarSesion() {
+    // 1. Freno si los campos están vacíos (evita enviar peticiones en blanco)
+    if (!this.email || !this.pass) {
+      this.errorBackend = 'Por favor, rellena tu correo y contraseña.';
+      return;
+    }
+
     this.cargando = true;
     this.errorBackend = '';
 
-    const credenciales = {
-      correo: this.email,
-      contrasenya: this.pass
+    const datosLogin = {
+      email: this.email,
+      password: this.pass
     };
 
-this.authService.login(credenciales).subscribe({
+    // 2. Forzamos las cabeceras para que Laravel reconozca el JSON
+    const opciones = {
+      headers: new HttpHeaders({
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      })
+    };
+
+    // 3. Petición POST a la IP de tu Máquina Virtual
+    this.http.post('http://192.168.1.132:8000/api/login', datosLogin, opciones).subscribe({
       next: (res: any) => {
         this.cargando = false;
-        // Ahora entra a la vista principal para ver el logo
-        this.router.navigate(['/principal']); 
+        
+        // ¡PASO CRÍTICO!: Guardamos el Token para que el Perfil pueda usarlo luego
+        if (res.access_token) {
+          localStorage.setItem('token', res.access_token);
+        }
+
+        // Redirigimos al sistema ERP
+        this.router.navigate(['/principal']);
       },
       error: (err: any) => {
         this.cargando = false;
-        // Mostramos el mensaje exacto que devuelve Laravel (ej. "Credenciales incorrectas")
-        this.errorBackend = err.error?.message || 'Error al conectar con el servidor';
+        
+        // Analizamos los posibles rechazos
+        if (err.status === 401) {
+          this.errorBackend = 'El correo o la contraseña son incorrectos.';
+        } else if (err.status === 422) {
+          this.errorBackend = 'Faltan datos por enviar o tienen un formato inválido.';
+        } else {
+          this.errorBackend = 'Error de conexión con el servidor de la hermandad.';
+        }
       }
     });
   }
 
-  abrirRegistro() {
+  irAlRegistro() {
     this.router.navigate(['/registro']);
   }
+  // #endregion
 }
