@@ -1,3 +1,57 @@
-<div class="logo-container">
-  <img src="assets/logo.png" alt="GuildMasterERP Logo" class="big-logo">
+<div *ngIf="cargando" class="profile-loading">
+  <div class="spinner"></div>
+  <p>Invocando datos desde las Tierras Sombrías...</p>
+</div>
+<div *ngIf="errorCarga && !cargando" class="profile-error">
+  <p>No se pudo sincronizar el personaje. Revisa que el enlace a Raider.io sea correcto.</p>
+</div>
+<div *ngIf="characterData && !cargando" class="profile-container">
+
+  <div class="character-card">
+    <div class="avatar-wrapper">
+      <img [src]="characterData.thumbnail_url" alt="Avatar" class="char-avatar">
+    </div>
+    
+    <div class="char-info">
+      <h2>{{ characterData.name }}</h2>
+      <p class="char-sub">{{ characterData.race }} {{ characterData.active_spec_name }} {{ characterData.class }}</p>
+      <p class="char-realm">{{ characterData.realm }} ({{ characterData.region | uppercase }})</p>
+    </div>
+
+    <div class="char-ilvl">
+      <span class="ilvl-number">{{ characterData.gear.item_level_equipped }}</span>
+      <span class="ilvl-label">iLvl Equipado</span>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    
+    <div class="stat-box mplus-box">
+      <h3>Míticas+ Score</h3>
+      <div class="score-display">
+        <span [style.color]="characterData.mythic_plus_scores_by_season[0].scores.all > 2000 ? '#ff8000' : '#a335ee'">
+          {{ characterData.mythic_plus_scores_by_season[0].scores.all | number:'1.0-0' }}
+        </span>
+      </div>
+      <p class="season-text">Temporada Actual</p>
+    </div>
+
+    <div class="stat-box raid-box">
+      <h3>Progreso de Raid</h3>
+      <div class="raid-summary" *ngIf="characterData.raid_progression">
+        <div class="raid-item">
+          <span class="raid-name">Avance Actual:</span>
+          <span class="raid-progress-badge">
+            {{ characterData.raid_progression['liberation-of-undermine']?.summary || '0/0' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <a [href]="characterData.profile_url" target="_blank" class="btn-external-link">
+    Ver Perfil Completo en Raider.io
+  </a>
+
 </div>

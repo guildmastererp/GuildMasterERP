@@ -2,59 +2,66 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
-    {
-        // 1. Validamos los datos que envía Angular
-        $request->validate([
-            'correo' => 'required|email|unique:users,email',
-            'contrasenya' => 'required|min:6',
-            'nombre' => 'required|string',
-            'battletag' => 'required|string',
-            'nombreMain' => 'required|string'
-        ]);
+    // #region AUTENTICACIÓN Y REGISTRO
 
-        // 2. Creamos el usuario
-        $user = User::create([
-            'name' => $request->nombre,
-            'email' => $request->correo,
-            'password' => Hash::make($request->contrasenya),
-            'battletag' => $request->battletag,
-            'nombre_main' => $request->nombreMain
-        ]);
+/**
+ * @description Registra un nuevo usuario en el ERP validando el BattleTag 
+ * y extrayendo los datos del personaje desde su URL de Raider.io.
+ */
+public function register(Request $request) // <--- Cambiado de 'registrar' a 'register'
+{
+    // #region VALIDADOR DE ENTRADA
+    $request->validate([
+        'name'         => 'required|string|max:255',
+        'email'        => 'required|string|email|max:255|unique:users',
+        'password'     => 'required|string|min:8|confirmed',
+        'battletag'    => 'required|string|max:50|unique:users,battletag',
+        'raiderio_url' => ['required', 'url', 'regex:~raider\.io/characters/[^/]+/[^/]+/[^/]+~i']
+    ]);
+    // #endregion
 
-        return response()->json([
-            'message' => 'Usuario registrado con éxito',
-            'user' => $user
-        ], 201);
+    // #region EXTRACCIÓN DE DATOS RAIDER.IO
+    $url = $request->input('raiderio_url');
+    
+    $region = null;
+    $reino = null;
+    $nombreMain = null;
+
+    if (preg_match('~raider\.io/characters/([^/]+)/([^/]+)/([^/]+)~i', $url, $matches)) {
+        $region     = $matches[1];
+        $reino      = $matches[2];
+        $nombreMain = $matches[3];
     }
+    // #endregion
 
-    public function login(Request $request)
-    {
-        // 1. Validamos la petición
-        $request->validate([
-            'correo' => 'required|email',
-            'contrasenya' => 'required'
-        ]);
+    // #region ALMACENAMIENTO EN BASE DE DATOS
+    $user = User::create([
+        'battletag'   => $request->input('battletag'),
+        'name'        => $request->input('name'),
+        'email'       => $request->input('email'),
+        'password'    => Hash::make($request->input('password')),
+        'nombre_main' => $nombreMain,
+        'reino'       => $reino,
+        'region'      => $region,
+    ]);
+    // #endregion
 
-        // 2. Buscamos al usuario
-        $user = User::where('email', $request->correo)->first();
+    // #region RESPUESTA JSON
+    return response()->json([
+        'status'  => 'success',
+        'message' => 'Cuenta de hermandad creada correctamente.',
+        'user'    => $user
+    ], 201);
+    // #endregion
+}
 
-        // 3. Comprobamos contraseña
-        if (!$user || !Hash::check($request->contrasenya, $user->password)) {
-            return response()->json([
-                'message' => 'Credenciales incorrectas'
-            ], 401);
-        }
-
-        return response()->json([
-            'message' => 'Login correcto',
-            'user' => $user
-        ]);
-    }
+// #endregion
 }

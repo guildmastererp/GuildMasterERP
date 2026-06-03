@@ -1,44 +1,86 @@
 <div class="registro-container">
   <div class="registro-card">
+    
     <h2 class="title">Únete a GuildMasterERP</h2>
     <p class="subtitle">Registra tu personaje principal</p>
 
-<form (ngSubmit)="registrarUsuario()" #registroForm="ngForm">      
+    <form (ngSubmit)="registrarUsuario()" #registroForm="ngForm">      
+      
       <div class="form-group">
         <label for="email">Correo Electrónico</label>
-        <input type="email" id="email" name="email" [(ngModel)]="email" required placeholder="tu@correo.com">
+        <input 
+          type="email" 
+          id="email" 
+          name="email" 
+          [(ngModel)]="email" 
+          [disabled]="cargando"
+          required 
+          placeholder="tu@correo.com">
       </div>
 
       <div class="form-group">
         <label for="pass">Contraseña</label>
-        <input type="password" id="pass" name="pass" [(ngModel)]="pass" required minlength="6" placeholder="Mínimo 6 caracteres">
+        <input 
+          type="password" 
+          id="pass" 
+          name="pass" 
+          [(ngModel)]="pass" 
+          [disabled]="cargando"
+          required 
+          minlength="6" 
+          placeholder="Mínimo 6 caracteres">
       </div>
 
       <div class="form-group">
         <label for="battletag">BattleTag</label>
-        <input type="text" id="battletag" name="battletag" [(ngModel)]="battletag" required placeholder="Ejemplo#1234">
+        <input 
+          type="text" 
+          id="battletag" 
+          name="battletag" 
+          [(ngModel)]="battletag" 
+          [disabled]="cargando"
+          required 
+          placeholder="Ejemplo#1234">
       </div>
 
       <div class="form-group">
         <label for="urlRaiderIo">Perfil de Raider.io (Main)</label>
-        <input type="text" id="urlRaiderIo" name="urlRaiderIo" [(ngModel)]="urlRaiderIo" (blur)="procesarUrl()" required placeholder="https://raider.io/characters/eu/sanguino/TuPersonaje">
+        <input 
+          type="text" 
+          id="urlRaiderIo" 
+          name="urlRaiderIo" 
+          [(ngModel)]="urlRaiderIo" 
+          (blur)="procesarUrl()" 
+          [disabled]="cargando"
+          required 
+          placeholder="https://raider.io/characters/eu/sanguino/TuPersonaje">
         
         <small class="error-text" *ngIf="errorUrl">URL inválida. Asegúrate de copiar el enlace completo de tu personaje.</small>
         <small class="success-text" *ngIf="!errorUrl && nombreExtraido">Personaje detectado: {{ nombreExtraido }} ({{ reinoExtraido }})</small>
       </div>
 
-      <div class="alert error" *ngIf="errorBackend">
-        {{ errorBackend }}
-      </div>
-
       <div class="actions">
-        <button type="submit" class="btn-primary" [disabled]="!registroForm.form.valid || errorUrl || cargando">
+        
+        <div class="alert error" *ngIf="errorBackend" style="margin-bottom: 15px; width: 100%; box-sizing: border-box;">
+          {{ errorBackend }}
+        </div>
+
+        <button 
+          type="submit" 
+          class="btn-primary" 
+          [disabled]="!registroForm.form.valid || errorUrl || cargando">
           <span *ngIf="!cargando">Registrarse</span>
           <span *ngIf="cargando">Creando cuenta...</span>
         </button>
-        <button type="button" class="btn-secondary" routerLink="/login">Volver al Login</button>
+        
+        <button 
+          type="button" 
+          class="btn-secondary" 
+          (click)="volverAlLogin()"
+          [disabled]="cargando">
+          Volver al Login
+        </button>
       </div>
-
-    </form>
+      </form>
   </div>
 </div>

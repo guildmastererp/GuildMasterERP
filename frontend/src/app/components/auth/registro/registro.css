@@ -1,18 +1,18 @@
-/* #region REGISTRATION STYLES (REGISTRO DE CUENTAS) */
+/* #region REGISTRO DE CUENTAS */
 
 .registro-container {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: var(--gris-pestanas); /* Enlazado con tu gris de fondo general */
+  background-color: var(--gris-pestanas); 
 }
 
 .registro-card {
-  background-color: var(--azul-oscuro); /* Tu azul corporativo */
+  background-color: var(--azul-oscuro); 
   padding: 40px;
   border-radius: 8px;
-  border: 2px solid var(--amarillo-dorado); /* Cambiado a borde completo para que clone el diseño de la tarjeta de Login */
+  border: 2px solid var(--amarillo-dorado); 
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   width: 100%;
   max-width: 450px;
@@ -24,7 +24,7 @@
 .title {
   margin: 0 0 10px 0;
   text-align: center;
-  color: var(--amarillo-dorado); /* Tu dorado (Heredará Morpheus por defecto) */
+  color: var(--amarillo-dorado); 
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
@@ -32,12 +32,12 @@
   text-align: center;
   margin-bottom: 30px;
   font-size: 0.9rem;
-  color: #a0aabf; /* Gris azulado sutil para el subtítulo */
+  color: #a0aabf; 
 }
 
 /* #endregion */
 
-/* #region CAMPOS DE FORMULARIO (INPUTS) */
+/* #region CAMPOS DE FORMULARIO */
 
 .form-group {
   margin-bottom: 20px;
@@ -54,8 +54,8 @@ label {
 input {
   width: 100%;
   padding: 12px;
-  background-color: var(--blanco); /* Fondo blanco para unificarlo con el Login y mejorar la legibilidad */
-  color: var(--azul-oscuro); /* El usuario escribe en azul oscuro sobre el fondo blanco */
+  background-color: var(--blanco); 
+  color: var(--azul-oscuro); 
   border: 2px solid transparent;
   border-radius: 4px;
   box-sizing: border-box;
@@ -64,7 +64,7 @@ input {
 
 input:focus {
   outline: none;
-  border-color: var(--amarillo-dorado); /* Iluminación dorada al seleccionar el campo */
+  border-color: var(--amarillo-dorado); 
   box-shadow: 0 0 8px rgba(199, 169, 56, 0.4);
 }
 
@@ -74,7 +74,7 @@ input:focus {
 
 .error-text {
   display: block;
-  color: var(--rojo-cerrar); /* Usando tu variable de rojo para errores */
+  color: var(--rojo-cerrar); 
   margin-top: 5px;
   font-size: 0.8rem;
   font-weight: bold;
@@ -82,7 +82,7 @@ input:focus {
 
 .success-text {
   display: block;
-  color: #51cf66; /* Verde esmeralda para éxitos */
+  color: #51cf66; 
   margin-top: 5px;
   font-size: 0.8rem;
   font-weight: bold;
@@ -90,7 +90,7 @@ input:focus {
 
 .alert.error {
   background-color: rgba(255, 107, 107, 0.1);
-  border-left: 4px solid var(--rojo-cerrar); /* Enlazado al rojo corporativo */
+  border-left: 4px solid var(--rojo-cerrar); 
   padding: 10px;
   margin-bottom: 20px;
   font-size: 0.9rem;

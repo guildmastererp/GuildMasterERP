@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+// #region IMPORTS
+import { Component, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../../services/auth';
+// #endregion
 
 @Component({
   selector: 'app-registro',
@@ -9,42 +10,39 @@ import { AuthService } from '../../../services/auth';
   standalone: false
 })
 export class Registro {
-  // Campos del formulario
+
+  // #region PROPIEDADES
   email: string = '';
   pass: string = '';
   battletag: string = '';
   urlRaiderIo: string = '';
 
-  // Variables extraídas automáticamente
   nombreExtraido: string = '';
   reinoExtraido: string = '';
 
-  // Control de estado y errores
   errorUrl: boolean = false;
   cargando: boolean = false;
   errorBackend: string = '';
+  // #endregion
 
+  // #region CONSTRUCTOR
   constructor(
-    private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef // <-- Herramienta para forzar el repintado de la pantalla
   ) {}
+  // #endregion
 
-  // Se ejecuta al quitar el foco del input de Raider.io
+  // #region MÉTODOS
   procesarUrl() {
     this.errorUrl = false;
     this.nombreExtraido = '';
     this.reinoExtraido = '';
 
-    if (!this.urlRaiderIo) {
-      return;
-    }
+    if (!this.urlRaiderIo) return;
 
     try {
-      // Ejemplo esperado: https://raider.io/characters/eu/sanguino/TuPersonaje
       const url = new URL(this.urlRaiderIo);
       const partesRuta = url.pathname.split('/').filter(part => part.length > 0);
-
-      // Verificamos que tenga la estructura correcta: ['characters', 'region', 'reino', 'nombre']
       const indexCharacters = partesRuta.indexOf('characters');
       
       if (indexCharacters !== -1 && partesRuta.length >= indexCharacters + 4) {
@@ -54,50 +52,74 @@ export class Registro {
         this.errorUrl = true;
       }
     } catch (error) {
-      // Si la URL no tiene formato válido (ej. falta el https://)
       this.errorUrl = true;
     }
   }
 
-  registrarUsuario() {
-    // Evitamos enviar si hay errores en la URL o faltan datos clave
+  // Convertimos el método en asíncrono para usar fetch nativo
+  async registrarUsuario() {
     if (this.errorUrl || !this.nombreExtraido) {
-      this.errorBackend = 'Por favor, introduce un enlace de Raider.io válido primero.';
+      this.errorBackend = 'Introduce un enlace de Raider.io válido primero.';
       return;
     }
 
+    // Bloqueamos el botón y limpiamos alertas previas
     this.cargando = true;
     this.errorBackend = '';
 
-    // Mapeamos los datos para que coincidan con las validaciones de tu AuthController en Laravel
     const datosRegistro = {
-      correo: this.email,
-      contrasenya: this.pass,
-      nombre: this.nombreExtraido, // Usamos el nombre del Main como nombre de usuario base
+      name: this.nombreExtraido,
+      email: this.email,
+      password: this.pass,
+      password_confirmation: this.pass,
       battletag: this.battletag,
-      nombreMain: this.nombreExtraido
+      raiderio_url: this.urlRaiderIo
     };
 
-this.authService.registrarUsuario(datosRegistro).subscribe({
-      next: (res: any) => {
-        this.cargando = false;
-        // Al terminar de crear la cuenta, al principal
+    try {
+      // API FETCH: Bypassea cualquier Interceptor de Angular que se esté tragando tus errores
+      const response = await fetch('http://192.168.1.132:8000/api/registro', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(datosRegistro)
+      });
+      // ¡LIBERAMOS LOS BOTONES INMEDIATAMENTE!
+      this.cargando = false;
+
+      if (response.ok) {
+        // Redirección si la cuenta se crea bien
         this.router.navigate(['/principal']);
-      },
-      error: (err: any) => {
-        this.cargando = false;
-        // Si el correo ya existe, Laravel devolverá un error de validación (422)
-        if (err.status === 422) {
-          this.errorBackend = 'Ese correo o BattleTag ya está en uso. Revisa los datos.';
+      } else {
+        // Si hay fallo, leemos el JSON manualmente
+        const body = await response.json();
+
+        // Evaluamos exactamente lo que devuelve Laravel
+        if (response.status === 422 && body.errors) {
+          if (body.errors.battletag) {
+            this.errorBackend = 'El BattleTag ya tiene una cuenta asociada.';
+          } else if (body.errors.email) {
+            this.errorBackend = 'El correo electrónico ya está registrado.';
+          } else {
+            this.errorBackend = 'Revisa los datos introducidos.';
+          }
         } else {
-          this.errorBackend = err.error?.message || 'Error al intentar registrar el usuario';
+          this.errorBackend = body.message || 'Error desconocido del servidor.';
         }
       }
-    });
+    } catch (error) {
+      this.cargando = false;
+      this.errorBackend = 'Error crítico de red. El servidor no responde.';
+    }
+
+    // ORDEN DIRECTA A ANGULAR: "He cambiado una variable, pinta la alerta roja AHORA MISMO"
+    this.cdr.detectChanges();
   }
 
   volverAlLogin() {
-    // Devuelve al usuario a la pantalla principal de login
-    this.router.navigate(['/autentificacion']);
+    this.router.navigate(['/login']);
   }
+  // #endregion
 }

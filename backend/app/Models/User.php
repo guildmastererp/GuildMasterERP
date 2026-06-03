@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,36 +11,41 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    // #region CONFIGURACIÓN DE LLAVES Y MODELO
+
+    // 1. Definimos que la Clave Primaria real es el BattleTag
+    protected $primaryKey = 'battletag';
+
+    // 2. Como es un String (Varchar) y no un entero, desactivamos el incremento automático en Eloquent
+    public $incrementing = false;
+
+    // 3. Le indicamos que el tipo de datos de la clave es una cadena de texto
+    protected $keyType = 'string';
+
+    // #endregion
+
+    // #region ATRIBUTOS PERMISIVOS (MASS ASSIGNMENT)
     /**
      * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
      */
     protected $fillable = [
+        'battletag',
         'name',
         'email',
         'password',
-        'battletag',
         'nombre_main',
+        'reino',
+        'region',
     ];
+    // #endregion
 
+    // #region ATRIBUTOS OCULTOS
     /**
      * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
      */
     protected $hidden = [
         'password',
         'remember_token',
     ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-    ];
+    // #endregion
 }

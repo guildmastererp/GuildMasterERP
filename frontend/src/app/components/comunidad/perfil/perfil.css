@@ -1,11 +1,194 @@
-.logo-container {
+/* #region CONTENEDORES DE ESTADO (LOADING / ERROR) */
+
+.profile-loading, .profile-error {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 80vh; /* Ocupa casi toda la altura */
+  height: 50vh;
+  color: var(--blanco);
 }
 
-.big-logo {
-  max-width: 500px; /* Tamaño del logo */
-  width: 100%;
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--amarillo-dorado);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px;
 }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.profile-error {
+  color: var(--rojo-cerrar);
+  font-weight: bold;
+}
+
+/* #endregion */
+
+/* #region CARD DE IDENTIDAD (HEADER DEL PERSONAJE) */
+
+.profile-container {
+  max-width: 800px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.character-card {
+  display: flex;
+  align-items: center;
+  background-color: var(--azul-oscuro);
+  border: 2px solid var(--amarillo-dorado);
+  border-radius: 8px;
+  padding: 20px;
+  gap: 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.char-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 6px;
+  border: 2px solid var(--amarillo-dorado);
+  object-fit: cover;
+}
+
+.char-info {
+  flex-grow: 1;
+}
+
+.char-info h2 {
+  margin: 0 0 5px 0;
+  color: var(--amarillo-dorado);
+  font-size: 1.8rem;
+}
+
+.char-sub {
+  margin: 0;
+  color: var(--blanco);
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.char-realm {
+  margin: 3px 0 0 0;
+  color: #a0aabf;
+  font-size: 0.85rem;
+}
+
+.char-ilvl {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.05);
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: 1px solid rgba(29, 33, 64, 0.5);
+}
+
+.ilvl-number {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: var(--amarillo-dorado);
+}
+
+.ilvl-label {
+  font-size: 0.75rem;
+  color: var(--blanco);
+}
+
+/* #endregion */
+
+/* #region GRID DE ESTADÍSTICAS */
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1px 1px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.stat-box {
+  background-color: #121629; /* Color de fondo idéntico al ribbon content */
+  border: 1px solid var(--azul-oscuro);
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.stat-box h3 {
+  margin: 0 0 15px 0;
+  color: var(--blanco);
+  font-size: 1.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+}
+
+.score-display {
+  font-size: 3rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+.season-text {
+  margin: 0;
+  color: #a0aabf;
+  font-size: 0.85rem;
+}
+
+/* Detalles de Raid */
+.raid-summary {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 10px;
+}
+
+.raid-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--blanco);
+  font-size: 1.05rem;
+}
+
+.raid-progress-badge {
+  background-color: var(--azul-oscuro);
+  border: 1px solid var(--amarillo-dorado);
+  color: var(--amarillo-dorado);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+/* #endregion */
+
+/* #region ENLACES EXTERNOS */
+
+.btn-external-link {
+  display: inline-block;
+  text-align: center;
+  background-color: transparent;
+  color: var(--amarillo-dorado);
+  border: 2px solid var(--amarillo-dorado);
+  padding: 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-external-link:hover {
+  background-color: rgba(199, 169, 56, 0.1);
+}
+
+/* #endregion */
