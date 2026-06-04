@@ -4,17 +4,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
-// Rutas de autenticación (No necesitan token)
+// Rutas Públicas
 Route::post('/registro', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Rutas protegidas (Requieren el Token Bearer)
+// Rutas Privadas ERP
 Route::middleware('auth:sanctum')->group(function () {
     
-    // Ruta que devuelve el usuario logueado con su personaje vinculado
+    // Obtener info del usuario actual
     Route::get('/user', function (Request $request) {
-        // Cargamos la relación 'personaje' definida en el Modelo User
         return $request->user()->load('personaje');
     });
 
+    // Gestión de personajes de WoW
+    Route::get('/mis-personajes', [AuthController::class, 'misPersonajes']);
+    Route::post('/añadir-personaje', [AuthController::class, 'añadirPersonaje']);
+    Route::post('/marcar-main', [AuthController::class, 'marcarComoMain']);
 });

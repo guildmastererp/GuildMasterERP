@@ -227,7 +227,9 @@
   flex-grow: 1;
   background-color: var(--blanco);
   position: relative;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* #region ESTADO VACÍO / PANTALLA DE BIENVENIDA (EMPTY STATE) */
@@ -261,8 +263,12 @@
 /* #region CONTENEDOR DINÁMICO DE RUTAS (ROUTER ROUTER-OUTLET) */
 
 .router-wrapper {
-  padding: 20px;
-  height: 100%;
+  padding: 2px;
+  flex: 1;
+  box-sizing: border-box; 
+  display: flex; 
+  flex-direction: column;
+  overflow: hidden;
 }
 
 /* #endregion */

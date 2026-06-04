@@ -12,12 +12,8 @@ class AuthController extends Controller
 {
     // #region AUTENTICACIÓN Y REGISTRO
 
-    /**
-     * @description Registra un nuevo usuario en el ERP y vincula su personaje principal.
-     */
     public function register(Request $request)
     {
-        // 1. Validación de campos (sin los campos antiguos)
         $request->validate([
             'name'         => 'required|string|max:255',
             'email'        => 'required|string|email|max:255|unique:users',
@@ -26,38 +22,32 @@ class AuthController extends Controller
             'raiderio_url' => ['required', 'url', 'regex:~raider\.io/characters/[^/]+/[^/]+/[^/]+~i']
         ]);
 
-        // 2. Ejecución segura con transacción
         return DB::transaction(function () use ($request) {
             
-            // Extraer datos del link
             $url = $request->input('raiderio_url');
             preg_match('~raider\.io/characters/([^/]+)/([^/]+)/([^/]+)~i', $url, $matches);
             
-            // Generar el código 000X autoincremental
             $ultimo = DB::table('aux_personajes')->orderBy('id', 'desc')->first();
             $nuevoId = $ultimo ? ($ultimo->id + 1) : 1;
             $codigoGenerado = str_pad($nuevoId, 4, '0', STR_PAD_LEFT);
 
-            // Crear registro en aux_personajes
             DB::table('aux_personajes')->insert([
-                'codigo' => $codigoGenerado,
-                'nombre' => $matches[3],
-                'reino'  => $matches[2],
-                'region' => $matches[1],
-                'es_main'=> true,
+                'codigo'         => $codigoGenerado,
+                'nombre'         => $matches[3],
+                'reino'          => $matches[2],
+                'region'         => $matches[1],
+                'es_main'        => true,
+                'user_battletag' => $request->input('battletag') // Vinculamos el dueño
             ]);
 
-            // Crear el usuario (SOLO campos que existen en la tabla)
-// 4. Crear el usuario
-$user = User::create([
-    'battletag'   => $request->input('battletag'),
-    'name'        => $request->input('name'),
-    'email'       => $request->input('email'),
-    'password'    => Hash::make($request->input('password')),
-    'codigo_main' => $codigoGenerado, // <-- Solo esto
-]);
+            $user = User::create([
+                'battletag'   => $request->input('battletag'),
+                'name'        => $request->input('name'),
+                'email'       => $request->input('email'),
+                'password'    => Hash::make($request->input('password')),
+                'codigo_main' => $codigoGenerado,
+            ]);
 
-            // Cargar la relación
             $user->load('personaje');
 
             return response()->json([
@@ -68,9 +58,6 @@ $user = User::create([
         });
     }
 
-    /**
-     * @description Inicia sesión y genera el Token de Sanctum.
-     */
     public function login(Request $request)
     {
         $request->validate([
@@ -78,7 +65,6 @@ $user = User::create([
             'password' => 'required',
         ]);
 
-        // Buscamos al usuario y cargamos su relación personaje
         $user = User::with('personaje')->where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
@@ -94,6 +80,74 @@ $user = User::create([
             'access_token' => $token,
             'token_type'   => 'Bearer',
             'user'         => $user
+        ]);
+    }
+    // #endregion
+
+    // #region GESTIÓN DE PERSONAJES (ALTERS)
+
+    public function misPersonajes(Request $request)
+    {
+        // Devuelve el array de todos los personajes vinculados al battletag del usuario
+        return response()->json($request->user()->personajes);
+    }
+
+    public function añadirPersonaje(Request $request)
+    {
+        $request->validate([
+            'raiderio_url' => ['required', 'url', 'regex:~raider\.io/characters/[^/]+/[^/]+/[^/]+~i']
+        ]);
+
+        $url = $request->input('raiderio_url');
+        preg_match('~raider\.io/characters/([^/]+)/([^/]+)/([^/]+)~i', $url, $matches);
+
+        $ultimo = DB::table('aux_personajes')->orderBy('id', 'desc')->first();
+        $nuevoId = $ultimo ? ($ultimo->id + 1) : 1;
+        $codigoGenerado = str_pad($nuevoId, 4, '0', STR_PAD_LEFT);
+
+        DB::table('aux_personajes')->insert([
+            'codigo'         => $codigoGenerado,
+            'nombre'         => $matches[3],
+            'reino'          => $matches[2],
+            'region'         => $matches[1],
+            'es_main'        => false, // Por defecto es un alter
+            'user_battletag' => $request->user()->battletag
+        ]);
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Alter añadido correctamente a tu hermandad.'
+        ], 201);
+    }
+
+    public function marcarComoMain(Request $request)
+    {
+        $request->validate([
+            'codigo' => 'required|string'
+        ]);
+
+        $user = $request->user();
+        $nuevoCodigoMain = $request->input('codigo');
+
+        DB::transaction(function () use ($user, $nuevoCodigoMain) {
+            // 1. Asignamos el nuevo código al usuario
+            $user->codigo_main = $nuevoCodigoMain;
+            $user->save();
+
+            // 2. Limpiamos el flag de main en todos sus personajes
+            DB::table('aux_personajes')
+                ->where('user_battletag', $user->battletag)
+                ->update(['es_main' => false]);
+
+            // 3. Activamos el flag solo en el seleccionado
+            DB::table('aux_personajes')
+                ->where('codigo', $nuevoCodigoMain)
+                ->update(['es_main' => true]);
+        });
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Personaje principal actualizado con éxito.'
         ]);
     }
     // #endregion

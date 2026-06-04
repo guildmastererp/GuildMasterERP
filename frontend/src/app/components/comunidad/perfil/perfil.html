@@ -1,54 +1,112 @@
-<div *ngIf="cargando" class="profile-loading">
-  <div class="spinner"></div>
-  <p>Invocando datos desde las Tierras Sombrías...</p>
-</div>
-<div *ngIf="errorCarga && !cargando" class="profile-error">
-  <p>{{ mensajeError }}</p>
-</div>
-<div *ngIf="characterData && !cargando" class="profile-container">
+<div class="perfil-container">
 
-  <div class="character-card">
-    <div class="avatar-wrapper">
-      <img [src]="characterData.thumbnail_url" alt="Avatar" class="char-avatar">
-    </div>
-    
-    <div class="char-info">
-      <h2>{{ characterData.name }}</h2>
-      <p class="char-sub">{{ characterData.race }} {{ characterData.active_spec_name }} {{ characterData.class }}</p>
-      <p class="char-realm">{{ characterData.realm }} ({{ characterData.region | uppercase }})</p>
-    </div>
+  <div class="ribbon">
 
-    <div class="char-ilvl">
-      <span class="ilvl-number">{{ characterData.gear?.item_level_equipped || 0 }}</span>
-      <span class="ilvl-label">iLvl Equipado</span>
-    </div>
-  </div>
-  <div class="stats-grid">
-    
-    <div class="stat-box mplus-box">
-      <h3>Míticas+ Score</h3>
-      <div class="score-display">
-        <span [style.color]="(characterData.mythic_plus_scores_by_season?.[0]?.scores?.all || 0) > 2000 ? '#ff8000' : '#a335ee'">
-          {{ characterData.mythic_plus_scores_by_season?.[0]?.scores?.all || 0 | number:'1.0-0' }}
-        </span>
+    <div class="ribbon-grupo">
+      <label>Personaje:</label>
+
+      <div class="selector-main">
+        <select [(ngModel)]="codigoSeleccionado" (ngModelChange)="onCodigoCambiado($event)">
+          <option *ngFor="let p of personajes" [value]="p.codigo">
+            {{ p.nombre }} - {{ p.reino }}
+          </option>
+        </select>
+
+        <button class="btn-ribbon" (click)="marcarComoMain()">
+          Hacer Main
+        </button>
       </div>
-      <p class="season-text">Temporada Actual</p>
     </div>
 
-    <div class="stat-box raid-box">
-      <h3>Progreso de Raid</h3>
-      <div class="raid-summary" *ngIf="characterData.raid_progression">
-        <div class="raid-item">
-          <span class="raid-name">Avance Actual:</span>
-          <span class="raid-progress-badge">
-            {{ characterData.raid_progression?.['liberation-of-undermine']?.summary || '0/0' }}
+    <div class="ribbon-grupo">
+      <label>Añadir:</label>
+      <input type="text" [(ngModel)]="nuevoLinkRaiderIo" placeholder="URL de Raider.io">
+      <button class="btn-ribbon" (click)="agregarNuevoPersonaje()">Añadir</button>
+    </div>
+
+  </div>
+
+  <div *ngIf="cargando" class="estado-carga">
+    <p>Invocando datos desde las Tierras Sombrías...</p>
+  </div>
+
+  <div *ngIf="errorCarga" class="estado-error">
+    <p>{{ mensajeError }}</p>
+  </div>
+
+  <div *ngIf="!cargando && !errorCarga && characterData" class="datos-personaje">
+
+    <div class="cabecera-personaje">
+      <img [src]="characterData.thumbnail_url" alt="Avatar del personaje">
+      <div class="info-principal">
+        <h2>
+          <a [href]="characterData.profile_url" target="_blank" title="Ver perfil en Raider.io">
+            {{ characterData.name }} - {{ characterData.realm }}
+          </a>
+        </h2>
+        <p>
+          <span class="tag-facccion" [ngClass]="characterData.faction === 'horde' ? 'horda' : 'alianza'">
+            {{ characterData.faction }}
           </span>
+          • {{ characterData.race }} • {{ characterData.active_spec_name }} {{ characterData.class }}
+        </p>
+      </div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icono">⚔️</div>
+        <div class="stat-detalle">
+          <h4>Nivel de Objeto</h4>
+          <span class="stat-valor">
+            {{ characterData.gear.item_level_equipped }}
+            <small>/ {{ characterData.gear.item_level_total }}</small>
+          </span>
+        </div>
+      </div>
+
+      <div class="stat-card" *ngIf="characterData.mythic_plus_scores_by_season?.length > 0">
+        <div class="stat-icono">🏆</div>
+        <div class="stat-detalle">
+          <h4>Puntuación M+ (RIO)</h4>
+          <span class="stat-valor rio-score">
+            {{ characterData.mythic_plus_scores_by_season[0].scores.all }}
+          </span>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icono">🛡️</div>
+        <div class="stat-detalle">
+          <h4>Puntos de Logro</h4>
+          <span class="stat-valor">{{ characterData.achievement_points }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="raid-progression" *ngIf="characterData.raid_progression">
+      <h3>Progreso de Banda</h3>
+      <div class="raid-grid">
+        <div class="raid-card" *ngFor="let raid of characterData.raid_progression | keyvalue">
+          <div class="raid-info">
+            <h4 class="raid-nombre">{{ raid.key }}</h4>
+            <p class="raid-resumen">{{ raid.value.summary }}</p>
+          </div>
+          <div class="raid-kills">
+            <span class="kill-tag normal" title="Bosses en Normal">
+              {{ raid.value.normal_bosses_killed }}/{{ raid.value.total_bosses }} N
+            </span>
+            <span class="kill-tag heroico" title="Bosses en Heroico">
+              {{ raid.value.heroic_bosses_killed }}/{{ raid.value.total_bosses }} H
+            </span>
+            <span class="kill-tag mitico" title="Bosses en Mítico">
+              {{ raid.value.mythic_bosses_killed }}/{{ raid.value.total_bosses }} M
+            </span>
+          </div>
         </div>
       </div>
     </div>
 
   </div>
-  <a [href]="characterData.profile_url" target="_blank" class="btn-external-link">
-    Ver Perfil Completo en Raider.io
-  </a>
-  </div>
+
+</div>
