@@ -4,13 +4,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 
-// #region RUTAS PÚBLICAS DE AUTENTICACIÓN
+// Rutas de autenticación (No necesitan token)
 Route::post('/registro', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-// #endregion
 
-// #region RUTAS PROTEGIDAS
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+// Rutas protegidas (Requieren el Token Bearer)
+Route::middleware('auth:sanctum')->group(function () {
+    
+    // Ruta que devuelve el usuario logueado con su personaje vinculado
+    Route::get('/user', function (Request $request) {
+        // Cargamos la relación 'personaje' definida en el Modelo User
+        return $request->user()->load('personaje');
+    });
+
 });
-// #endregion
