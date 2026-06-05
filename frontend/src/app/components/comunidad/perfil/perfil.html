@@ -1,7 +1,6 @@
 <div class="perfil-container">
 
   <div class="ribbon">
-
     <div class="ribbon-grupo">
       <label>Personaje:</label>
 
@@ -23,6 +22,37 @@
       <input type="text" [(ngModel)]="nuevoLinkRaiderIo" placeholder="URL de Raider.io">
       <button class="btn-ribbon" (click)="agregarNuevoPersonaje()">Añadir</button>
     </div>
+  </div>
+
+  <div class="ribbon" *ngIf="personajeSeleccionado">
+    
+    <div class="ribbon-grupo">
+      <label>Clase:</label>
+      <select [(ngModel)]="editClase" (change)="onClaseChange()">
+        <option value="">-- Sin asignar --</option>
+        <option *ngFor="let c of auxClases" [value]="c.nombre">{{ c.nombre }}</option>
+      </select>
+    </div>
+
+    <div class="ribbon-grupo">
+      <label>Especialización:</label>
+      <select [(ngModel)]="editSpec">
+        <option value="">-- Sin asignar --</option>
+        <option *ngFor="let s of specsFiltradas" [value]="s.nombre">{{ s.nombre }}</option>
+      </select>
+    </div>
+
+    <div class="ribbon-grupo">
+      <label>Profesión:</label>
+      <select [(ngModel)]="editProfesion">
+        <option value="">-- Sin asignar --</option>
+        <option *ngFor="let p of auxProfesiones" [value]="p.nombre">{{ p.nombre }}</option>
+      </select>
+    </div>
+
+    <button class="btn-ribbon btn-guardar" (click)="guardarConfiguracionPersonaje()" [disabled]="guardandoDatos">
+      {{ guardandoDatos ? 'Guardando...' : 'Guardar Datos' }}
+    </button>
 
   </div>
 
@@ -35,7 +65,6 @@
   </div>
 
   <div *ngIf="!cargando && !errorCarga && characterData" class="datos-personaje">
-
     <div class="cabecera-personaje">
       <img [src]="characterData.thumbnail_url" alt="Avatar del personaje">
       <div class="info-principal">
@@ -106,7 +135,6 @@
         </div>
       </div>
     </div>
-
   </div>
 
 </div>

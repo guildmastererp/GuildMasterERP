@@ -2,6 +2,7 @@
 
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
 
 // #endregion
 
@@ -13,7 +14,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 })
 export class Perfil implements OnInit {
 
-  // #region PROPIEDADES
+  // #region PROPIEDADES DE ESTADO Y PERSONAJES
 
   personajes: any[] = [];
   personajeSeleccionado: any = null;
@@ -24,6 +25,22 @@ export class Perfil implements OnInit {
   cargando: boolean = true;
   errorCarga: boolean = false;
   mensajeError: string = 'Invocando datos desde las Tierras Sombrías...';
+
+  // #endregion
+
+  // #region PROPIEDADES DE TABLAS AUXILIARES Y EDICIÓN
+
+  auxClases: any[] = [];
+  auxSpecs: any[] = [];
+  auxProfesiones: any[] = [];
+  auxFunciones: any[] = [];
+  
+  specsFiltradas: any[] = []; // Se llena al elegir una clase
+
+  editClase: string = '';
+  editSpec: string = '';
+  editProfesion: string = '';
+  guardandoDatos: boolean = false;
 
   // #endregion
 
@@ -38,20 +55,16 @@ export class Perfil implements OnInit {
     // #region HOOKS
     
   /**
-   * @description Inicializa el componente ejecutando la carga inicial del roster de personajes del usuario.
+   * @description Inicializa el componente cargando primero las tablas maestras y luego los personajes.
    */
   ngOnInit(): void {
-    this.cargarListaPersonajes();
+    this.cargarDatosAuxiliares();
   }
 
     // #endregion
 
     // #region UTILIDADES Y CONFIGURACIÓN
 
-  /**
-   * @description Genera los encabezados HTTP necesarios para las peticiones al backend, incluyendo el token de autorización JWT.
-   * @returns Instancia de HttpHeaders con la configuración de seguridad y formato.
-   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -60,10 +73,6 @@ export class Perfil implements OnInit {
     });
   }
 
-  /**
-   * @description Maneja la visualización de estados de error en la interfaz. Detiene el estado de carga y actualiza el mensaje.
-   * @param m Cadena de texto con el mensaje de error a mostrar al usuario.
-   */
   mostrarError(m: string) {
     this.mensajeError = m;
     this.errorCarga = true;
@@ -76,11 +85,32 @@ export class Perfil implements OnInit {
     // #region GESTIÓN DE PERSONAJES Y ESTADO
 
   /**
-   * @description Obtiene la lista completa de personajes (mains y alters) asociados a la cuenta del usuario desde la API.
-   * Si existen personajes, selecciona automáticamente el marcado como 'main' o el primero de la lista.
+   * @description Descarga las tablas auxiliares en paralelo para los combos. Una vez listas, carga el roster.
    */
-  cargarListaPersonajes() {
+  cargarDatosAuxiliares() {
     this.cargando = true;
+    
+    // Asume que has creado estos 4 métodos GET básicos en tu backend de Laravel
+    forkJoin({
+      clases: this.http.get<any[]>('http://192.168.1.132:8000/api/aux-clases', { headers: this.getHeaders() }),
+      specs: this.http.get<any[]>('http://192.168.1.132:8000/api/aux-specs', { headers: this.getHeaders() }),
+      profesiones: this.http.get<any[]>('http://192.168.1.132:8000/api/aux-profesiones', { headers: this.getHeaders() }),
+      funciones: this.http.get<any[]>('http://192.168.1.132:8000/api/aux-funciones', { headers: this.getHeaders() })
+    }).subscribe({
+      next: (res) => {
+        this.auxClases = res.clases;
+        this.auxSpecs = res.specs;
+        this.auxProfesiones = res.profesiones;
+        this.auxFunciones = res.funciones;
+        
+        // Una vez tenemos los combos listos, pedimos los personajes
+        this.cargarListaPersonajes();
+      },
+      error: () => this.mostrarError('Error al cargar las tablas maestras de la base de datos.')
+    });
+  }
+
+  cargarListaPersonajes() {
     this.http.get<any[]>('http://192.168.1.132:8000/api/mis-personajes', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
@@ -96,20 +126,19 @@ export class Perfil implements OnInit {
       });
   }
 
-  /**
-   * @description Centraliza el proceso de cambio de personaje activo en el panel, actualizando el selector y disparando la búsqueda en Raider.io.
-   * @param personaje Objeto completo del personaje seleccionado.
-   */
   actualizarPersonaje(personaje: any) {
     this.personajeSeleccionado = personaje;
     this.codigoSeleccionado = personaje.codigo; 
+    
+    // Sincronizamos los combos manuales con los datos guardados en BD
+    this.editClase = personaje.clase || '';
+    this.editProfesion = personaje.profesion || '';
+    this.onClaseChange(); // Forzamos el filtrado de specs basado en la clase cargada
+    this.editSpec = personaje.spec || '';
+
     this.cargarPerfilRaiderIo(personaje.region, personaje.reino, personaje.nombre);
   }
 
-  /**
-   * @description Intercepta el cambio de valor en el selector desplegable (combobox) y sincroniza el estado de la vista.
-   * @param codigo Código identificador único del personaje seleccionado en la vista.
-   */
   onCodigoCambiado(codigo: string) {
     const encontrado = this.personajes.find(p => p.codigo === codigo);
     if (encontrado) {
@@ -117,26 +146,93 @@ export class Perfil implements OnInit {
     }
   }
 
+    // #endregion
+
+    // #region EDICIÓN MANUAL DE CONFIGURACIÓN (NUEVO)
+
   /**
-   * @description Marca el personaje actualmente visible como el principal (main) en la base de datos del ERP.
-   * Tras una respuesta exitosa, recarga la lista para actualizar los indicadores visuales.
+   * @description Filtra las especializaciones disponibles basándose en la clase seleccionada en el combo.
    */
+  onClaseChange() {
+    const claseSeleccionadaObj = this.auxClases.find(c => c.nombre === this.editClase);
+    
+    if (claseSeleccionadaObj) {
+      this.specsFiltradas = this.auxSpecs.filter(s => s.codigoClase === claseSeleccionadaObj.codigo);
+    } else {
+      this.specsFiltradas = [];
+    }
+    
+    // Reseteamos el combo de spec para evitar selecciones fantasma
+    this.editSpec = ''; 
+  }
+
+  /**
+   * @description Calcula la función automáticamente basándose en la spec elegida y envía los datos a guardar.
+   */
+  guardarConfiguracionPersonaje() {
+    let funcionAuto = '';
+
+    // Buscamos el objeto de la clase y la spec seleccionadas para extraer los códigos
+    const claseObj = this.auxClases.find(c => c.nombre === this.editClase);
+    
+    if (claseObj && this.editSpec) {
+      const specObj = this.auxSpecs.find(s => s.nombre === this.editSpec && s.codigoClase === claseObj.codigo);
+      
+      if (specObj) {
+        // Encontramos la función a través del 'codigoFuncion' que hay en la tabla aux_spec
+        const funcionObj = this.auxFunciones.find(f => f.codigo === specObj.codigoFuncion);
+        if (funcionObj) {
+          funcionAuto = funcionObj.nombre;
+        }
+      }
+    }
+
+    const payload = {
+      codigo: this.codigoSeleccionado,
+      clase: this.editClase,
+      spec: this.editSpec,
+      profesion: this.editProfesion,
+      funcion: funcionAuto // Se asigna de forma 100% automática
+    };
+
+    this.guardandoDatos = true;
+    this.http.post('http://192.168.1.132:8000/api/actualizar-datos-personaje', payload, { headers: this.getHeaders() })
+      .subscribe({
+        next: () => {
+          this.guardandoDatos = false;
+          alert('Configuración del personaje guardada correctamente.');
+          
+          // Actualizamos el objeto local para no tener que recargar toda la página
+          if (this.personajeSeleccionado) {
+            this.personajeSeleccionado.clase = this.editClase;
+            this.personajeSeleccionado.spec = this.editSpec;
+            this.personajeSeleccionado.profesion = this.editProfesion;
+            this.personajeSeleccionado.funcion = funcionAuto;
+          }
+        },
+        error: () => {
+          this.guardandoDatos = false;
+          alert('Error al guardar los datos del personaje.');
+        }
+      });
+  }
+
+    // #endregion
+
+  // ... Resto de métodos que ya tenías intactos (marcarComoMain, agregarNuevoPersonaje, cargarPerfilRaiderIo) ...
+
   marcarComoMain() {
     if(!this.personajeSeleccionado) return;
     this.http.post('http://192.168.1.132:8000/api/marcar-main', { codigo: this.codigoSeleccionado }, { headers: this.getHeaders() })
       .subscribe({
         next: () => {
           alert('Personaje principal actualizado.');
-          this.cargarListaPersonajes();
+          this.cargarListaPersonajes(); // Recargamos para refrescar la marca
         },
         error: () => alert('Error al actualizar el personaje principal.')
       });
   }
 
-  /**
-   * @description Registra un nuevo alter en la cuenta del usuario validando y enviando un enlace de Raider.io.
-   * Limpia el formulario y recarga el roster tras una inserción exitosa.
-   */
   agregarNuevoPersonaje() {
     if (!this.nuevoLinkRaiderIo) {
       alert('Introduce un enlace válido.');
@@ -148,7 +244,7 @@ export class Perfil implements OnInit {
         next: () => {
           alert('Alter añadido a tu cuenta.');
           this.nuevoLinkRaiderIo = '';
-          this.cargarListaPersonajes();
+          this.cargarDatosAuxiliares(); // Reiniciamos el ciclo de vida completo
         },
         error: () => {
           this.cargando = false;
@@ -157,17 +253,6 @@ export class Perfil implements OnInit {
       });
   }
 
-    // #endregion
-
-    // #region INTEGRACIÓN CON RAIDER.IO
-
-  /**
-   * @description Realiza una petición GET a la API de Raider.io para obtener información detallada del personaje (equipo, índice mítico y progresión de banda).
-   * Filtra las raids históricas para mostrar únicamente el contenido de las temporadas actuales.
-   * @param region Región del servidor (ej. 'eu', 'us').
-   * @param reino Nombre del servidor del personaje (ej. 'dun-modr').
-   * @param nombre Nombre del personaje.
-   */
   cargarPerfilRaiderIo(region: string, reino: string, nombre: string) {
     this.cargando = true;
     this.errorCarga = false;
@@ -181,8 +266,6 @@ export class Perfil implements OnInit {
 
     this.http.get(apiUrl).subscribe({
       next: (data: any) => {
-        
-        // Filtro: Limpiamos el histórico de raids para quedarnos con el contenido reciente
         if (data.raid_progression) {
           const raidsActuales = Object.keys(data.raid_progression).filter(key => 
             !key.startsWith('tier-') && key !== 'world-of-warcraft-remix-mists-of-pandaria'
@@ -206,8 +289,4 @@ export class Perfil implements OnInit {
       }
     });
   }
-
-    // #endregion
-
-  // #endregion
 }

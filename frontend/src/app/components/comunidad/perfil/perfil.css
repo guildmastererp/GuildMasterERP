@@ -18,6 +18,7 @@
   color: var(--azul-oscuro);
 }
 
+/* --- RIBBONS (FILAS DE FILTROS) --- */
 .ribbon {
   width: 100%;
   box-sizing: border-box;
@@ -26,9 +27,10 @@
   padding: 16px 20px; 
   margin: 0; 
   display: flex;
-  flex-direction: column; 
-  align-items: flex-start; 
-  gap: 16px; 
+  flex-direction: row; /* CAMBIADO: Ahora se colocan en fila horizontal */
+  flex-wrap: wrap; /* CAMBIADO: Si la pantalla es pequeña, bajan de línea solos */
+  align-items: center; 
+  gap: 30px; /* Espacio entre los bloques (ej. entre Personaje y Añadir) */
   box-shadow: 0 4px 8px rgba(29, 38, 78, 0.15); 
 }
 
@@ -36,14 +38,13 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-wrap: wrap;
-  width: 100%;
+  width: auto; /* CAMBIADO: Quitamos el 100% para que no fuercen un salto de línea */
 }
 
 .selector-main {
   display: flex;
   align-items: center;
-  gap: 2px; /* prácticamente pegado */
+  gap: 2px;
   flex-wrap: nowrap;
 }
 
@@ -52,7 +53,6 @@
   color: var(--blanco);
   white-space: nowrap;
   font-size: 14px; 
-  min-width: 80px; 
 }
 
 .ribbon-grupo select,
@@ -72,11 +72,11 @@
 
 .ribbon-grupo input[type="text"] {
   width: 100%;
-  max-width: 320px; 
+  min-width: 250px; 
 }
 
 .ribbon-grupo select {
-  min-width: 250px; 
+  min-width: 180px; /* Reducido un poco para que quepan bien los 3 combos en una sola línea */
 }
 
 .ribbon-grupo select:focus,
@@ -112,7 +112,27 @@
   transform: translateY(1px);
 }
 
+/* --- BOTÓN DE GUARDAR CONFIGURACIÓN --- */
+.btn-guardar {
+  background-color: #2e7d32; 
+  color: var(--blanco);
+  margin-left: auto; /* IMPORTANTE: Esto empuja el botón siempre a la esquina derecha de la fila */
+}
 
+.btn-guardar:hover {
+  background-color: #1b5e20;
+  color: var(--amarillo-dorado);
+}
+
+.btn-guardar:disabled {
+  background-color: var(--gris-pestanas);
+  color: #a0a0a0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* --- RESTO DEL DISEÑO DE LA PÁGINA --- */
 .datos-personaje {
   width: 100%;
   box-sizing: border-box;
