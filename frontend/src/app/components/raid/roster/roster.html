@@ -1,1 +1,60 @@
-<p>roster works!</p>
+<div class="roster-container">
+
+  <div class="ribbon">
+    <div class="ribbon-grupo">
+      <span class="icono-ribbon">📋</span>
+      <label class="titulo-ribbon">Gestión del Roster Oficial</label>
+    </div>
+  </div>
+
+  <div *ngIf="cargandoRol" class="mensaje-estado">Verificando credenciales...</div>
+
+  <div *ngIf="!cargandoRol && !esAdmin" class="acceso-denegado">
+    <span class="icono-prohibido">⛔</span>
+    <h2>Acceso Restringido</h2>
+    <p>Esta sección contiene información estratégica. Solamente los usuarios con rango de Máster u Oficial pueden organizar el equipo de banda.</p>
+  </div>
+
+  <div *ngIf="!cargandoRol && esAdmin" class="gestion-grid">
+    
+    <div class="panel buscador-panel">
+      <h3>🔍 Reclutar Personajes</h3>
+      <input type="text" class="input-buscar" placeholder="Buscar por nombre, clase o rol..." [(ngModel)]="terminoBusqueda">
+      
+      <div class="lista-resultados">
+        <p *ngIf="terminoBusqueda && resultadosBuscador.length === 0" class="mensaje-vacio">No hay jugadores disponibles con ese término.</p>
+        
+        <div class="card-personaje" *ngFor="let p of resultadosBuscador">
+          <div class="info">
+            <span class="nombre">{{ p.nombre }}</span>
+            <span class="detalles">{{ p.clase }} • {{ p.funcion }}</span>
+          </div>
+          <button class="btn-add" [disabled]="procesando" (click)="agregarAlRoster(p)">+ Añadir</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel roster-panel">
+      <h3>⚔️ Roster Titular Actual ({{ rosterActual.length }})</h3>
+      
+      <div class="lista-roster">
+        <p *ngIf="rosterActual.length === 0" class="mensaje-vacio">El roster está completamente vacío. Empieza a buscar jugadores a la izquierda.</p>
+        
+        <div class="card-personaje roster-card" *ngFor="let r of rosterActual">
+          <div class="info-rol">
+            <span class="icono-rol" *ngIf="r.funcion === 'Tanque'">🛡️</span>
+            <span class="icono-rol" *ngIf="r.funcion === 'Healer'">💚</span>
+            <span class="icono-rol" *ngIf="r.funcion === 'DPS'">⚔️</span>
+          </div>
+          <div class="info">
+            <span class="nombre">{{ r.nombre }}</span>
+            <span class="detalles">{{ r.clase }}</span>
+          </div>
+          <button class="btn-remove" [disabled]="procesando" (click)="expulsarDelRoster(r)">Expulsar</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

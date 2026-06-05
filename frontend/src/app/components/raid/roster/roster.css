@@ -1,0 +1,51 @@
+:host { display: block; width: 100%; height: 100%; }
+
+.roster-container {
+  width: 100%; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; color: var(--azul-oscuro);
+}
+
+.ribbon { background-color: var(--azul-claro); border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; box-shadow: 0 4px 8px rgba(29, 38, 78, 0.15); }
+.ribbon-grupo { display: flex; align-items: center; }
+.icono-ribbon { font-size: 24px; margin-right: 10px; }
+.titulo-ribbon { font-weight: 900; color: var(--amarillo-dorado); font-size: 20px; text-transform: uppercase; }
+
+.mensaje-estado { padding: 40px; text-align: center; color: var(--azul-claro); font-weight: bold; }
+
+/* Mensaje Denegado */
+.acceso-denegado { display: flex; flex-direction: column; align-items: center; justify-content: center; background-color: white; border: 1px solid var(--gris-pestanas); border-radius: 8px; padding: 50px; text-align: center; margin-top: 20px; }
+.icono-prohibido { font-size: 60px; margin-bottom: 10px; }
+.acceso-denegado h2 { color: #cc0000; margin: 0 0 10px 0; }
+.acceso-denegado p { color: var(--azul-claro); max-width: 400px; }
+
+/* Grid Gestión */
+.gestion-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; flex: 1; overflow: hidden; }
+
+.panel { background-color: white; border: 1px solid var(--gris-pestanas); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+.panel h3 { margin: 0 0 15px 0; color: var(--azul-oscuro); border-bottom: 2px solid var(--gris-pestanas); padding-bottom: 10px; }
+
+/* Buscador */
+.input-buscar { width: 100%; box-sizing: border-box; padding: 12px; border: 1px solid var(--gris-pestanas); border-radius: 6px; font-size: 14px; margin-bottom: 15px; outline: none; }
+.input-buscar:focus { border-color: var(--azul-claro); }
+
+.lista-resultados, .lista-roster { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px; }
+
+.mensaje-vacio { font-size: 13px; color: var(--azul-claro); text-align: center; font-style: italic; margin-top: 20px; }
+
+/* Tarjetas */
+.card-personaje { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; border: 1px solid var(--gris-pestanas); border-radius: 6px; background-color: #fcfcfc; transition: 0.2s; }
+.card-personaje:hover { border-color: var(--azul-claro); }
+
+.roster-card { border-left: 4px solid var(--azul-oscuro); background-color: white; }
+
+.info-rol { font-size: 20px; margin-right: 15px; }
+
+.info { display: flex; flex-direction: column; flex: 1; }
+.nombre { font-weight: 900; font-size: 15px; color: var(--azul-oscuro); }
+.detalles { font-size: 12px; color: var(--azul-claro); }
+
+.btn-add { background-color: var(--azul-oscuro); color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.btn-add:hover:not(:disabled) { background-color: var(--amarillo-dorado); color: var(--azul-oscuro); }
+.btn-add:disabled, .btn-remove:disabled { opacity: 0.5; cursor: wait; }
+
+.btn-remove { background-color: #ffe6e6; color: #cc0000; border: 1px solid #cc0000; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.btn-remove:hover:not(:disabled) { background-color: #cc0000; color: white; }

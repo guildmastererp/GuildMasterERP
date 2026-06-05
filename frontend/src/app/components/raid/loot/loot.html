@@ -1,1 +1,68 @@
-<p>loot works!</p>
+<div class="loot-container">
+  <div class="ribbon">
+    <div class="ribbon-grupo">
+      <span class="icono-ribbon">💎</span>
+      <label class="titulo-ribbon">Registro de Loot Avanzado</label>
+    </div>
+  </div>
+
+  <div class="panel-admin" *ngIf="esAdmin">
+    <h3>👑 Asignación de Botín</h3>
+    
+    <div class="filtros-grid">
+      <select [(ngModel)]="filtro.expansion" (change)="filtro.temporada=''; filtro.raid=''; filtro.boss=''; filtro.item=''">
+        <option value="">Selecciona Expansión</option>
+        <option *ngFor="let e of expansiones" [value]="e.codigo">{{ e.nombre }}</option>
+      </select>
+
+      <select [(ngModel)]="filtro.temporada" [disabled]="!filtro.expansion" (change)="filtro.raid=''; filtro.boss=''; filtro.item=''">
+        <option value="">Selecciona Temporada</option>
+        <option *ngFor="let t of temporadasFiltradas" [value]="t.codigo">{{ t.numero }}</option>
+      </select>
+
+      <select [(ngModel)]="filtro.raid" [disabled]="!filtro.temporada" (change)="filtro.boss=''; filtro.item=''">
+        <option value="">Selecciona Raid</option>
+        <option *ngFor="let r of raidsFiltradas" [value]="r.codigo">{{ r.nombre }}</option>
+      </select>
+
+      <select [(ngModel)]="filtro.boss" [disabled]="!filtro.raid" (change)="filtro.item=''">
+        <option value="">Selecciona Boss</option>
+        <option *ngFor="let b of bossesFiltrados" [value]="b.codigo">{{ b.nombre }}</option>
+      </select>
+
+      <select [(ngModel)]="filtro.item" [disabled]="!filtro.boss">
+        <option value="">Selecciona Ítem</option>
+        <option *ngFor="let i of itemsFiltrados" [value]="i.codigo">{{ i.display }}</option>
+      </select>
+    </div>
+
+    <div class="formulario-loot">
+      <select [(ngModel)]="nuevoLoot.codigoPersonaje">
+        <option value="">-- Seleccionar jugador --</option>
+        <option *ngFor="let p of jugadoresDisponibles" [value]="p.codigo">{{ p.nombre }}</option>
+      </select>
+      <button class="btn-otorgar" [disabled]="procesando" (click)="registrarLoot()">Otorgar Item</button>
+    </div>
+  </div>
+
+  <div class="panel-historial">
+    <div class="tabla-contenedor">
+      <table class="tabla-loot">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Objeto</th>
+            <th>Jugador</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of historialLoot">
+            <td>{{ r.fecha | date:'dd/MM/yyyy' }}</td>
+            <td>{{ r.item_nombre }}</td>
+            <td>{{ r.personaje_nombre }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
