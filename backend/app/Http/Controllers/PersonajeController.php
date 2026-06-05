@@ -30,4 +30,36 @@ class PersonajeController extends Controller
             ], 500);
         }
     }
+
+    public function actualizarPuntos(Request $request)
+    {
+        $user = $request->user();
+        
+        // Medida extra de seguridad en el backend
+        if (!in_array($user->codigo_rol, ['0001', '0002'])) {
+            return response()->json(['message' => 'No tienes rango suficiente para hacer esto.'], 403);
+        }
+
+        $request->validate([
+            'codigo' => 'required|string',
+            'cantidad' => 'required|numeric' // Puede ser negativo para penalizaciones
+        ]);
+
+        try {
+            DB::table('aux_personajes')
+                ->where('codigo', $request->input('codigo'))
+                ->increment('puntos', $request->input('cantidad'));
+
+            // Devolvemos los puntos actualizados para refrescar el frontend
+            $nuevosPuntos = DB::table('aux_personajes')->where('codigo', $request->input('codigo'))->value('puntos');
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Puntos actualizados correctamente.',
+                'nuevosPuntos' => $nuevosPuntos
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error al actualizar puntos.'], 500);
+        }
+    }
 }

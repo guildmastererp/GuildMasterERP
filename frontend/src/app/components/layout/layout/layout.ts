@@ -1,6 +1,6 @@
 // #region IMPORTS
 
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { filter } from 'rxjs/operators';
@@ -53,7 +53,11 @@ export class Layout implements OnInit {
 
   // #region CONSTRUCTOR
 
-  constructor(private router: Router, private http: HttpClient) {}
+  constructor(
+    private router: Router, 
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   // #endregion
 
@@ -98,12 +102,19 @@ export class Layout implements OnInit {
           if (user.codigo_rol === '0001' || user.codigo_rol === '0002') {
             this.esAdmin = true;
             
-            // Añadimos dinámicamente la pestaña al menú de "Comunidad"
-            this.menus['Comunidad'].push({ 
-              nombre: 'Gestión Puntos', 
-              ruta: '/principal/comunidad/gestion-puntos', 
-              icono: '/images/ico_lootRaid.png' // Puedes cambiar este icono por uno específico de puntos si lo tienes
-            });
+            // Comprobamos si el botón ya existe para no duplicarlo
+            const botonExiste = this.menus['Comunidad'].find((m: any) => m.nombre === 'Gestión Puntos');
+            
+            if (!botonExiste) {
+              this.menus['Comunidad'].push({ 
+                nombre: 'Gestión Puntos', 
+                ruta: '/principal/comunidad/gestion-puntos', 
+                icono: '/images/ico_lootRaid.png' // Puedes cambiar este icono por uno específico de puntos si lo tienes
+              });
+              
+              // Forzamos a Angular a repintar la vista inmediatamente
+              this.cdr.detectChanges(); 
+            }
           }
         },
         error: (err) => {

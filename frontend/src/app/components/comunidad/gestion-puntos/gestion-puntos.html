@@ -1,0 +1,53 @@
+<div class="gestion-container">
+
+  <div class="ribbon">
+    <div class="ribbon-grupo">
+      <span class="icono-tesoro">⚖️</span>
+      <label class="titulo-gestion">Tesorería de Puntos (DKP)</label>
+    </div>
+
+    <div class="buscador-grupo">
+      <input 
+        type="text" 
+        class="input-buscador" 
+        placeholder="Buscar personaje o reino..." 
+        [(ngModel)]="terminoBusqueda">
+    </div>
+  </div>
+
+  <div *ngIf="cargando" class="estado-carga">
+    <p>Revisando los libros de cuentas...</p>
+  </div>
+
+  <div class="resultados-container" *ngIf="!cargando">
+    <div class="grid-gestion">
+      
+      <div class="card-gestion" *ngFor="let p of personajesFiltrados">
+        
+        <div class="info-personaje">
+          <h3 class="personaje-nombre">{{ p.nombre }} <span *ngIf="p.es_main == 1" class="tag-main">MAIN</span></h3>
+          <p class="personaje-reino">
+            <span class="region-tag">{{ p.region | uppercase }}</span> {{ p.reino }}
+          </p>
+        </div>
+
+        <div class="bloque-tesoreria">
+          <div class="puntos-actuales">
+            <span class="label">Total:</span>
+            <span class="valor">{{ p.puntos }}</span>
+          </div>
+
+          <div class="controles">
+            <input type="number" class="input-puntos" [(ngModel)]="p.puntosInput" placeholder="0">
+            <button class="btn-otorgar" [disabled]="procesando || p.puntosInput == 0" (click)="otorgarPuntos(p)">
+              Aplicar
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>

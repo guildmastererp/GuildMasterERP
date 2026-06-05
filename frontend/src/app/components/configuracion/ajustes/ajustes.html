@@ -1,1 +1,56 @@
-<p>ajustes works!</p>
+<div class="ajustes-container">
+
+  <div class="ribbon">
+    <div class="ribbon-grupo">
+      <span class="icono-ajustes">⚙️</span>
+      <label class="titulo-ajustes">Ajustes de Cuenta</label>
+    </div>
+  </div>
+
+  <div class="paneles-grid">
+    
+    <div class="panel-ajustes">
+      <h3>✉️ Modificar Correo Electrónico</h3>
+      <p class="descripcion">Actualiza el correo electrónico vinculado a tu cuenta para notificaciones y recuperación de contraseña.</p>
+      
+      <div class="formulario">
+        <label>Nuevo Correo:</label>
+        <input type="email" [(ngModel)]="nuevoEmail" placeholder="tu_nuevo@email.com">
+        <button class="btn-guardar" (click)="actualizarEmail()" [disabled]="cargando || !nuevoEmail">
+          Guardar Correo
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-ajustes">
+      <h3>🔑 Cambiar Contraseña</h3>
+      <p class="descripcion">Por seguridad, te pediremos tu contraseña actual antes de establecer una nueva.</p>
+      
+      <div class="formulario">
+        <label>Contraseña Actual:</label>
+        <input type="password" [(ngModel)]="passActual" placeholder="••••••••">
+        
+        <label>Nueva Contraseña:</label>
+        <input type="password" [(ngModel)]="passNueva" placeholder="Mínimo 8 caracteres">
+        
+        <label>Confirmar Nueva Contraseña:</label>
+        <input type="password" [(ngModel)]="passConfirmar" placeholder="Repite la nueva contraseña">
+        
+        <button class="btn-guardar" (click)="actualizarPassword()" [disabled]="cargando || !passActual || !passNueva || !passConfirmar">
+          Actualizar Contraseña
+        </button>
+      </div>
+    </div>
+
+    <div class="panel-ajustes zona-peligro">
+      <h3>⚠️ Zona de Peligro</h3>
+      <p class="descripcion-peligro">Una vez elimines tu cuenta, no hay vuelta atrás. Se perderán todos tus personajes, tu registro de loot y tus DKP.</p>
+      
+      <button class="btn-peligro" (click)="borrarCuenta()" [disabled]="cargando">
+        Eliminar Cuenta Definitivamente
+      </button>
+    </div>
+
+  </div>
+
+</div>

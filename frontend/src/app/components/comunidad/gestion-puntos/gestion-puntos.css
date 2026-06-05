@@ -1,0 +1,130 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.gestion-container {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px; 
+  color: var(--azul-oscuro);
+}
+
+.ribbon {
+  background-color: var(--azul-claro); 
+  border-radius: 8px; 
+  padding: 16px 20px; 
+  display: flex;
+  flex-wrap: wrap; 
+  align-items: center; 
+  justify-content: space-between; 
+  box-shadow: 0 4px 8px rgba(29, 38, 78, 0.15); 
+}
+
+.titulo-gestion {
+  font-weight: 900;
+  color: var(--amarillo-dorado);
+  font-size: 20px;
+  text-transform: uppercase;
+}
+
+.icono-tesoro { font-size: 24px; margin-right: 10px; }
+
+.input-buscador {
+  width: 300px;
+  padding: 8px 15px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.resultados-container {
+  background-color: var(--blanco);
+  border-radius: 8px;
+  padding: 25px; 
+  flex: 1; 
+  overflow-y: auto; 
+  box-shadow: 0 4px 10px rgba(29, 38, 78, 0.08);
+  border: 1px solid var(--gris-pestanas);
+}
+
+.grid-gestion {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 20px;
+}
+
+.card-gestion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fcfcfc;
+  border: 1px solid var(--gris-pestanas);
+  border-radius: 8px;
+  padding: 15px;
+  transition: all 0.2s ease;
+  border-left: 5px solid var(--azul-oscuro);
+}
+
+.card-gestion:hover {
+  box-shadow: 0 4px 8px rgba(29, 38, 78, 0.1);
+  border-left-color: var(--amarillo-dorado);
+}
+
+.personaje-nombre { margin: 0 0 5px 0; font-size: 18px; font-weight: 900; }
+.tag-main { font-size: 10px; background-color: var(--azul-oscuro); color: white; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 5px;}
+.personaje-reino { margin: 0; color: var(--azul-claro); font-size: 13px; }
+.region-tag { background-color: var(--gris-pestanas); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+
+.bloque-tesoreria {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.puntos-actuales {
+  font-size: 14px;
+  color: var(--azul-claro);
+}
+
+.puntos-actuales .valor {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--azul-oscuro);
+  margin-left: 5px;
+}
+
+.controles {
+  display: flex;
+  gap: 8px;
+}
+
+.input-puntos {
+  width: 70px;
+  padding: 6px;
+  border: 1px solid var(--gris-pestanas);
+  border-radius: 4px;
+  text-align: center;
+  font-weight: bold;
+}
+
+.btn-otorgar {
+  background-color: var(--azul-oscuro);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 15px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.2s;
+}
+
+.btn-otorgar:hover:not(:disabled) { background-color: var(--amarillo-dorado); color: var(--azul-oscuro); }
+.btn-otorgar:disabled { opacity: 0.5; cursor: not-allowed; }
+.estado-carga { padding: 40px; text-align: center; color: var(--azul-claro); font-weight: bold; }

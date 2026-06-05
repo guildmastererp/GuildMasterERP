@@ -19,6 +19,8 @@ import { Perfil } from './components/comunidad/perfil/perfil';
 import { Ranking } from './components/comunidad/ranking/ranking';
 import { Buscador } from './components/comunidad/buscador/buscador';
 import { Guias as GuiasComunidad } from './components/comunidad/guias/guias';
+import { GestionPuntos } from './components/comunidad/gestion-puntos/gestion-puntos';
+
 
 // Raid
 import { Organizacion } from './components/raid/organizacion/organizacion';
@@ -53,16 +55,12 @@ import { Ajustes } from './components/configuracion/ajustes/ajustes';
     GuiasMiticas,
     Tablon,
     Inscripcion,
-    Ajustes
+    Ajustes,
+    GestionPuntos,
+    
   ],
-  imports: [
-    BrowserModule,
-    AppRoutingModule,
-    FormsModule
-  ],
-  providers: [
-    provideHttpClient(withFetch())
-  ],
-  bootstrap: [AppComponent]
+  imports: [BrowserModule, AppRoutingModule, FormsModule],
+  providers: [provideHttpClient(withFetch())],
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

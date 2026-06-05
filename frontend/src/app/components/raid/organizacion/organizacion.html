@@ -1,1 +1,131 @@
-<p>organizacion works!</p>
+<div class="organizacion-container">
+
+  <div class="ribbon">
+    <div class="ribbon-grupo">
+      <span class="icono-raid">⚔️</span>
+      <label class="titulo-raid">Organización de Raid</label>
+      <button class="btn-accion" *ngIf="esAdmin" (click)="abrirModalCrear()">+ Añadir Raid</button>
+    </div>
+
+    <div class="navegacion-meses">
+      <button class="btn-mes" (click)="cambiarMes(-1)">◀ Anterior</button>
+      <h2 class="mes-actual">{{ mesNombre | uppercase }} {{ anioActual }}</h2>
+      <button class="btn-mes" (click)="cambiarMes(1)">Siguiente ▶</button>
+    </div>
+  </div>
+
+  <div class="calendario-wrapper">
+    <div class="dias-semana">
+      <div class="dia-cabecera" *ngFor="let d of diasSemanas">{{ d }}</div>
+    </div>
+
+    <div class="grid-calendario">
+      <div class="celda-dia" 
+           *ngFor="let c of calendarioDias" 
+           [ngClass]="{'vacia': !c.dia, 'hoy': c.esHoy, 'con-evento': c.evento}"
+           (click)="abrirModal(c.evento)">
+        
+        <span class="numero-dia" *ngIf="c.dia">{{ c.dia }}</span>
+
+        <div class="evento-pill" *ngIf="c.evento" [ngClass]="c.evento.dificultad.toLowerCase()">
+          <span class="nombre-raid">{{ c.evento.nombre }}</span>
+          <span class="dificultad-raid">{{ c.evento.dificultad }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="modal-overlay" *ngIf="modalAbierta" (click)="cerrarModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>{{ raidSeleccionada?.nombre }}</h2>
+      <span class="btn-cerrar-modal" (click)="cerrarModal()">✖</span>
+    </div>
+
+    <div class="modal-body">
+      <div class="info-destacada">
+        <div class="dato">
+          <span class="dato-label">Fecha</span>
+          <span class="dato-valor">{{ raidSeleccionada?.fecha }}</span>
+        </div>
+        <div class="dato">
+          <span class="dato-label">Dificultad</span>
+          <span class="dato-valor tag-dificultad" [ngClass]="raidSeleccionada?.dificultad.toLowerCase()">
+            {{ raidSeleccionada?.dificultad }}
+          </span>
+        </div>
+      </div>
+
+      <h3 class="titulo-roster">Composición de Roles</h3>
+      <div class="roster-grid">
+        <div class="rol-card tanques">
+          <span class="rol-icono">🛡️</span><span class="rol-cantidad">{{ totalTanques }}</span><span class="rol-nombre">Tanques</span>
+        </div>
+        <div class="rol-card healers">
+          <span class="rol-icono">💚</span><span class="rol-cantidad">{{ totalHealers }}</span><span class="rol-nombre">Healers</span>
+        </div>
+        <div class="rol-card dps">
+          <span class="rol-icono">⚔️</span><span class="rol-cantidad">{{ totalDPS }}</span><span class="rol-nombre">DPS</span>
+        </div>
+      </div>
+
+      <div class="lista-asistentes-container">
+        <h4 class="titulo-asistentes">Jugadores Convocados (Roster Oficial)</h4>
+        
+        <div class="asistentes-grid">
+          <div class="asistente-item" *ngFor="let jugador of rosterActual">
+            
+            <span class="icono-rol" *ngIf="jugador.funcion === 'Tanque'">🛡️</span>
+            <span class="icono-rol" *ngIf="jugador.funcion === 'Healer'">💚</span>
+            <span class="icono-rol" *ngIf="jugador.funcion === 'DPS'">⚔️</span>
+            
+            <div class="asistente-info">
+              <span class="asistente-nombre">{{ jugador.nombre }}</span>
+              <span class="asistente-clase">{{ jugador.clase }}</span>
+            </div>
+            
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-peligro" *ngIf="esAdmin" (click)="eliminarRaid()">Cancelar Evento de Raid</button>
+
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="modalCrearAbierta" (click)="cerrarModalCrear()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>Planificar Nueva Raid</h2>
+      <span class="btn-cerrar-modal" (click)="cerrarModalCrear()">✖</span>
+    </div>
+
+    <div class="modal-body">
+      <div class="formulario">
+        <label>Fecha de la convocatoria:</label>
+        <input type="date" [(ngModel)]="nuevaRaid.fecha">
+        
+        <label>Banda a la que ir:</label>
+        <select [(ngModel)]="nuevaRaid.nombre">
+          <option value="The Dreamrift">The Dreamrift</option>
+          <option value="The Voidspire">The Voidspire</option>
+          <option value="March on Quel'Danas">March on Quel'Danas</option>
+        </select>
+        
+        <label>Dificultad objetivo:</label>
+        <select [(ngModel)]="nuevaRaid.dificultad">
+          <option value="Normal">Normal</option>
+          <option value="Heroico">Heroico</option>
+          <option value="Mítico">Mítico</option>
+        </select>
+
+        <button class="btn-guardar" (click)="guardarRaid()">Añadir al Calendario</button>
+      </div>
+    </div>
+  </div>
+</div>

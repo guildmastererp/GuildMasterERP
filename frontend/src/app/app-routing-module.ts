@@ -15,6 +15,7 @@ import { Perfil } from './components/comunidad/perfil/perfil';
 import { Ranking } from './components/comunidad/ranking/ranking';
 import { Buscador } from './components/comunidad/buscador/buscador';
 import { Guias as GuiasComunidad } from './components/comunidad/guias/guias';
+import { GestionPuntos } from './components/comunidad/gestion-puntos/gestion-puntos'; // <-- NUEVO IMPORT
 
 // Módulo de Raid
 import { Organizacion } from './components/raid/organizacion/organizacion';
@@ -56,6 +57,7 @@ const routes: Routes = [
       { path: 'comunidad/ranking', component: Ranking },
       { path: 'comunidad/buscador', component: Buscador },
       { path: 'comunidad/guias', component: GuiasComunidad },
+      { path: 'comunidad/gestion-puntos', component: GestionPuntos }, // <-- NUEVA RUTA
       // #endregion
 
       // #region SUB-RUTAS DE RAID
