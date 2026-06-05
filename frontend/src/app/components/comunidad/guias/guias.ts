@@ -48,9 +48,9 @@ export class Guias implements OnInit {
     this.cargando = true;
     
     forkJoin({
-      clases: this.http.get<any[]>('http://192.168.1.132:8000/api/aux-clases', { headers: this.getHeaders() }),
-      specs: this.http.get<any[]>('http://192.168.1.132:8000/api/aux-specs', { headers: this.getHeaders() }),
-      funciones: this.http.get<any[]>('http://192.168.1.132:8000/api/aux-funciones', { headers: this.getHeaders() })
+      clases: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-clases', { headers: this.getHeaders() }),
+      specs: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-specs', { headers: this.getHeaders() }),
+      funciones: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-funciones', { headers: this.getHeaders() })
     }).subscribe({
       next: (res) => {
         this.auxClases = res.clases;

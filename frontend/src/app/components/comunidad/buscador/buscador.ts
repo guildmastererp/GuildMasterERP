@@ -55,7 +55,7 @@ cargarTodosLosPersonajes() {
     this.cargando = true;
     this.errorCarga = false;
 
-    this.http.get<any>('http://192.168.1.132:8000/api/aux-personajes', { headers: this.getHeaders() })
+    this.http.get<any>('http://192.168.1.130:8000/api/aux-personajes', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
           console.log('👀 Datos exactos recibidos del backend:', data); // Nuestro chivato

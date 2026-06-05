@@ -90,12 +90,11 @@ export class Perfil implements OnInit {
   cargarDatosAuxiliares() {
     this.cargando = true;
     
-    // Asume que has creado estos 4 métodos GET básicos en tu backend de Laravel
     forkJoin({
-      clases: this.http.get<any[]>('http://192.168.1.132:8000/api/aux-clases', { headers: this.getHeaders() }),
-      specs: this.http.get<any[]>('http://192.168.1.132:8000/api/aux-specs', { headers: this.getHeaders() }),
-      profesiones: this.http.get<any[]>('http://192.168.1.132:8000/api/aux-profesiones', { headers: this.getHeaders() }),
-      funciones: this.http.get<any[]>('http://192.168.1.132:8000/api/aux-funciones', { headers: this.getHeaders() })
+      clases: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-clases', { headers: this.getHeaders() }),
+      specs: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-specs', { headers: this.getHeaders() }),
+      profesiones: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-profesiones', { headers: this.getHeaders() }),
+      funciones: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-funciones', { headers: this.getHeaders() })
     }).subscribe({
       next: (res) => {
         this.auxClases = res.clases;
@@ -111,7 +110,7 @@ export class Perfil implements OnInit {
   }
 
   cargarListaPersonajes() {
-    this.http.get<any[]>('http://192.168.1.132:8000/api/mis-personajes', { headers: this.getHeaders() })
+    this.http.get<any[]>('http://192.168.1.130:8000/api/mis-personajes', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
           this.personajes = data;
@@ -196,7 +195,7 @@ export class Perfil implements OnInit {
     };
 
     this.guardandoDatos = true;
-    this.http.post('http://192.168.1.132:8000/api/actualizar-datos-personaje', payload, { headers: this.getHeaders() })
+    this.http.post('http://192.168.1.130:8000/api/actualizar-datos-personaje', payload, { headers: this.getHeaders() })
       .subscribe({
         next: () => {
           this.guardandoDatos = false;
@@ -219,11 +218,9 @@ export class Perfil implements OnInit {
 
     // #endregion
 
-  // ... Resto de métodos que ya tenías intactos (marcarComoMain, agregarNuevoPersonaje, cargarPerfilRaiderIo) ...
-
   marcarComoMain() {
     if(!this.personajeSeleccionado) return;
-    this.http.post('http://192.168.1.132:8000/api/marcar-main', { codigo: this.codigoSeleccionado }, { headers: this.getHeaders() })
+    this.http.post('http://192.168.1.130:8000/api/marcar-main', { codigo: this.codigoSeleccionado }, { headers: this.getHeaders() })
       .subscribe({
         next: () => {
           alert('Personaje principal actualizado.');
@@ -239,7 +236,7 @@ export class Perfil implements OnInit {
       return;
     }
     this.cargando = true;
-    this.http.post('http://192.168.1.132:8000/api/añadir-personaje', { raiderio_url: this.nuevoLinkRaiderIo }, { headers: this.getHeaders() })
+    this.http.post('http://192.168.1.130:8000/api/añadir-personaje', { raiderio_url: this.nuevoLinkRaiderIo }, { headers: this.getHeaders() })
       .subscribe({
         next: () => {
           alert('Alter añadido a tu cuenta.');
@@ -258,9 +255,10 @@ export class Perfil implements OnInit {
     this.errorCarga = false;
     this.characterData = null;
 
-    const regionLimpia = region.toLowerCase().trim();
-    const reinoLimpio = reino.toLowerCase().trim().replace(/\s+/g, '-');
-    const nombreLimpio = nombre.toLowerCase().trim();
+    // Aquí está la magia: Limpiamos por completo la región y el reino para Raider.io
+    const regionLimpia = region ? region.toLowerCase().trim() : '';
+    const reinoLimpio = reino ? reino.toLowerCase().trim().replace(/\s+/g, '-').replace(/'/g, '') : '';
+    const nombreLimpio = nombre ? nombre.toLowerCase().trim() : '';
 
     const apiUrl = `https://raider.io/api/v1/characters/profile?region=${regionLimpia}&realm=${reinoLimpio}&name=${nombreLimpio}&fields=gear,mythic_plus_scores_by_season:current,raid_progression`;
 
@@ -285,7 +283,7 @@ export class Perfil implements OnInit {
       },
       error: (e) => {
         console.error('Fallo en Raider.io:', e);
-        this.mostrarError('No se pudo sincronizar el personaje de Raider.io.');
+        this.mostrarError('No se pudo sincronizar el personaje de Raider.io. Verifica que el personaje exista y sea nivel máximo.');
       }
     });
   }

@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class AuthService {
   // Aquí está la magia: usando la IP real de tu máquina virtual
-  private apiUrl = 'http://192.168.1.132:8000/api'; 
+  private apiUrl = 'http://192.168.1.130:8000/api'; 
 
   constructor(private http: HttpClient) {}
 

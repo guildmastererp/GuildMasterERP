@@ -83,6 +83,17 @@
     </div>
 
     <div class="stats-grid">
+      
+      <div class="stat-card" *ngIf="personajeSeleccionado">
+        <div class="stat-icono">💎</div>
+        <div class="stat-detalle">
+          <h4>Puntos Guild</h4>
+          <span class="stat-valor">
+            {{ personajeSeleccionado.puntos }}
+          </span>
+        </div>
+      </div>
+
       <div class="stat-card">
         <div class="stat-icono">⚔️</div>
         <div class="stat-detalle">

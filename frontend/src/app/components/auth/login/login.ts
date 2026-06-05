@@ -51,7 +51,7 @@ export class Login {
     };
 
     // 3. Petición POST a la IP de tu Máquina Virtual
-    this.http.post('http://192.168.1.132:8000/api/login', datosLogin, opciones).subscribe({
+    this.http.post('http://192.168.1.130:8000/api/login', datosLogin, opciones).subscribe({
       next: (res: any) => {
         this.cargando = false;
         

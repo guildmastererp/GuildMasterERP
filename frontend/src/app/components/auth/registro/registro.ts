@@ -78,7 +78,7 @@ export class Registro {
 
     try {
       // API FETCH: Bypassea cualquier Interceptor de Angular que se esté tragando tus errores
-      const response = await fetch('http://192.168.1.132:8000/api/registro', {
+      const response = await fetch('http://192.168.1.130:8000/api/registro', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class PerfilController extends Controller
 {
@@ -11,8 +12,15 @@ class PerfilController extends Controller
 
     public function misPersonajes(Request $request)
     {
-        // Devuelve el array de todos los personajes vinculados al battletag del usuario
-        return response()->json($request->user()->personajes);
+        // Hacemos JOIN para devolver los nombres reales de reino y región, y traemos los puntos
+        $personajes = DB::table('aux_personajes')
+            ->leftJoin('aux_reino', 'aux_personajes.codigoReino', '=', 'aux_reino.codigo')
+            ->leftJoin('aux_region', 'aux_personajes.codigoRegion', '=', 'aux_region.codigo')
+            ->where('user_battletag', $request->user()->battletag)
+            ->select('aux_personajes.*', 'aux_reino.nombre as reino', 'aux_region.nombre as region')
+            ->get();
+
+        return response()->json($personajes);
     }
 
     public function añadirPersonaje(Request $request)
@@ -24,16 +32,35 @@ class PerfilController extends Controller
         $url = $request->input('raiderio_url');
         preg_match('~raider\.io/characters/([^/]+)/([^/]+)/([^/]+)~i', $url, $matches);
 
+        $regionUrl = strtolower($matches[1]);
+        $reinoUrl  = strtolower($matches[2]);
+        $nombrePj  = ucfirst(strtolower($matches[3]));
+
+        $regionDb = DB::table('aux_region')->whereRaw('LOWER(nombre) = ?', [$regionUrl])->first();
+        $codigoRegion = $regionDb ? $regionDb->codigo : null;
+
+        $todosLosReinos = DB::table('aux_reino')->get();
+        $codigoReino = null;
+        
+        foreach ($todosLosReinos as $reino) {
+            $nombreLimpio = Str::slug(str_replace("'", "", $reino->nombre));
+            if ($nombreLimpio === $reinoUrl) {
+                $codigoReino = $reino->codigo;
+                break;
+            }
+        }
+
         $ultimo = DB::table('aux_personajes')->orderBy('id', 'desc')->first();
         $nuevoId = $ultimo ? ($ultimo->id + 1) : 1;
         $codigoGenerado = str_pad($nuevoId, 4, '0', STR_PAD_LEFT);
 
         DB::table('aux_personajes')->insert([
             'codigo'         => $codigoGenerado,
-            'nombre'         => $matches[3],
-            'reino'          => $matches[2],
-            'region'         => $matches[1],
-            'es_main'        => false, // Por defecto es un alter
+            'nombre'         => $nombrePj,
+            'codigoRegion'   => $codigoRegion,
+            'codigoReino'    => $codigoReino,
+            'es_main'        => false,
+            'puntos'         => 0,
             'user_battletag' => $request->user()->battletag
         ]);
 
@@ -53,16 +80,13 @@ class PerfilController extends Controller
         $nuevoCodigoMain = $request->input('codigo');
 
         DB::transaction(function () use ($user, $nuevoCodigoMain) {
-            // 1. Asignamos el nuevo código al usuario
             $user->codigo_main = $nuevoCodigoMain;
             $user->save();
 
-            // 2. Limpiamos el flag de main en todos sus personajes
             DB::table('aux_personajes')
                 ->where('user_battletag', $user->battletag)
                 ->update(['es_main' => false]);
 
-            // 3. Activamos el flag solo en el seleccionado
             DB::table('aux_personajes')
                 ->where('codigo', $nuevoCodigoMain)
                 ->update(['es_main' => true]);

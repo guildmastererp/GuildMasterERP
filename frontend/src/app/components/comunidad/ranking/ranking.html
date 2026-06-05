@@ -1,1 +1,59 @@
-<p>ranking works!</p>
+<div class="ranking-container">
+
+  <div class="ribbon">
+    <div class="ribbon-grupo title-group">
+      <span class="icono-trofeo">🏆</span>
+      <label class="titulo-ranking">Clasificación de la Hermandad</label>
+    </div>
+
+    <button class="btn-ribbon btn-invertir" (click)="invertirOrden()">
+      <span *ngIf="ordenDescendente">⬇ Mayor a Menor</span>
+      <span *ngIf="!ordenDescendente">⬆ Menor a Mayor</span>
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="estado-carga">
+    <p>Revisando los registros del banco de la hermandad...</p>
+  </div>
+
+  <div *ngIf="errorCarga" class="estado-error">
+    <p>Error al obtener las puntuaciones. El tesorero está ilocalizable.</p>
+  </div>
+
+  <div class="resultados-container" *ngIf="!cargando && !errorCarga">
+    
+    <div class="grid-ranking">
+      
+      <div class="card-ranking" 
+           *ngFor="let p of mains; let i = index" 
+           [ngClass]="{
+             'top-1': i === 0 && ordenDescendente, 
+             'top-2': i === 1 && ordenDescendente, 
+             'top-3': i === 2 && ordenDescendente
+           }">
+        
+        <div class="posicion">#{{ i + 1 }}</div>
+        
+        <div class="info-personaje">
+          <h3 class="personaje-nombre">{{ p.nombre }}</h3>
+          <p class="personaje-reino">
+            <span class="region-tag">{{ p.region | uppercase }}</span> {{ p.reino }}
+          </p>
+          <div class="tags">
+            <span class="tag spec" *ngIf="p.spec">{{ p.spec }}</span>
+            <span class="tag funcion" *ngIf="p.funcion">{{ p.funcion }}</span>
+          </div>
+        </div>
+
+        <div class="puntos-bloque">
+          <span class="puntos-icono">💎</span>
+          <span class="puntos-valor">{{ p.puntos }}</span>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
