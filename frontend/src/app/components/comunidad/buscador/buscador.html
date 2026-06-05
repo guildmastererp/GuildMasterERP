@@ -1,1 +1,107 @@
-<p>buscador works!</p>
+<div class="buscador-container">
+  
+  <div class="ribbon">
+    
+    <div class="ribbon-grupo">
+      <label>Buscar:</label>
+      <input type="text" [(ngModel)]="filtroNombre" placeholder="Nombre del personaje...">
+    </div>
+
+    <div class="ribbon-grupo">
+      <label>Región:</label>
+      <select [(ngModel)]="filtroRegion">
+        <option value="">Todas</option>
+        <option *ngFor="let region of regionesDisponibles" [value]="region">{{ region | uppercase }}</option>
+      </select>
+    </div>
+
+    <div class="ribbon-grupo">
+      <label>Reino:</label>
+      <select [(ngModel)]="filtroReino">
+        <option value="">Todos</option>
+        <option *ngFor="let reino of reinosDisponibles" [value]="reino">{{ reino }}</option>
+      </select>
+    </div>
+
+    <div class="ribbon-grupo">
+      <label>Función:</label>
+      <select [(ngModel)]="filtroFuncion">
+        <option value="">Todas</option>
+        <option *ngFor="let f of funcionesDisponibles" [value]="f">{{ f }}</option>
+      </select>
+    </div>
+
+    <div class="ribbon-grupo">
+      <label>Especialización:</label>
+      <select [(ngModel)]="filtroSpec">
+        <option value="">Todas</option>
+        <option *ngFor="let s of specsDisponibles" [value]="s">{{ s }}</option>
+      </select>
+    </div>
+
+    <div class="ribbon-grupo">
+      <label>Profesión:</label>
+      <select [(ngModel)]="filtroProfesion">
+        <option value="">Todas</option>
+        <option *ngFor="let prof of profesionesDisponibles" [value]="prof">{{ prof }}</option>
+      </select>
+    </div>
+
+    <button class="btn-ribbon btn-limpiar" (click)="limpiarFiltros()" 
+            *ngIf="filtroNombre || filtroReino || filtroRegion || filtroSpec || filtroProfesion || filtroFuncion">
+      Limpiar Filtros
+    </button>
+
+  </div>
+
+  <div *ngIf="cargando" class="estado-carga">
+    <p>Reuniendo la lista de personajes de la base de datos...</p>
+  </div>
+
+  <div *ngIf="errorCarga" class="estado-error">
+    <p>Error al conectar con el cuartel general (API). Inténtalo de nuevo más tarde.</p>
+  </div>
+
+  <div class="resultados-container" *ngIf="!cargando && !errorCarga">
+    
+    <div class="resultados-header">
+      <p>Mostrando <strong>{{ personajesFiltrados.length }}</strong> personajes.</p>
+    </div>
+
+    <div class="grid-personajes" *ngIf="personajesFiltrados.length > 0; else emptyState">
+      
+      <div class="card-personaje" *ngFor="let p of personajesFiltrados">
+        <div class="card-avatar">
+          <span>{{ p.nombre.charAt(0) | uppercase }}</span>
+        </div>
+        
+        <div class="card-info">
+          <h3 class="personaje-nombre">{{ p.nombre }}</h3>
+          <p class="personaje-reino">
+            <span class="region-tag">{{ p.region | uppercase }}</span> {{ p.reino }}
+          </p>
+          
+          <div class="personaje-tags">
+             <span class="tag" *ngIf="p.es_main == 1 || p.es_main === true">👑 Main</span>
+             <span class="tag alter" *ngIf="p.es_main == 0 || p.es_main === false">🗡️ Alter</span>
+             
+             <span class="tag funcion" *ngIf="p.funcion">🛡️ {{ p.funcion }}</span>
+             <span class="tag spec" *ngIf="p.spec">✨ {{ p.spec }}</span>
+             <span class="tag profesion" *ngIf="p.profesion">⚒️ {{ p.profesion }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <ng-template #emptyState>
+      <div class="estado-vacio">
+        <div class="icono-vacio">🔍</div>
+        <h3>No se encontraron personajes</h3>
+        <p>Prueba a cambiar o limpiar los filtros de búsqueda superior.</p>
+      </div>
+    </ng-template>
+
+  </div>
+
+</div>
