@@ -51,19 +51,39 @@ export class Buscador implements OnInit {
     });
   }
 
-  cargarTodosLosPersonajes() {
+cargarTodosLosPersonajes() {
     this.cargando = true;
     this.errorCarga = false;
 
-    this.http.get<any[]>('http://192.168.1.132:8000/api/aux-personajes', { headers: this.getHeaders() })
+    this.http.get<any>('http://192.168.1.132:8000/api/aux-personajes', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
-          this.personajes = data;
-          this.extraerFiltrosDinamicos();
+          console.log('👀 Datos exactos recibidos del backend:', data); // Nuestro chivato
+
+          // 1. Nos aseguramos de que data sea un Array antes de intentar mapearlo
+          if (Array.isArray(data)) {
+            this.personajes = data;
+          } 
+          // Si el backend lo ha encapsulado en un objeto (ej. data.personajes)
+          else if (data && data.personajes && Array.isArray(data.personajes)) {
+            this.personajes = data.personajes;
+          } 
+          // Si no es nada de lo anterior, inicializamos vacío para que no rompa la app
+          else {
+            console.error('🚨 Formato inesperado del backend. No es un Array.');
+            this.personajes = [];
+          }
+
+          // 2. Extraemos filtros solo si hay personajes
+          if (this.personajes.length > 0) {
+             this.extraerFiltrosDinamicos();
+          }
+
+          // 3. Paramos la rueda de carga con total seguridad
           this.cargando = false;
         },
         error: (err) => {
-          console.error(err);
+          console.error('❌ Error de conexión con Laravel:', err);
           this.errorCarga = true;
           this.cargando = false;
         }

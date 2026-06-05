@@ -1,1 +1,76 @@
-<p>guias works!</p>
+<div class="guias-container">
+
+  <div class="ribbon">
+    <div class="ribbon-grupo">
+      <label>Clase:</label>
+      <select [(ngModel)]="filtroClase" (change)="aplicarFiltros()">
+        <option value="">Todas las Clases</option>
+        <option *ngFor="let c of auxClases" [value]="c.nombre">{{ c.nombre }}</option>
+      </select>
+    </div>
+
+    <div class="ribbon-grupo">
+      <label>Rol / Función:</label>
+      <select [(ngModel)]="filtroFuncion" (change)="aplicarFiltros()">
+        <option value="">Todas las Funciones</option>
+        <option *ngFor="let f of auxFunciones" [value]="f.nombre">{{ f.nombre }}</option>
+      </select>
+    </div>
+
+    <button class="btn-ribbon btn-limpiar" (click)="limpiarFiltros()" *ngIf="filtroClase || filtroFuncion">
+      Limpiar Filtros
+    </button>
+  </div>
+
+  <div *ngIf="cargando" class="estado-carga">
+    <p>Conectando con la biblioteca del Kirin Tor...</p>
+  </div>
+
+  <div *ngIf="errorCarga" class="estado-error">
+    <p>Error al cargar las clases desde el servidor.</p>
+  </div>
+
+  <div class="resultados-container" *ngIf="!cargando && !errorCarga">
+    
+    <div class="resultados-header">
+      <p>Selecciona una especialización para abrir su guía en <strong>Icy Veins</strong>.</p>
+    </div>
+
+    <div class="grid-clases" *ngIf="clasesConSpecs.length > 0; else emptyState">
+      
+      <div class="card-clase" *ngFor="let clase of clasesConSpecs">
+        
+        <div class="clase-header">
+          <h3>{{ clase.nombre }}</h3>
+          <span class="clase-count">{{ clase.specs.length }} Specs</span>
+        </div>
+
+        <div class="clase-body">
+          <button class="btn-spec" *ngFor="let spec of clase.specs" 
+                  (click)="abrirGuiaIcyVeins(clase.nombre, spec.nombre, spec.nombreFuncion)">
+            
+            <span class="spec-icono">
+              <ng-container *ngIf="spec.nombreFuncion === 'Tanque'">🛡️</ng-container>
+              <ng-container *ngIf="spec.nombreFuncion === 'Sanador'">💚</ng-container>
+              <ng-container *ngIf="spec.nombreFuncion === 'DPS'">⚔️</ng-container>
+            </span>
+            <span class="spec-nombre">{{ spec.nombre }}</span>
+          
+          </button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <ng-template #emptyState>
+      <div class="estado-vacio">
+        <div class="icono-vacio">📚</div>
+        <h3>No se encontraron especializaciones</h3>
+        <p>Prueba a limpiar los filtros superiores.</p>
+      </div>
+    </ng-template>
+
+  </div>
+
+</div>
