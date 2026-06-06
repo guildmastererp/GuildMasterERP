@@ -1,66 +1,96 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
-import { provideHttpClient, withFetch } from '@angular/common/http';
-import { AppRoutingModule } from './app-routing-module';
+import { FormsModule } from '@angular/forms'; 
+import { HttpClientModule } from '@angular/common/http';
+import { RouterModule, Routes } from '@angular/router'; 
 
-// Importación del componente principal
+// Componente Raíz
 import { AppComponent } from './app';
 
-// Auth
+// Componentes de Autenticación
 import { Login } from './components/auth/login/login';
-import { Registro } from './components/auth/registro/registro';
+import { Registro as RegistroAuth } from './components/auth/registro/registro';
 
-// Layout
+// Estructura Base
 import { Layout } from './components/layout/layout/layout';
 
-// Comunidad
+// Módulo de Comunidad
 import { Perfil } from './components/comunidad/perfil/perfil';
 import { Ranking } from './components/comunidad/ranking/ranking';
 import { Buscador } from './components/comunidad/buscador/buscador';
 import { Guias as GuiasComunidad } from './components/comunidad/guias/guias';
 import { GestionPuntos } from './components/comunidad/gestion-puntos/gestion-puntos';
 
-
-// Raid
+// Módulo de Raid
 import { Organizacion } from './components/raid/organizacion/organizacion';
 import { Roster } from './components/raid/roster/roster';
 import { Loot } from './components/raid/loot/loot';
 
-// Miticas
-import { Registro as RegistroPiedras } from './components/miticas/registro/registro';
+// Módulo de Míticas (AQUÍ ESTÁ LA CORRECCIÓN DEL NOMBRE)
+import { RegistroMiticas } from './components/miticas/registro/registro';
 import { Guias as GuiasMiticas } from './components/miticas/guias/guias';
 
-// Eventos
+// Módulo de Eventos
 import { Tablon } from './components/eventos/tablon/tablon';
 import { Inscripcion } from './components/eventos/inscripcion/inscripcion';
 
-// Configuración
+// Módulo de Configuración
 import { Ajustes } from './components/configuracion/ajustes/ajustes';
+
+// CONFIGURACIÓN DE RUTAS
+const routes: Routes = [
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  { path: 'login', component: Login },
+  { path: 'registro', component: RegistroAuth },
+  { 
+    path: 'principal', 
+    component: Layout, 
+    children: [
+      { path: 'comunidad/perfil', component: Perfil },
+      { path: 'comunidad/ranking', component: Ranking },
+      { path: 'comunidad/buscador', component: Buscador },
+      { path: 'comunidad/guias', component: GuiasComunidad },
+      { path: 'comunidad/gestion-puntos', component: GestionPuntos },
+      { path: 'raid/organizacion', component: Organizacion },
+      { path: 'raid/roster', component: Roster },
+      { path: 'raid/loot', component: Loot },
+      { path: 'miticas/registro', component: RegistroMiticas },
+      { path: 'miticas/guias', component: GuiasMiticas },
+      { path: 'eventos/tablon', component: Tablon },
+      { path: 'eventos/inscripcion', component: Inscripcion },
+      { path: 'configuracion/ajustes', component: Ajustes }
+    ]
+  },
+  { path: '**', redirectTo: '/login' }
+];
 
 @NgModule({
   declarations: [
     AppComponent,
     Login,
-    Registro,
+    RegistroAuth,
     Layout,
     Perfil,
     Ranking,
     Buscador,
     GuiasComunidad,
+    GestionPuntos,
     Organizacion,
     Roster,
     Loot,
-    RegistroPiedras,
+    RegistroMiticas, 
     GuiasMiticas,
     Tablon,
     Inscripcion,
-    Ajustes,
-    GestionPuntos,
-    
+    Ajustes
   ],
-  imports: [BrowserModule, AppRoutingModule, FormsModule],
-  providers: [provideHttpClient(withFetch())],
-  bootstrap: [AppComponent],
+  imports: [
+    BrowserModule,
+    FormsModule,      
+    HttpClientModule,  
+    RouterModule.forRoot(routes) 
+  ],
+  providers: [],
+  bootstrap: [AppComponent] 
 })
-export class AppModule {}
+export class AppModule { }

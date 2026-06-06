@@ -7,5 +7,4 @@ import { Component } from '@angular/core';
   standalone: false
 })
 export class AppComponent {
-  // Archivo limpio. El Router de Angular se encarga de todo ahora.
 }

@@ -1,0 +1,161 @@
+.loot-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.ribbon {
+  background-color: #2c3e50;
+  color: #ecf0f1;
+  padding: 15px 20px;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.icono-ribbon {
+  font-size: 1.5rem;
+  margin-right: 10px;
+}
+
+.titulo-ribbon {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.panel-admin {
+  background: #f8f9fa;
+  padding: 20px;
+  border: 1px solid #dee2e6;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  margin-bottom: 20px;
+}
+
+.filtros-grid {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+/* Ajuste para los inputs y select de los filtros */
+input[type="text"], input[type="number"] {
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Botón de limpiar filtros */
+.btn-reset {
+  padding: 10px 20px;
+  background-color: #95a5a6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.3s;
+}
+
+.btn-reset:hover {
+  background-color: #7f8c8d;
+}
+
+/* Estilos del botón mágico de Sincronización de Raider.io */
+.btn-sincronizar {
+  background-color: #5865F2;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-sincronizar:hover:not([disabled]) {
+  background-color: #4752C4;
+}
+
+.btn-sincronizar[disabled] {
+  background-color: #95a5a6;
+  cursor: wait;
+}
+
+.tabla-contenedor {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow-x: auto;
+}
+
+.tabla-loot {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tabla-loot th {
+  background-color: #34495e;
+  color: white;
+  padding: 12px;
+  text-align: left;
+}
+
+.tabla-loot td {
+  padding: 12px;
+  border-bottom: 1px solid #ecf0f1;
+}
+
+.tabla-loot tr:hover {
+  background-color: #f5f6fa;
+}
+
+/* Badges para el resultado de la mítica */
+.badge-success {
+  background-color: #2ecc71;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: bold;
+  display: inline-block;
+  text-align: center;
+  min-width: 80px;
+}
+
+.badge-danger {
+  background-color: #e74c3c;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 0.85em;
+  font-weight: bold;
+  display: inline-block;
+  text-align: center;
+  min-width: 80px;
+}
+
+.tabla-contenedor {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow-x: auto;
+  
+  /* NUEVO: Limitar altura y activar scroll */
+  max-height: 500px; 
+  overflow-y: auto;
+}
+
+/* Opcional: Para que el encabezado se quede fijo al hacer scroll */
+.tabla-loot thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}

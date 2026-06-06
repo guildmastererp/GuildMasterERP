@@ -15,7 +15,7 @@ import { Perfil } from './components/comunidad/perfil/perfil';
 import { Ranking } from './components/comunidad/ranking/ranking';
 import { Buscador } from './components/comunidad/buscador/buscador';
 import { Guias as GuiasComunidad } from './components/comunidad/guias/guias';
-import { GestionPuntos } from './components/comunidad/gestion-puntos/gestion-puntos'; // <-- NUEVO IMPORT
+import { GestionPuntos } from './components/comunidad/gestion-puntos/gestion-puntos'; 
 
 // Módulo de Raid
 import { Organizacion } from './components/raid/organizacion/organizacion';
@@ -23,7 +23,8 @@ import { Roster } from './components/raid/roster/roster';
 import { Loot } from './components/raid/loot/loot';
 
 // Módulo de Míticas
-import { Registro as RegistroPiedras } from './components/miticas/registro/registro';
+// CORRECCIÓN AQUÍ: Importamos RegistroMiticas (el nombre real de la clase)
+import { RegistroMiticas as RegistroPiedras } from './components/miticas/registro/registro';
 import { Guias as GuiasMiticas } from './components/miticas/guias/guias';
 
 // Módulo de Eventos
@@ -57,7 +58,7 @@ const routes: Routes = [
       { path: 'comunidad/ranking', component: Ranking },
       { path: 'comunidad/buscador', component: Buscador },
       { path: 'comunidad/guias', component: GuiasComunidad },
-      { path: 'comunidad/gestion-puntos', component: GestionPuntos }, // <-- NUEVA RUTA
+      { path: 'comunidad/gestion-puntos', component: GestionPuntos },
       // #endregion
 
       // #region SUB-RUTAS DE RAID

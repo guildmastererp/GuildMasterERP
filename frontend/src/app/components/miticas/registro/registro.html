@@ -1,1 +1,67 @@
-<p>registro works!</p>
+<div class="loot-container">
+  <!-- Ribbon Superior -->
+  <div class="ribbon">
+    <div class="ribbon-grupo">
+      <span class="icono-ribbon">🔍</span>
+      <label class="titulo-ribbon">Historial de Míticas +</label>
+    </div>
+  </div>
+
+  <!-- PANEL DE FILTROS -->
+  <div class="panel-admin">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+      <h3 style="margin: 0;">📊 Filtrar Historial</h3>
+      
+      <!-- BOTÓN MÁGICO DE SINCRONIZACIÓN -->
+      <button class="btn-sincronizar" 
+              [disabled]="sincronizandoIO" 
+              (click)="sincronizarConRaiderIO()">
+        <span *ngIf="!sincronizandoIO">🔄 Actualizar desde Raider.io</span>
+        <span *ngIf="sincronizandoIO">⏳ Sincronizando...</span>
+      </button>
+    </div>
+
+    <!-- ZONA DE FILTROS -->
+    <div class="filtros-grid">
+      <input type="text" [(ngModel)]="filtroMazmorra" placeholder="Filtrar por nombre de mazmorra...">
+      <input type="number" [(ngModel)]="filtroNivel" placeholder="Nivel exacto...">
+      <button class="btn-reset" (click)="filtroMazmorra=''; filtroNivel=null">Limpiar filtros</button>
+    </div>
+  </div>
+
+  <!-- GRID DE HISTORIAL -->
+  <div class="panel-historial">
+    <div class="tabla-contenedor">
+      <table class="tabla-loot">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Mazmorra</th>
+            <th>Nivel</th>
+            <th>Resultado</th>
+            <th>Jugador</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- AQUÍ USAMOS EL FILTRADO QUE DEFINIMOS EN EL .TS -->
+          <tr *ngFor="let r of historialFiltrado">
+            <td>{{ r.fecha | date:'dd/MM/yyyy' }}</td>
+            <td style="font-weight: bold; color: #ffcc00;">{{ r.mitica_nombre }}</td>
+            <td>+{{ r.nivel }}</td>
+            <td>
+              <span [class]="r.resultado === 'En Tiempo' ? 'badge-success' : 'badge-danger'">
+                {{ r.resultado }}
+              </span>
+            </td>
+            <td>{{ r.personaje_nombre }}</td>
+          </tr>
+          
+          <!-- Mensaje si no hay resultados -->
+          <tr *ngIf="historialFiltrado.length === 0">
+            <td colspan="5" style="text-align: center; padding: 20px;">No se encontraron míticas con los filtros actuales.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
