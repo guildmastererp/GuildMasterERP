@@ -1,1 +1,72 @@
-<p>inscripcion works!</p>
+<div class="organizacion-container">
+  
+  <div class="ribbon">
+    <div class="ribbon-grupo">
+      <span class="icono-raid">📝</span>
+      <label class="titulo-raid">Inscripciones a Próximos Eventos</label>
+    </div>
+  </div>
+
+  <div class="resultados-container">
+    
+    <div *ngIf="eventosProximos.length === 0" class="estado-vacio">
+      <div class="icono-vacio">💤</div>
+      <h3>No hay eventos próximos planificados</h3>
+      <p>Pásate por el tablón para ver eventos pasados o hablar con un oficial.</p>
+    </div>
+
+    <div class="eventos-list">
+      
+      <div class="card-inscripcion" *ngFor="let e of eventosProximos">
+        
+        <div class="evento-info">
+          <span class="tipo-tag">{{ e.nombre_tipo }}</span>
+          <h3>{{ e.titulo }}</h3>
+          <p class="fecha">📅 {{ e.fecha_evento | date:'EEEE, dd MMMM - HH:mm':'':'es' | uppercase }}</p>
+          <p class="desc">{{ e.descripcion }}</p>
+        </div>
+
+        <div class="evento-accion">
+          
+          <div class="asistentes-header">
+            <h4>Inscritos ({{ e.inscritos?.length || 0 }})</h4>
+          </div>
+
+          <div class="lista-asistentes">
+            <span class="asistente-pill" *ngFor="let inscrito of e.inscritos">
+              <span *ngIf="inscrito.funcion === 'Tanque'">🛡️</span>
+              <span *ngIf="inscrito.funcion === 'Healer'">💚</span>
+              <span *ngIf="inscrito.funcion === 'DPS'">⚔️</span>
+              {{ inscrito.nombre }}
+            </span>
+            <span *ngIf="e.inscritos?.length === 0" class="sin-inscritos">Aún no hay nadie apuntado.</span>
+          </div>
+
+          <div class="accion-container">
+            
+            <ng-container *ngIf="!obtenerMiInscripcion(e)">
+              <select [(ngModel)]="personajeSeleccionado[e.codigo]" class="select-pj" [disabled]="procesando">
+                <option *ngFor="let pj of misPersonajes" [value]="pj.codigo">{{ pj.nombre }} ({{ pj.clase }})</option>
+              </select>
+              <button class="btn-inscribir" [disabled]="procesando" (click)="inscribirse(e.codigo)">
+                {{ procesando ? '⏳ Procesando...' : 'Apuntarme' }}
+              </button>
+            </ng-container>
+
+            <ng-container *ngIf="obtenerMiInscripcion(e) as miInscripcion">
+              <div class="estado-inscrito">
+                ✅ Apuntado con: <strong>{{ miInscripcion.nombre }}</strong>
+              </div>
+              <button class="btn-desapuntar" [disabled]="procesando" (click)="desapuntarse(e.codigo, miInscripcion.codigo)">
+                {{ procesando ? '⏳ Procesando...' : 'Desapuntarse' }}
+              </button>
+            </ng-container>
+
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

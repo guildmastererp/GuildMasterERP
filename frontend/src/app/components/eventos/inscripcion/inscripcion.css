@@ -1,0 +1,56 @@
+:host { display: block; width: 100%; height: 100%; }
+.organizacion-container { width: 100%; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; color: var(--azul-oscuro); }
+
+.ribbon { background-color: var(--azul-claro); border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; box-shadow: 0 4px 8px rgba(29, 38, 78, 0.15); }
+.ribbon-grupo { display: flex; align-items: center; }
+.icono-raid { font-size: 24px; margin-right: 10px; }
+.titulo-raid { font-weight: 900; color: var(--amarillo-dorado); font-size: 20px; text-transform: uppercase; }
+
+.resultados-container { flex: 1; overflow-y: auto; }
+.eventos-list { display: flex; flex-direction: column; gap: 20px; padding-bottom: 20px;}
+
+.card-inscripcion { 
+  display: flex; background: white; border: 1px solid var(--gris-pestanas); 
+  border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(29, 38, 78, 0.05); 
+}
+
+/* Mitad izquierda: Info */
+.evento-info { flex: 1; padding: 20px; border-right: 1px solid #f0f0f0; }
+.tipo-tag { background: var(--amarillo-dorado); color: var(--azul-oscuro); padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+.evento-info h3 { margin: 10px 0; font-size: 22px; color: var(--azul-oscuro); }
+.fecha { color: var(--azul-claro); font-weight: bold; font-size: 14px; margin-bottom: 15px; }
+.desc { font-size: 14px; color: #555; white-space: pre-wrap; line-height: 1.5; }
+
+/* Mitad derecha: Roster y Acciones */
+.evento-accion { width: 350px; background: #fafafa; display: flex; flex-direction: column; }
+.asistentes-header { background: var(--azul-oscuro); color: white; padding: 12px 20px; text-align: center; }
+.asistentes-header h4 { margin: 0; font-size: 14px; }
+
+.lista-asistentes { padding: 15px; flex: 1; display: flex; flex-wrap: wrap; gap: 8px; align-content: flex-start; max-height: 200px; overflow-y: auto; }
+.asistente-pill { background: white; border: 1px solid #ddd; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.sin-inscritos { font-size: 13px; color: #999; font-style: italic; width: 100%; text-align: center; margin-top: 20px; }
+
+/* Zona de botones inferior */
+.accion-container { padding: 15px; border-top: 1px solid #eee; display: flex; flex-direction: column; gap: 10px; }
+.select-pj { padding: 8px; border-radius: 4px; border: 1px solid #ccc; outline: none; font-family: inherit; }
+.select-pj[disabled] { background-color: #eee; cursor: not-allowed; }
+
+.btn-inscribir { background: var(--azul-oscuro); color: var(--amarillo-dorado); border: none; padding: 10px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.btn-inscribir:hover:not([disabled]) { background: #1d264e; transform: translateY(-1px); }
+.btn-inscribir[disabled] { background: #95a5a6; color: white; cursor: not-allowed; opacity: 0.7; }
+
+.estado-inscrito { background: #e8f5e9; color: #2e7d32; border: 1px solid #c8e6c9; padding: 10px; border-radius: 4px; font-size: 13px; text-align: center; }
+.btn-desapuntar { background: transparent; color: #d32f2f; border: 1px solid #d32f2f; padding: 8px; border-radius: 4px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+.btn-desapuntar:hover:not([disabled]) { background: #ffebee; }
+.btn-desapuntar[disabled] { border-color: #95a5a6; color: #95a5a6; cursor: not-allowed; opacity: 0.7; }
+
+/* Estado vacío */
+.estado-vacio { text-align: center; padding: 50px; color: var(--azul-claro); }
+.icono-vacio { font-size: 48px; opacity: 0.5; margin-bottom: 10px; }
+
+/* Responsive para pantallas pequeñas */
+@media (max-width: 768px) {
+  .card-inscripcion { flex-direction: column; }
+  .evento-info { border-right: none; border-bottom: 1px solid #f0f0f0; }
+  .evento-accion { width: 100%; }
+}

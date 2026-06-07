@@ -1,1 +1,91 @@
-<p>tablon works!</p>
+<div class="organizacion-container">
+
+  <div class="ribbon">
+    <div class="ribbon-grupo">
+      <span class="icono-raid">📅</span>
+      <label class="titulo-raid">Calendario de Eventos</label>
+      <button class="btn-accion" (click)="abrirModalCrear()">+ Añadir Evento</button>
+    </div>
+
+    <div class="navegacion-meses">
+      <button class="btn-mes" (click)="cambiarMes(-1)">◀ Anterior</button>
+      <h2 class="mes-actual">{{ mesNombre | uppercase }} {{ anioActual }}</h2>
+      <button class="btn-mes" (click)="cambiarMes(1)">Siguiente ▶</button>
+    </div>
+  </div>
+  <div class="calendario-wrapper">
+    <div class="dias-semana">
+      <div class="dia-cabecera" *ngFor="let d of diasSemanas">{{ d }}</div>
+    </div>
+
+    <div class="grid-calendario">
+      <div class="celda-dia" *ngFor="let c of calendarioDias" [ngClass]="{'vacia': !c.dia, 'hoy': c.esHoy}">
+        <span class="numero-dia" *ngIf="c.dia">{{ c.dia }}</span>
+
+        <div class="evento-pill" *ngFor="let ev of c.eventos" (click)="abrirModal(ev)">
+          <span class="nombre-raid">{{ ev.titulo }}</span>
+          <span class="dificultad-raid">{{ ev.nombre_tipo }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+<div class="modal-overlay" *ngIf="modalAbierta" (click)="cerrarModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>{{ eventoSeleccionado?.titulo }}</h2>
+      <span class="btn-cerrar-modal" (click)="cerrarModal()">✖</span>
+    </div>
+
+    <div class="modal-body">
+      <div class="info-destacada">
+        <div class="dato">
+          <span class="dato-label">Fecha y Hora</span>
+          <span class="dato-valor">{{ eventoSeleccionado?.fecha_evento | date:'dd/MM/yyyy HH:mm' }}</span>
+        </div>
+        <div class="dato">
+          <span class="dato-label">Tipo</span>
+          <span class="dato-valor tag-dificultad">{{ eventoSeleccionado?.nombre_tipo }}</span>
+        </div>
+      </div>
+
+      <div class="descripcion-evento" *ngIf="eventoSeleccionado?.descripcion">
+        <h3 class="titulo-roster">Descripción</h3>
+        <p style="white-space: pre-wrap; font-size: 14px;">{{ eventoSeleccionado?.descripcion }}</p>
+      </div>
+
+      <button class="btn-peligro" *ngIf="esAdmin" (click)="eliminarEvento()">Cancelar Evento</button>
+    </div>
+  </div>
+</div>
+<div class="modal-overlay" *ngIf="modalCrearAbierta" (click)="cerrarModalCrear()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    
+    <div class="modal-header">
+      <h2>Planificar Nuevo Evento</h2>
+      <span class="btn-cerrar-modal" (click)="cerrarModalCrear()">✖</span>
+    </div>
+
+    <div class="modal-body">
+      <div class="formulario">
+        <label>Título del evento:</label>
+        <input type="text" [(ngModel)]="nuevoEvento.titulo" placeholder="Ej: Run de monturas de Legion">
+        
+        <label>Descripción / Reglas:</label>
+        <textarea [(ngModel)]="nuevoEvento.descripcion" placeholder="Explica de qué va el evento..."></textarea>
+        
+        <label>Fecha y Hora:</label>
+        <input type="datetime-local" [(ngModel)]="nuevoEvento.fecha_evento">
+        
+        <label>Tipo de Evento:</label>
+        <select [(ngModel)]="nuevoEvento.codigoTipo">
+          <option *ngFor="let t of tipos" [value]="t.codigo">{{ t.nombre }}</option>
+        </select>
+
+        <button class="btn-guardar" (click)="guardarEvento()">Añadir al Calendario</button>
+      </div>
+    </div>
+  </div>
+</div>

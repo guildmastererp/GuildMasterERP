@@ -9,6 +9,8 @@ use App\Http\Controllers\RosterRaidController;
 use App\Http\Controllers\LootRaidController;
 use App\Http\Controllers\MiticasController;
 use App\Http\Controllers\GestionController;
+use App\Http\Controllers\GuiasController; 
+use App\Http\Controllers\EventosController;
 
 // Rutas Públicas
 Route::post('/registro', [AuthController::class, 'register']);
@@ -45,16 +47,24 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/loot/add', [LootRaidController::class, 'addLoot']);
     Route::delete('/loot/remove/{id}', [LootRaidController::class, 'deleteLoot']);
     Route::get('/loot/estructura', [LootRaidController::class, 'getEstructuraRaids']);
+    Route::get('/aux-personajes', [PersonajeController::class, 'getAllAuxPersonajes']);
 
-    // NUEVAS RUTAS: Registro de Míticas (AQUÍ ESTÁ LA RUTA QUE FALTABA)
+    // Registro de Míticas 
     Route::get('/miticas', [MiticasController::class, 'getRegistros']);
     Route::get('/miticas/estructura', [MiticasController::class, 'getEstructura']);
     Route::post('/miticas/add', [MiticasController::class, 'addRegistro']);
     Route::delete('/miticas/remove/{id}', [MiticasController::class, 'deleteRegistro']);
-    Route::post('/miticas/sincronizar', [MiticasController::class, 'sincronizarRaiderIo']); // <-- ESTA
+    Route::post('/miticas/sincronizar', [MiticasController::class, 'sincronizarRaiderIo']); 
+    Route::get('/miticas/guias-lista', [GuiasController::class, 'getGuias']); 
 
-    // Buscador de la hermandad
-    Route::get('/aux-personajes', [PersonajeController::class, 'getAllAuxPersonajes']);
+    // Eventos
+    Route::get('/eventos', [EventosController::class, 'getEventos']);
+    Route::get('/eventos/tipos', [EventosController::class, 'getTipos']);
+    Route::post('/eventos/add', [EventosController::class, 'addEvento']);
+    Route::delete('/eventos/remove/{id}', [EventosController::class, 'deleteEvento']);
+    Route::get('/eventos/proximos', [EventosController::class, 'getProximosConInscritos']);
+    Route::post('/eventos/inscribir', [EventosController::class, 'inscribirse']);
+    Route::delete('/eventos/desinscribir/{evento}/{personaje}', [EventosController::class, 'desinscribirse']);
     
     // Gestión de cuenta
     Route::post('/ajustes/email', [GestionController::class, 'updateEmail']);

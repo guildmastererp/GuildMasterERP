@@ -1,1 +1,75 @@
-<p>guias works!</p>
+<div class="guias-container">
+
+  <div class="ribbon">
+    <div class="ribbon-grupo">
+      <label>Buscar guía:</label>
+      <input type="text" class="input-busqueda" [(ngModel)]="filtroBusqueda" (keyup)="aplicarFiltros()" placeholder="Ej. Ruta MDT, Bosses...">
+    </div>
+
+    <div class="ribbon-grupo">
+      <label>Expansión:</label>
+      <select [(ngModel)]="filtroExpansion" (change)="filtroTemporada=''; aplicarFiltros()">
+        <option value="">Todas las Expansiones</option>
+        <option *ngFor="let e of expansionesDisponibles" [value]="e.codigo">{{ e.nombre }}</option>
+      </select>
+    </div>
+
+    <div class="ribbon-grupo">
+      <label>Temporada:</label>
+      <select [(ngModel)]="filtroTemporada" [disabled]="!filtroExpansion" (change)="aplicarFiltros()">
+        <option value="">Todas las Temporadas</option>
+        <option *ngFor="let t of temporadasFiltradas" [value]="t.codigo">Temporada {{ t.numero }}</option>
+      </select>
+    </div>
+
+    <button class="btn-ribbon btn-limpiar" (click)="limpiarFiltros()" *ngIf="filtroExpansion || filtroTemporada || filtroBusqueda">
+      Limpiar Filtros
+    </button>
+  </div>
+  <div *ngIf="cargando" class="estado-carga">
+    <p>Conectando con la biblioteca de Keystones...</p>
+  </div>
+
+  <div *ngIf="errorCarga" class="estado-error">
+    <p>Error al cargar las guías desde el servidor.</p>
+  </div>
+  <div class="resultados-container" *ngIf="!cargando && !errorCarga">
+    
+    <div class="resultados-header">
+      <p>Selecciona una guía para abrirla en una nueva pestaña (Rutas MDT, Videoguías, etc).</p>
+    </div>
+
+    <div class="grid-clases" *ngIf="guiasConMazmorras.length > 0; else emptyState">
+      
+      <div class="card-clase" *ngFor="let mazmorra of guiasConMazmorras">
+        
+        <div class="clase-header">
+          <h3>{{ mazmorra.nombre }}</h3>
+          <span class="clase-count">{{ mazmorra.guias.length }} Guías</span>
+        </div>
+
+        <div class="clase-body">
+          <button class="btn-spec" *ngFor="let guia of mazmorra.guias" (click)="abrirGuia(guia.url)">
+            <span class="spec-icono">
+              <ng-container *ngIf="guia.tipo === 'Ruta MDT'">🗺️</ng-container>
+              <ng-container *ngIf="guia.tipo === 'Video'">🎥</ng-container>
+              <ng-container *ngIf="guia.tipo === 'Jefes'">💀</ng-container>
+              <ng-container *ngIf="guia.tipo !== 'Ruta MDT' && guia.tipo !== 'Video' && guia.tipo !== 'Jefes'">📄</ng-container>
+            </span>
+            <span class="spec-nombre">{{ guia.titulo }}</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+
+    <ng-template #emptyState>
+      <div class="estado-vacio">
+        <div class="icono-vacio">📚</div>
+        <h3>No se encontraron guías</h3>
+        <p>Prueba a limpiar los filtros superiores.</p>
+      </div>
+    </ng-template>
+
+  </div>
+  </div>
