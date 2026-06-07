@@ -1,6 +1,7 @@
 // #region IMPORTS
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
+import { HttpClient } from '@angular/common/http'; // Asegúrate de tenerlo por consistencia
 // #endregion
 
 @Component({
@@ -28,7 +29,7 @@ export class Registro {
   // #region CONSTRUCTOR
   constructor(
     private router: Router,
-    private cdr: ChangeDetectorRef // <-- Herramienta para forzar el repintado de la pantalla
+    private cdr: ChangeDetectorRef
   ) {}
   // #endregion
 
@@ -56,14 +57,12 @@ export class Registro {
     }
   }
 
-  // Convertimos el método en asíncrono para usar fetch nativo
   async registrarUsuario() {
     if (this.errorUrl || !this.nombreExtraido) {
       this.errorBackend = 'Introduce un enlace de Raider.io válido primero.';
       return;
     }
 
-    // Bloqueamos el botón y limpiamos alertas previas
     this.cargando = true;
     this.errorBackend = '';
 
@@ -77,7 +76,6 @@ export class Registro {
     };
 
     try {
-      // API FETCH: Bypassea cualquier Interceptor de Angular que se esté tragando tus errores
       const response = await fetch('http://192.168.1.130:8000/api/registro', {
         method: 'POST',
         headers: {
@@ -86,17 +84,16 @@ export class Registro {
         },
         body: JSON.stringify(datosRegistro)
       });
-      // ¡LIBERAMOS LOS BOTONES INMEDIATAMENTE!
+      
       this.cargando = false;
 
       if (response.ok) {
-        // Redirección si la cuenta se crea bien
-        this.router.navigate(['/principal']);
+        // CORRECCIÓN: Redirección al Login tras registro exitoso
+        alert('Cuenta creada con éxito. Redirigiendo a inicio de sesión...');
+        this.router.navigate(['/login']);
       } else {
-        // Si hay fallo, leemos el JSON manualmente
         const body = await response.json();
 
-        // Evaluamos exactamente lo que devuelve Laravel
         if (response.status === 422 && body.errors) {
           if (body.errors.battletag) {
             this.errorBackend = 'El BattleTag ya tiene una cuenta asociada.';
@@ -114,7 +111,6 @@ export class Registro {
       this.errorBackend = 'Error crítico de red. El servidor no responde.';
     }
 
-    // ORDEN DIRECTA A ANGULAR: "He cambiado una variable, pinta la alerta roja AHORA MISMO"
     this.cdr.detectChanges();
   }
 

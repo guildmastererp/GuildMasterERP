@@ -1,9 +1,7 @@
 // #region IMPORTS
-
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
-
 // #endregion
 
 @Component({
@@ -15,7 +13,6 @@ import { forkJoin } from 'rxjs';
 export class Perfil implements OnInit {
 
   // #region PROPIEDADES DE ESTADO Y PERSONAJES
-
   personajes: any[] = [];
   personajeSeleccionado: any = null;
   codigoSeleccionado: string = ''; 
@@ -25,46 +22,33 @@ export class Perfil implements OnInit {
   cargando: boolean = true;
   errorCarga: boolean = false;
   mensajeError: string = 'Invocando datos desde las Tierras Sombrías...';
-
   // #endregion
 
   // #region PROPIEDADES DE TABLAS AUXILIARES Y EDICIÓN
-
   auxClases: any[] = [];
   auxSpecs: any[] = [];
   auxProfesiones: any[] = [];
   auxFunciones: any[] = [];
   
-  specsFiltradas: any[] = []; // Se llena al elegir una clase
+  specsFiltradas: any[] = [];
+  profesionesPrincipales: any[] = [];
+  profesionesSecundarias: any[] = [];
 
   editClase: string = '';
   editSpec: string = '';
-  editProfesion: string = '';
+  editP1: string = ''; editP2: string = '';
+  editS1: string = ''; editS2: string = '';
+  
   guardandoDatos: boolean = false;
-
   // #endregion
-
-  // #region CONSTRUCTOR
 
   constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
-  // #endregion
-
-  // #region METODOS
-
-    // #region HOOKS
-    
-  /**
-   * @description Inicializa el componente cargando primero las tablas maestras y luego los personajes.
-   */
   ngOnInit(): void {
     this.cargarDatosAuxiliares();
   }
 
-    // #endregion
-
-    // #region UTILIDADES Y CONFIGURACIÓN
-
+  // #region UTILIDADES
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -79,17 +63,11 @@ export class Perfil implements OnInit {
     this.cargando = false;
     this.cdr.detectChanges(); 
   }
+  // #endregion
 
-    // #endregion
-
-    // #region GESTIÓN DE PERSONAJES Y ESTADO
-
-  /**
-   * @description Descarga las tablas auxiliares en paralelo para los combos. Una vez listas, carga el roster.
-   */
+  // #region GESTIÓN DE PERSONAJES
   cargarDatosAuxiliares() {
     this.cargando = true;
-    
     forkJoin({
       clases: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-clases', { headers: this.getHeaders() }),
       specs: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-specs', { headers: this.getHeaders() }),
@@ -99,13 +77,12 @@ export class Perfil implements OnInit {
       next: (res) => {
         this.auxClases = res.clases;
         this.auxSpecs = res.specs;
-        this.auxProfesiones = res.profesiones;
         this.auxFunciones = res.funciones;
-        
-        // Una vez tenemos los combos listos, pedimos los personajes
+        this.profesionesPrincipales = res.profesiones.filter(p => p.nivel === 'Principal');
+        this.profesionesSecundarias = res.profesiones.filter(p => p.nivel === 'Secundaria');
         this.cargarListaPersonajes();
       },
-      error: () => this.mostrarError('Error al cargar las tablas maestras de la base de datos.')
+      error: () => this.mostrarError('Error al cargar datos auxiliares.')
     });
   }
 
@@ -125,73 +102,55 @@ export class Perfil implements OnInit {
       });
   }
 
-  actualizarPersonaje(personaje: any) {
-    this.personajeSeleccionado = personaje;
-    this.codigoSeleccionado = personaje.codigo; 
-    
-    // Sincronizamos los combos manuales con los datos guardados en BD
-    this.editClase = personaje.clase || '';
-    this.editProfesion = personaje.profesion || '';
-    this.onClaseChange(); // Forzamos el filtrado de specs basado en la clase cargada
-    this.editSpec = personaje.spec || '';
-
-    this.cargarPerfilRaiderIo(personaje.region, personaje.reino, personaje.nombre);
-  }
-
+  // Este método es disparado por (ngModelChange) en el HTML
   onCodigoCambiado(codigo: string) {
-    const encontrado = this.personajes.find(p => p.codigo === codigo);
+    const encontrado = this.personajes.find(p => String(p.codigo) === String(codigo));
     if (encontrado) {
       this.actualizarPersonaje(encontrado);
     }
   }
 
-    // #endregion
-
-    // #region EDICIÓN MANUAL DE CONFIGURACIÓN (NUEVO)
-
-  /**
-   * @description Filtra las especializaciones disponibles basándose en la clase seleccionada en el combo.
-   */
-  onClaseChange() {
-    const claseSeleccionadaObj = this.auxClases.find(c => c.nombre === this.editClase);
+  actualizarPersonaje(personaje: any) {
+    // 1. Limpieza de estado para forzar refresco del *ngIf
+    this.cargando = true;
+    this.errorCarga = false;
+    this.characterData = null;
     
-    if (claseSeleccionadaObj) {
-      this.specsFiltradas = this.auxSpecs.filter(s => s.codigoClase === claseSeleccionadaObj.codigo);
-    } else {
-      this.specsFiltradas = [];
-    }
+    // 2. Asignación de datos
+    this.personajeSeleccionado = personaje;
+    this.codigoSeleccionado = personaje.codigo; 
     
-    // Reseteamos el combo de spec para evitar selecciones fantasma
-    this.editSpec = ''; 
+    this.editClase = personaje.clase || '';
+    this.editSpec = personaje.spec || '';
+    this.editP1 = personaje.profesion1 || '';
+    this.editP2 = personaje.profesion2 || '';
+    this.editS1 = personaje.profesion_sec1 || '';
+    this.editS2 = personaje.profesion_sec2 || '';
+    
+    this.onClaseChange();
+    
+    // 3. Petición externa (Raider.io)
+    this.cargarPerfilRaiderIo(personaje.region, personaje.reino, personaje.nombre);
   }
 
-  /**
-   * @description Calcula la función automáticamente basándose en la spec elegida y envía los datos a guardar.
-   */
-  guardarConfiguracionPersonaje() {
-    let funcionAuto = '';
-
-    // Buscamos el objeto de la clase y la spec seleccionadas para extraer los códigos
+  onClaseChange() {
     const claseObj = this.auxClases.find(c => c.nombre === this.editClase);
-    
-    if (claseObj && this.editSpec) {
-      const specObj = this.auxSpecs.find(s => s.nombre === this.editSpec && s.codigoClase === claseObj.codigo);
-      
-      if (specObj) {
-        // Encontramos la función a través del 'codigoFuncion' que hay en la tabla aux_spec
-        const funcionObj = this.auxFunciones.find(f => f.codigo === specObj.codigoFuncion);
-        if (funcionObj) {
-          funcionAuto = funcionObj.nombre;
-        }
-      }
-    }
+    this.specsFiltradas = claseObj ? this.auxSpecs.filter(s => s.codigoClase === claseObj.codigo) : [];
+    if (!this.specsFiltradas.find(s => s.nombre === this.editSpec)) this.editSpec = '';
+  }
+
+  guardarConfiguracionPersonaje() {
+    const claseObj = this.auxClases.find(c => c.nombre === this.editClase);
+    const specObj = this.auxSpecs.find(s => s.nombre === this.editSpec && s.codigoClase === claseObj?.codigo);
+    const funcionAuto = this.auxFunciones.find(f => f.codigo === specObj?.codigoFuncion)?.nombre || '';
 
     const payload = {
       codigo: this.codigoSeleccionado,
       clase: this.editClase,
       spec: this.editSpec,
-      profesion: this.editProfesion,
-      funcion: funcionAuto // Se asigna de forma 100% automática
+      funcion: funcionAuto,
+      profesion1: this.editP1, profesion2: this.editP2,
+      profesion_sec1: this.editS1, profesion_sec2: this.editS2
     };
 
     this.guardandoDatos = true;
@@ -199,91 +158,72 @@ export class Perfil implements OnInit {
       .subscribe({
         next: () => {
           this.guardandoDatos = false;
-          alert('Configuración del personaje guardada correctamente.');
-          
-          // Actualizamos el objeto local para no tener que recargar toda la página
-          if (this.personajeSeleccionado) {
-            this.personajeSeleccionado.clase = this.editClase;
-            this.personajeSeleccionado.spec = this.editSpec;
-            this.personajeSeleccionado.profesion = this.editProfesion;
-            this.personajeSeleccionado.funcion = funcionAuto;
-          }
+          alert('Datos actualizados.');
+          Object.assign(this.personajeSeleccionado, payload);
+          this.cdr.detectChanges();
         },
         error: () => {
           this.guardandoDatos = false;
-          alert('Error al guardar los datos del personaje.');
+          alert('Error al guardar.');
         }
       });
   }
 
-    // #endregion
-
   marcarComoMain() {
-    if(!this.personajeSeleccionado) return;
     this.http.post('http://192.168.1.130:8000/api/marcar-main', { codigo: this.codigoSeleccionado }, { headers: this.getHeaders() })
-      .subscribe({
-        next: () => {
-          alert('Personaje principal actualizado.');
-          this.cargarListaPersonajes(); // Recargamos para refrescar la marca
-        },
-        error: () => alert('Error al actualizar el personaje principal.')
-      });
+      .subscribe(() => { this.cargarListaPersonajes(); });
   }
 
   agregarNuevoPersonaje() {
-    if (!this.nuevoLinkRaiderIo) {
-      alert('Introduce un enlace válido.');
-      return;
-    }
+    if (!this.nuevoLinkRaiderIo) return;
     this.cargando = true;
     this.http.post('http://192.168.1.130:8000/api/añadir-personaje', { raiderio_url: this.nuevoLinkRaiderIo }, { headers: this.getHeaders() })
       .subscribe({
         next: () => {
-          alert('Alter añadido a tu cuenta.');
           this.nuevoLinkRaiderIo = '';
-          this.cargarDatosAuxiliares(); // Reiniciamos el ciclo de vida completo
+          this.cargarDatosAuxiliares();
         },
         error: () => {
           this.cargando = false;
-          alert('Error al añadir el personaje. Comprueba que el enlace es correcto.');
+          alert('Error al añadir personaje.');
         }
       });
   }
 
   cargarPerfilRaiderIo(region: string, reino: string, nombre: string) {
-    this.cargando = true;
-    this.errorCarga = false;
-    this.characterData = null;
+    if (!region || !reino || !nombre) {
+      this.cargando = false;
+      return;
+    }
 
-    // Aquí está la magia: Limpiamos por completo la región y el reino para Raider.io
-    const regionLimpia = region ? region.toLowerCase().trim() : '';
-    const reinoLimpio = reino ? reino.toLowerCase().trim().replace(/\s+/g, '-').replace(/'/g, '') : '';
-    const nombreLimpio = nombre ? nombre.toLowerCase().trim() : '';
+    // Normalización para Raider.io (sin acentos, minúsculas, espacios a guiones)
+    const rLimpia = region.toLowerCase().trim();
+    const rLimpio = reino.toLowerCase()
+                         .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                         .replace(/\s+/g, '-');
+    const nLimpio = nombre.trim();
 
-    const apiUrl = `https://raider.io/api/v1/characters/profile?region=${regionLimpia}&realm=${reinoLimpio}&name=${nombreLimpio}&fields=gear,mythic_plus_scores_by_season:current,raid_progression`;
-
-    this.http.get(apiUrl).subscribe({
+    const baseUrl = `https://raider.io/api/v1/characters/profile`;
+    const params = `region=${encodeURIComponent(rLimpia)}&realm=${encodeURIComponent(rLimpio)}&name=${encodeURIComponent(nLimpio)}&fields=gear,mythic_plus_scores_by_season:current,raid_progression`;
+    
+    this.http.get(`${baseUrl}?${params}`).subscribe({
       next: (data: any) => {
+        // Filtrado de progresiones irrelevantes
         if (data.raid_progression) {
           const raidsActuales = Object.keys(data.raid_progression).filter(key => 
             !key.startsWith('tier-') && key !== 'world-of-warcraft-remix-mists-of-pandaria'
           );
-
           const progresoFiltrado: any = {};
-          raidsActuales.forEach(key => {
-            progresoFiltrado[key] = data.raid_progression[key];
-          });
-          
+          raidsActuales.forEach(key => progresoFiltrado[key] = data.raid_progression[key]);
           data.raid_progression = progresoFiltrado;
         }
 
         this.characterData = data;
         this.cargando = false;
-        this.errorCarga = false;
+        this.cdr.detectChanges();
       },
-      error: (e) => {
-        console.error('Fallo en Raider.io:', e);
-        this.mostrarError('No se pudo sincronizar el personaje de Raider.io. Verifica que el personaje exista y sea nivel máximo.');
+      error: () => {
+        this.mostrarError(`No se pudo sincronizar a ${nombre} en ${reino}. Revisa que el nombre sea correcto.`);
       }
     });
   }

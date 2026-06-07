@@ -128,12 +128,16 @@ class PerfilController extends Controller
 
     public function actualizarDatosPersonaje(Request $request)
     {
+        // Validamos los 4 campos nuevos
         $request->validate([
             'codigo' => 'required|string',
             'clase' => 'nullable|string',
             'spec' => 'nullable|string',
-            'profesion' => 'nullable|string',
-            'funcion' => 'nullable|string'
+            'funcion' => 'nullable|string',
+            'profesion1' => 'nullable|string',
+            'profesion2' => 'nullable|string',
+            'profesion_sec1' => 'nullable|string',
+            'profesion_sec2' => 'nullable|string'
         ]);
 
         try {
@@ -142,21 +146,16 @@ class PerfilController extends Controller
                 ->update([
                     'clase' => $request->input('clase'),
                     'spec' => $request->input('spec'),
-                    'profesion' => $request->input('profesion'),
-                    'funcion' => $request->input('funcion')
+                    'funcion' => $request->input('funcion'),
+                    'profesion1' => $request->input('profesion1'),
+                    'profesion2' => $request->input('profesion2'),
+                    'profesion_sec1' => $request->input('profesion_sec1'),
+                    'profesion_sec2' => $request->input('profesion_sec2')
                 ]);
 
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Personaje actualizado correctamente.'
-            ], 200);
-
+            return response()->json(['status' => 'success', 'message' => 'Personaje actualizado correctamente.'], 200);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error al guardar en base de datos.',
-                'error' => $e->getMessage()
-            ], 500);
+            return response()->json(['status' => 'error', 'message' => 'Error al guardar.'], 500);
         }
     }
 
