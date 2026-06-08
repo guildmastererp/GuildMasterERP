@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
@@ -26,7 +26,6 @@ export class Loot implements OnInit {
   // #endregion
 
   // #region FILTROS Y FORMULARIO
-  // Cambiado 'itemsSeleccionados' (array) por 'item' (string) para selección única
   filtro = { 
     expansion: '', 
     temporada: '', 
@@ -38,7 +37,7 @@ export class Loot implements OnInit {
   nuevoLoot = { fecha: '', codigoPersonaje: '' };
   // #endregion
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.comprobarRol();
@@ -55,7 +54,6 @@ export class Loot implements OnInit {
   get raidsFiltradas() { return this.raids.filter(r => r.codigoTemporada == this.filtro.temporada); }
   get bossesFiltrados() { return this.bosses.filter(b => b.codigoRaid == this.filtro.raid); }
   
-  // Getter corregido: Fusiona nombre y rareza para el combo de selección única
   get itemsFiltrados() { 
     return this.items
       .filter(i => i.codigoBoss == this.filtro.boss)
@@ -73,7 +71,13 @@ export class Loot implements OnInit {
 
   comprobarRol() {
     this.http.get<any>('http://192.168.1.130:8000/api/user', { headers: this.getHeaders() })
-      .subscribe(user => this.esAdmin = (user.codigo_rol === '0001' || user.codigo_rol === '0002'));
+      .subscribe({
+        next: (user) => {
+          this.esAdmin = (user.codigo_rol === '0001' || user.codigo_rol === '0002');
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
+      });
   }
 
   cargarEstructura() {
@@ -85,20 +89,40 @@ export class Loot implements OnInit {
           this.raids = data.raids;
           this.bosses = data.bosses;
           this.items = data.items;
+          this.cdr.detectChanges();
         },
-        error: (err) => console.error("Error al cargar estructura:", err)
+        error: (err) => {
+          console.error("Error al cargar estructura:", err);
+          this.cdr.detectChanges();
+        }
       });
   }
 
   cargarJugadores() {
     this.http.get<any[]>('http://192.168.1.130:8000/api/aux-personajes', { headers: this.getHeaders() })
-      .subscribe(data => this.jugadoresDisponibles = data);
+      .subscribe({
+        next: (data) => {
+          this.jugadoresDisponibles = data;
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
+      });
   }
 
   cargarHistorial() {
     this.cargando = true;
     this.http.get<any[]>('http://192.168.1.130:8000/api/loot', { headers: this.getHeaders() })
-      .subscribe(data => { this.historialLoot = data; this.cargando = false; });
+      .subscribe({
+        next: (data) => {
+          this.historialLoot = data; 
+          this.cargando = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.cargando = false;
+          this.cdr.detectChanges();
+        }
+      });
   }
   // #endregion
 
@@ -111,8 +135,6 @@ export class Loot implements OnInit {
 
     this.procesando = true;
     
-    // Enviamos el código del ítem seleccionado. 
-    // Nota: El backend espera 'bosses' como array, enviamos el item en un array de 1 elemento.
     const payload = {
       fecha: this.nuevoLoot.fecha,
       codigoPersonaje: this.nuevoLoot.codigoPersonaje,
@@ -126,10 +148,12 @@ export class Loot implements OnInit {
           this.filtro.item = ''; // Limpiar selección
           this.cargarHistorial();
           this.procesando = false;
+          this.cdr.detectChanges();
         },
         error: () => {
           alert('Error al registrar el loot.');
           this.procesando = false;
+          this.cdr.detectChanges();
         }
       });
   }

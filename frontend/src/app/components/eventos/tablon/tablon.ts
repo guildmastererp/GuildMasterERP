@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
@@ -19,8 +19,8 @@ export class Tablon implements OnInit {
   // #endregion
 
   // #region DATOS DEL BACKEND
-  eventos: any[] = []; // Todos los eventos de la BD
-  tipos: any[] = []; // Tipos de evento (Reunión, PvP, etc)
+  eventos: any[] = []; 
+  tipos: any[] = []; 
   // #endregion
 
   // #region PROPIEDADES DE MODALES
@@ -31,12 +31,12 @@ export class Tablon implements OnInit {
   nuevoEvento: any = { titulo: '', descripcion: '', fecha_evento: '', codigoTipo: '' };
   // #endregion
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.comprobarRol();
     this.cargarTipos();
-    this.cargarDatos(); // Carga de BD y genera el calendario
+    this.cargarDatos(); 
   }
 
   private getHeaders(): HttpHeaders {
@@ -48,20 +48,36 @@ export class Tablon implements OnInit {
 
   comprobarRol() {
     this.http.get<any>('http://192.168.1.130:8000/api/user', { headers: this.getHeaders() })
-      .subscribe(user => this.esAdmin = (user.codigo_rol === '0001' || user.codigo_rol === '0002'));
+      .subscribe({
+        next: (user) => {
+          this.esAdmin = (user.codigo_rol === '0001' || user.codigo_rol === '0002');
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
+      });
   }
 
   // #region CARGA DE DATOS
   cargarTipos() {
     this.http.get<any[]>('http://192.168.1.130:8000/api/eventos/tipos', { headers: this.getHeaders() })
-      .subscribe(data => this.tipos = data);
+      .subscribe({
+        next: (data) => {
+          this.tipos = data;
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
+      });
   }
 
   cargarDatos() {
     this.http.get<any[]>('http://192.168.1.130:8000/api/eventos', { headers: this.getHeaders() })
-      .subscribe(data => {
-        this.eventos = data;
-        this.generarCalendario(); // Regeneramos el calendario con los datos frescos
+      .subscribe({
+        next: (data) => {
+          this.eventos = data;
+          this.generarCalendario(); 
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
       });
   }
   // #endregion
@@ -85,16 +101,12 @@ export class Tablon implements OnInit {
 
     const diasEnElMes = new Date(anio, mes + 1, 0).getDate();
 
-    // Días vacíos al principio del mes
     for (let i = 0; i < primerDia; i++) {
       this.calendarioDias.push({ dia: null, eventos: [] });
     }
 
-    // Días reales del mes
     for (let i = 1; i <= diasEnElMes; i++) {
       const fechaStr = `${anio}-${(mes + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
-      
-      // Buscamos TODOS los eventos que coincidan con la fecha (ignorando la hora para el grid)
       const eventosDelDia = this.eventos.filter(e => e.fecha_evento.startsWith(fechaStr));
 
       this.calendarioDias.push({
@@ -104,6 +116,7 @@ export class Tablon implements OnInit {
         esHoy: this.comprobarSiEsHoy(anio, mes, i)
       });
     }
+    this.cdr.detectChanges();
   }
 
   comprobarSiEsHoy(anio: number, mes: number, dia: number): boolean {
@@ -117,21 +130,25 @@ export class Tablon implements OnInit {
     if (evento) {
       this.eventoSeleccionado = evento;
       this.modalAbierta = true;
+      this.cdr.detectChanges();
     }
   }
 
   cerrarModal() {
     this.modalAbierta = false;
     this.eventoSeleccionado = null;
+    this.cdr.detectChanges();
   }
 
   eliminarEvento() {
     if (confirm('¿Estás seguro de que deseas cancelar este evento?')) {
-      // Necesitarás crear esta ruta en api.php y en el EventosController
       this.http.delete(`http://192.168.1.130:8000/api/eventos/remove/${this.eventoSeleccionado.id}`, { headers: this.getHeaders() })
-        .subscribe(() => {
-          this.cerrarModal();
-          this.cargarDatos(); // Recargamos de la BD
+        .subscribe({
+          next: () => {
+            this.cerrarModal();
+            this.cargarDatos(); 
+          },
+          error: () => this.cdr.detectChanges()
         });
     }
   }
@@ -141,10 +158,12 @@ export class Tablon implements OnInit {
   abrirModalCrear() {
     this.nuevoEvento = { titulo: '', descripcion: '', fecha_evento: '', codigoTipo: this.tipos[0]?.codigo || '' };
     this.modalCrearAbierta = true;
+    this.cdr.detectChanges();
   }
 
   cerrarModalCrear() {
     this.modalCrearAbierta = false;
+    this.cdr.detectChanges();
   }
 
   guardarEvento() {
@@ -154,9 +173,12 @@ export class Tablon implements OnInit {
     }
     
     this.http.post('http://192.168.1.130:8000/api/eventos/add', this.nuevoEvento, { headers: this.getHeaders() })
-      .subscribe(() => {
-        this.cerrarModalCrear();
-        this.cargarDatos(); // Recargamos para que aparezca en el calendario
+      .subscribe({
+        next: () => {
+          this.cerrarModalCrear();
+          this.cargarDatos(); 
+        },
+        error: () => this.cdr.detectChanges()
       });
   }
   // #endregion

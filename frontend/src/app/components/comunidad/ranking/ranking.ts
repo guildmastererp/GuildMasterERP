@@ -1,5 +1,5 @@
 // #region IMPORTS
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 // #endregion
 
@@ -20,7 +20,8 @@ export class Ranking implements OnInit {
   ordenDescendente: boolean = true; 
   // #endregion
 
-  constructor(private http: HttpClient) {}
+  // CORRECCIÓN: Inyección de ChangeDetectorRef
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.cargarRanking();
@@ -38,19 +39,21 @@ export class Ranking implements OnInit {
     this.cargando = true;
     this.errorCarga = false;
 
-    // Usamos el mismo endpoint del buscador que ya devuelve todos los datos y puntos
     this.http.get<any[]>('http://192.168.1.130:8000/api/aux-personajes', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
-          // Filtramos para que en el ranking de DKP/puntos solo compitan los Mains
           this.mains = data.filter(p => p.es_main == 1 || p.es_main === true);
           this.ordenarRanking();
           this.cargando = false;
+          // CORRECCIÓN: Forzar el repintado de la vista
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error al cargar el ranking:', err);
           this.errorCarga = true;
           this.cargando = false;
+          // CORRECCIÓN: Forzar el repintado de la vista
+          this.cdr.detectChanges();
         }
       });
   }
@@ -68,6 +71,8 @@ export class Ranking implements OnInit {
         return a.puntos - b.puntos; // De menor a mayor
       }
     });
+    // CORRECCIÓN: Al reordenar localmente, no viene mal refrescar la vista
+    this.cdr.detectChanges();
   }
   // #endregion
 }

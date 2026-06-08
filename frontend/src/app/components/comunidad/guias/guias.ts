@@ -1,5 +1,5 @@
 // #region IMPORTS
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
 // #endregion
@@ -12,9 +12,9 @@ import { forkJoin } from 'rxjs';
 })
 export class Guias implements OnInit {
 
-  // #region PROPIEDADES DE DATOS
-  clasesConSpecs: any[] = []; // Array principal agrupado para pintar la vista
-  datosOriginales: any[] = []; // Copia de seguridad para los filtros
+  // #region PROPIEDADES
+  clasesConSpecs: any[] = []; 
+  datosOriginales: any[] = []; 
 
   auxClases: any[] = [];
   auxSpecs: any[] = [];
@@ -22,14 +22,13 @@ export class Guias implements OnInit {
 
   cargando: boolean = true;
   errorCarga: boolean = false;
-  // #endregion
-
-  // #region PROPIEDADES DE FILTRO
+  
   filtroClase: string = '';
   filtroFuncion: string = '';
   // #endregion
 
-  constructor(private http: HttpClient) {}
+  // CORRECCIÓN: Inyección de ChangeDetectorRef
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.cargarDatosMaestros();
@@ -59,21 +58,21 @@ export class Guias implements OnInit {
         
         this.agruparDatos();
         this.cargando = false;
+        // CORRECCIÓN: Forzar el repintado de la vista
+        this.cdr.detectChanges();
       },
       error: () => {
         this.errorCarga = true;
         this.cargando = false;
+        // CORRECCIÓN: Forzar el repintado de la vista
+        this.cdr.detectChanges();
       }
     });
   }
 
   agruparDatos() {
-    // Creamos un array donde cada objeto es una Clase con sus Especializaciones dentro
     const agrupado = this.auxClases.map(clase => {
-      
-      // Buscamos las specs que pertenecen a esta clase
       const specsDeClase = this.auxSpecs.filter(s => s.codigoClase === clase.codigo).map(spec => {
-        // Le adjuntamos el nombre de su función para poder filtrar
         const funcionObj = this.auxFunciones.find(f => f.codigo === spec.codigoFuncion);
         return {
           ...spec,
@@ -92,26 +91,23 @@ export class Guias implements OnInit {
   }
   // #endregion
 
-  // #region FILTRADO DE LA VISTA
+  // #region FILTROS
   aplicarFiltros() {
-    // Clonamos el array original para no perder datos
     let resultado = JSON.parse(JSON.stringify(this.datosOriginales));
 
-    // 1. Filtrar por Clase entera
     if (this.filtroClase) {
       resultado = resultado.filter((c: any) => c.nombre === this.filtroClase);
     }
 
-    // 2. Filtrar las specs internas por Función (Tanque, Healer, DPS)
     if (this.filtroFuncion) {
       resultado.forEach((clase: any) => {
         clase.specs = clase.specs.filter((s: any) => s.nombreFuncion === this.filtroFuncion);
       });
-      // Quitamos las clases que se hayan quedado vacías tras filtrar sus specs
       resultado = resultado.filter((c: any) => c.specs.length > 0);
     }
 
     this.clasesConSpecs = resultado;
+    this.cdr.detectChanges();
   }
 
   limpiarFiltros() {
@@ -121,9 +117,8 @@ export class Guias implements OnInit {
   }
   // #endregion
 
-  // #region GENERADOR DE ENLACES A ICY VEINS
   abrirGuiaIcyVeins(nombreClase: string, nombreSpec: string, nombreFuncion: string) {
-    // 1. Diccionarios de traducción Español -> Inglés
+    // Igual que el tuyo, solo abriendo en nueva pestaña
     const dictClases: any = {
       'Caballero de la Muerte': 'death-knight', 'Cazador': 'hunter', 'Cazador de Demonios': 'demon-hunter',
       'Chamán': 'shaman', 'Druida': 'druid', 'Evocador': 'evoker', 'Guerrero': 'warrior',
@@ -139,31 +134,21 @@ export class Guias implements OnInit {
       'Equilibrio': 'balance', 'Feral': 'feral', 'Guardián': 'guardian',
       'Aumento': 'augmentation', 'Preservación': 'preservation',
       'Armas': 'arms', 'Furia': 'fury', 'Protección': 'protection',
-      'Arcano': 'arcane', 'Fuego': 'fire', // Escarcha ya está
+      'Arcano': 'arcane', 'Fuego': 'fire', 
       'Maestro Cervecero': 'brewmaster', 'Tejedor de Niebla': 'mistweaver', 'Viajero del Viento': 'windwalker',
-      'Sagrado': 'holy', 'Reprensión': 'retribution', // Protección ya está
+      'Sagrado': 'holy', 'Reprensión': 'retribution', 
       'Asesinato': 'assassination', 'Forajido': 'outlaw', 'Sutileza': 'subtlety',
-      'Disciplina': 'discipline', 'Sombras': 'shadow', // Sagrado ya está
+      'Disciplina': 'discipline', 'Sombras': 'shadow', 
       'Aflicción': 'affliction', 'Demonología': 'demonology', 'Destrucción': 'destruction'
     };
 
-    const dictRoles: any = {
-      'Tanque': 'tank',
-      'Sanador': 'healing',
-      'DPS': 'dps'
-    };
+    const dictRoles: any = { 'Tanque': 'tank', 'Sanador': 'healing', 'DPS': 'dps' };
 
-    // 2. Extraemos los términos en inglés (o hacemos limpieza básica si no existen)
     const claseEng = dictClases[nombreClase] || nombreClase.toLowerCase().replace(/ /g, '-');
     const specEng = dictSpecs[nombreSpec] || nombreSpec.toLowerCase().replace(/ /g, '-');
-    const rolEng = dictRoles[nombreFuncion] || 'dps'; // Por defecto dps
+    const rolEng = dictRoles[nombreFuncion] || 'dps';
 
-    // 3. Montamos la URL con el patrón oficial de Icy Veins
-    // Ejemplo: https://www.icy-veins.com/wow/blood-death-knight-pve-tank-guide
     const urlGuia = `https://www.icy-veins.com/wow/${specEng}-${claseEng}-pve-${rolEng}-guide`;
-
-    // 4. Abrimos en una nueva pestaña
     window.open(urlGuia, '_blank');
   }
-  // #endregion
 }

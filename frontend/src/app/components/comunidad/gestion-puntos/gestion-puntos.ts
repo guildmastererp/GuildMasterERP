@@ -17,7 +17,6 @@ export class GestionPuntos implements OnInit {
   cargando: boolean = true;
   procesando: boolean = false;
 
-  // Tablas maestras para los selects de oficiales
   auxClases: any[] = [];
   auxSpecs: any[] = [];
   auxFunciones: any[] = [];
@@ -38,7 +37,6 @@ export class GestionPuntos implements OnInit {
     });
   }
 
-  // Cargamos los combos en paralelo (mismo sistema que perfil)
   cargarDatosAuxiliares() {
     this.cargando = true;
     forkJoin({
@@ -69,7 +67,7 @@ export class GestionPuntos implements OnInit {
         next: (data) => {
           this.personajes = data.map(p => ({ ...p, puntosInput: 0 }));
           this.cargando = false;
-          this.cdr.detectChanges(); // <-- Cambio visual instantáneo
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error('Error al cargar personajes', err);
@@ -87,18 +85,16 @@ export class GestionPuntos implements OnInit {
     );
   }
 
-  // Filtra las specs en el HTML dinámicamente según la clase que tenga el pj
   getSpecsDeClase(claseNombre: string) {
     const claseObj = this.auxClases.find(c => c.nombre === claseNombre);
     return claseObj ? this.auxSpecs.filter(s => s.codigoClase === claseObj.codigo) : [];
   }
 
   onClaseChange(p: any) {
-    p.spec = ''; // Resetea la spec si cambias de clase
+    p.spec = ''; 
     this.guardarConfiguracion(p);
   }
 
-  // Guardado silencioso en background
   guardarConfiguracion(p: any) {
     const claseObj = this.auxClases.find(c => c.nombre === p.clase);
     const specObj = this.auxSpecs.find(s => s.nombre === p.spec && s.codigoClase === claseObj?.codigo);
@@ -125,10 +121,7 @@ export class GestionPuntos implements OnInit {
     if (!personaje.puntosInput || personaje.puntosInput === 0) return;
 
     this.procesando = true;
-    const payload = {
-      codigo: personaje.codigo,
-      cantidad: personaje.puntosInput
-    };
+    const payload = { codigo: personaje.codigo, cantidad: personaje.puntosInput };
 
     this.http.post('http://192.168.1.130:8000/api/actualizar-puntos', payload, { headers: this.getHeaders() })
       .subscribe({

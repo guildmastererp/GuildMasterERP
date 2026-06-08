@@ -1,5 +1,5 @@
 // #region IMPORTS
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 // #endregion
 
@@ -11,13 +11,11 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 })
 export class Buscador implements OnInit {
 
-  // #region PROPIEDADES DE DATOS
+  // #region PROPIEDADES
   personajes: any[] = [];
   cargando: boolean = true;
   errorCarga: boolean = false;
-  // #endregion
 
-  // #region PROPIEDADES DE FILTRADO
   filtroNombre: string = '';
   filtroReino: string = '';
   filtroRegion: string = '';
@@ -32,17 +30,13 @@ export class Buscador implements OnInit {
   funcionesDisponibles: string[] = [];
   // #endregion
 
-  // #region CONSTRUCTOR
-  constructor(private http: HttpClient) {}
-  // #endregion
+  // CORRECCIÓN: Inyección de ChangeDetectorRef
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
-  // #region HOOKS
   ngOnInit(): void {
     this.cargarTodosLosPersonajes();
   }
-  // #endregion
 
-  // #region MÉTODOS DE DATOS
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -51,53 +45,47 @@ export class Buscador implements OnInit {
     });
   }
 
-cargarTodosLosPersonajes() {
+  cargarTodosLosPersonajes() {
     this.cargando = true;
     this.errorCarga = false;
 
     this.http.get<any>('http://192.168.1.130:8000/api/aux-personajes', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
-          console.log('👀 Datos exactos recibidos del backend:', data); // Nuestro chivato
-
-          // 1. Nos aseguramos de que data sea un Array antes de intentar mapearlo
           if (Array.isArray(data)) {
             this.personajes = data;
-          } 
-          // Si el backend lo ha encapsulado en un objeto (ej. data.personajes)
-          else if (data && data.personajes && Array.isArray(data.personajes)) {
+          } else if (data && data.personajes && Array.isArray(data.personajes)) {
             this.personajes = data.personajes;
-          } 
-          // Si no es nada de lo anterior, inicializamos vacío para que no rompa la app
-          else {
-            console.error('🚨 Formato inesperado del backend. No es un Array.');
+          } else {
             this.personajes = [];
           }
 
-          // 2. Extraemos filtros solo si hay personajes
           if (this.personajes.length > 0) {
              this.extraerFiltrosDinamicos();
           }
 
-          // 3. Paramos la rueda de carga con total seguridad
           this.cargando = false;
+          // CORRECCIÓN: Forzar el repintado de la vista
+          this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error('❌ Error de conexión con Laravel:', err);
           this.errorCarga = true;
           this.cargando = false;
+          // CORRECCIÓN: Forzar el repintado de la vista
+          this.cdr.detectChanges();
         }
       });
   }
-  // #endregion
 
-  // #region MÉTODOS DE FILTRADO
   private extraerFiltrosDinamicos() {
     this.reinosDisponibles = [...new Set(this.personajes.map(p => p.reino))].filter(Boolean) as string[];
     this.regionesDisponibles = [...new Set(this.personajes.map(p => p.region))].filter(Boolean) as string[];
     this.specsDisponibles = [...new Set(this.personajes.map(p => p.spec))].filter(Boolean) as string[];
-    this.profesionesDisponibles = [...new Set(this.personajes.map(p => p.profesion))].filter(Boolean) as string[];
     this.funcionesDisponibles = [...new Set(this.personajes.map(p => p.funcion))].filter(Boolean) as string[];
+
+    // CORRECCIÓN: Extraemos las profesiones de los 4 campos posibles
+    const todasLasProfesiones = this.personajes.flatMap(p => [p.profesion1, p.profesion2, p.profesion_sec1, p.profesion_sec2]);
+    this.profesionesDisponibles = [...new Set(todasLasProfesiones)].filter(Boolean) as string[];
   }
 
   get personajesFiltrados(): any[] {
@@ -108,8 +96,16 @@ cargarTodosLosPersonajes() {
       const coincideReino = this.filtroReino ? p.reino === this.filtroReino : true;
       const coincideRegion = this.filtroRegion ? p.region === this.filtroRegion : true;
       const coincideSpec = this.filtroSpec ? p.spec === this.filtroSpec : true;
-      const coincideProfesion = this.filtroProfesion ? p.profesion === this.filtroProfesion : true;
       const coincideFuncion = this.filtroFuncion ? p.funcion === this.filtroFuncion : true;
+      
+      // CORRECCIÓN: Comprobamos si la profesión buscada está en alguno de los 4 slots del personaje
+      let coincideProfesion = true;
+      if (this.filtroProfesion) {
+        coincideProfesion = (p.profesion1 === this.filtroProfesion) || 
+                            (p.profesion2 === this.filtroProfesion) || 
+                            (p.profesion_sec1 === this.filtroProfesion) || 
+                            (p.profesion_sec2 === this.filtroProfesion);
+      }
 
       return coincideNombre && coincideReino && coincideRegion && coincideSpec && coincideProfesion && coincideFuncion;
     });
@@ -122,6 +118,6 @@ cargarTodosLosPersonajes() {
     this.filtroSpec = '';
     this.filtroProfesion = '';
     this.filtroFuncion = '';
+    this.cdr.detectChanges();
   }
-  // #endregion
 }

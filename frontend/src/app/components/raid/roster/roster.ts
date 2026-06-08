@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+// #region IMPORTS
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+// #endregion
 
 @Component({
   selector: 'app-roster',
@@ -17,7 +19,7 @@ export class Roster implements OnInit {
   todosPersonajes: any[] = [];
   terminoBusqueda: string = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.comprobarRol();
@@ -40,8 +42,12 @@ export class Roster implements OnInit {
             this.esAdmin = true;
             this.cargarDatos();
           }
+          this.cdr.detectChanges(); // Forzamos el repintado
         },
-        error: () => this.cargandoRol = false
+        error: () => {
+          this.cargandoRol = false;
+          this.cdr.detectChanges();
+        }
       });
   }
 
@@ -53,13 +59,24 @@ export class Roster implements OnInit {
 
   cargarRoster() {
     this.http.get<any[]>('http://192.168.1.130:8000/api/roster', { headers: this.getHeaders() })
-      .subscribe(data => this.rosterActual = data);
+      .subscribe({
+        next: (data) => {
+          this.rosterActual = data;
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
+      });
   }
 
   cargarPersonajesParaBuscador() {
-    // Reutilizamos el endpoint del buscador general
     this.http.get<any[]>('http://192.168.1.130:8000/api/aux-personajes', { headers: this.getHeaders() })
-      .subscribe(data => this.todosPersonajes = data);
+      .subscribe({
+        next: (data) => {
+          this.todosPersonajes = data;
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
+      });
   }
 
   // 3. LÓGICA DEL BUSCADOR (Filtra a los que ya están en el roster)
@@ -85,8 +102,12 @@ export class Roster implements OnInit {
           this.terminoBusqueda = ''; // Limpiamos buscador
           this.cargarRoster(); // Refrescamos lista
           this.procesando = false;
+          this.cdr.detectChanges();
         },
-        error: () => this.procesando = false
+        error: () => {
+          this.procesando = false;
+          this.cdr.detectChanges();
+        }
       });
   }
 
@@ -98,10 +119,13 @@ export class Roster implements OnInit {
           next: () => {
             this.cargarRoster();
             this.procesando = false;
+            this.cdr.detectChanges();
           },
-          error: () => this.procesando = false
+          error: () => {
+            this.procesando = false;
+            this.cdr.detectChanges();
+          }
         });
     }
   }
-
 }

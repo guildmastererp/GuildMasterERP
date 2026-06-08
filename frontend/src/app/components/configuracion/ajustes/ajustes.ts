@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
 
@@ -22,7 +22,7 @@ export class Ajustes implements OnInit {
   // Estados
   cargando: boolean = false;
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient, private router: Router, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.obtenerDatosUsuario();
@@ -37,9 +37,13 @@ export class Ajustes implements OnInit {
 
   obtenerDatosUsuario() {
     this.http.get<any>('http://192.168.1.130:8000/api/user', { headers: this.getHeaders() })
-      .subscribe(user => {
-        this.usuarioActual = user;
-        this.nuevoEmail = user.email;
+      .subscribe({
+        next: (user) => {
+          this.usuarioActual = user;
+          this.nuevoEmail = user.email;
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
       });
   }
 
@@ -52,10 +56,12 @@ export class Ajustes implements OnInit {
         next: () => {
           this.cargando = false;
           alert('Correo actualizado con éxito.');
+          this.cdr.detectChanges();
         },
         error: (err) => {
           this.cargando = false;
           alert(err.error.message || 'Error al actualizar el correo.');
+          this.cdr.detectChanges();
         }
       });
   }
@@ -78,10 +84,12 @@ export class Ajustes implements OnInit {
           this.passNueva = '';
           this.passConfirmar = '';
           alert('Contraseña cambiada con éxito.');
+          this.cdr.detectChanges();
         },
         error: (err) => {
           this.cargando = false;
           alert(err.error.message || 'Error al cambiar la contraseña. Verifica los datos.');
+          this.cdr.detectChanges();
         }
       });
   }
@@ -103,6 +111,7 @@ export class Ajustes implements OnInit {
           error: () => {
             this.cargando = false;
             alert('Error al intentar eliminar la cuenta.');
+            this.cdr.detectChanges();
           }
         });
     }

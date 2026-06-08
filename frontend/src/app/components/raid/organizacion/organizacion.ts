@@ -1,5 +1,5 @@
 // #region IMPORTS
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 // #endregion
 
@@ -30,7 +30,7 @@ export class Organizacion implements OnInit {
   // #endregion
 
   // #region PROPIEDADES DEL ROSTER REAL
-  rosterActual: any[] = []; // <-- ¡Esto debe estar VACÍO para que lo llene Laravel!
+  rosterActual: any[] = [];
   totalTanques: number = 0;
   totalHealers: number = 0;
   totalDPS: number = 0;
@@ -44,12 +44,12 @@ export class Organizacion implements OnInit {
   nuevaRaid: any = { fecha: '', nombre: 'The Dreamrift', dificultad: 'Normal' };
   // #endregion
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.comprobarRol();
     this.generarCalendario();
-    this.cargarRoster(); // Consultamos a la BD real
+    this.cargarRoster();
   }
 
   // #region SEGURIDAD Y ROLES
@@ -67,7 +67,9 @@ export class Organizacion implements OnInit {
           if (user.codigo_rol === '0001' || user.codigo_rol === '0002') {
             this.esAdmin = true;
           }
-        }
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
       });
   }
   // #endregion
@@ -79,8 +81,12 @@ export class Organizacion implements OnInit {
         next: (data) => {
           this.rosterActual = data;
           this.calcularComposicion();
+          this.cdr.detectChanges();
         },
-        error: (err) => console.error('Error al cargar el roster de la BD', err)
+        error: (err) => {
+          console.error('Error al cargar el roster de la BD', err);
+          this.cdr.detectChanges();
+        }
       });
   }
 
@@ -125,6 +131,7 @@ export class Organizacion implements OnInit {
         esHoy: this.comprobarSiEsHoy(anio, mes, i)
       });
     }
+    this.cdr.detectChanges();
   }
 
   comprobarSiEsHoy(anio: number, mes: number, dia: number): boolean {
@@ -138,12 +145,14 @@ export class Organizacion implements OnInit {
     if (evento) {
       this.raidSeleccionada = evento;
       this.modalAbierta = true;
+      this.cdr.detectChanges();
     }
   }
 
   cerrarModal() {
     this.modalAbierta = false;
     this.raidSeleccionada = null;
+    this.cdr.detectChanges();
   }
 
   eliminarRaid() {
@@ -163,10 +172,12 @@ export class Organizacion implements OnInit {
     
     this.nuevaRaid = { fecha: fechaStr, nombre: 'The Dreamrift', dificultad: 'Normal' };
     this.modalCrearAbierta = true;
+    this.cdr.detectChanges();
   }
 
   cerrarModalCrear() {
     this.modalCrearAbierta = false;
+    this.cdr.detectChanges();
   }
 
   guardarRaid() {

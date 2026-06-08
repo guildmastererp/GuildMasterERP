@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 @Component({
@@ -12,13 +12,10 @@ export class Inscripcion implements OnInit {
   eventosProximos: any[] = [];
   misPersonajes: any[] = [];
   
-  // Guardamos qué personaje selecciona el usuario en el desplegable de cada evento
   personajeSeleccionado: { [codigoEvento: string]: string } = {};
-
-  // Variable de estado para bloquear los botones y evitar dobles inscripciones
   procesando: boolean = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     this.cargarMisPersonajes();
@@ -31,33 +28,39 @@ export class Inscripcion implements OnInit {
 
   cargarMisPersonajes() {
     this.http.get<any[]>('http://192.168.1.130:8000/api/mis-personajes', { headers: this.getHeaders() })
-      .subscribe(data => {
-        this.misPersonajes = data;
+      .subscribe({
+        next: (data) => {
+          this.misPersonajes = data;
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
       });
   }
 
   cargarEventosProximos() {
     this.http.get<any[]>('http://192.168.1.130:8000/api/eventos/proximos', { headers: this.getHeaders() })
-      .subscribe(data => {
-        this.eventosProximos = data;
-        
-        // Inicializamos los selects con el Main (si lo tiene) o el primer pj
-        this.eventosProximos.forEach(e => {
-          if (this.misPersonajes.length > 0) {
-            const main = this.misPersonajes.find(p => p.es_main);
-            this.personajeSeleccionado[e.codigo] = main ? main.codigo : this.misPersonajes[0].codigo;
-          }
-        });
+      .subscribe({
+        next: (data) => {
+          this.eventosProximos = data;
+          
+          this.eventosProximos.forEach(e => {
+            if (this.misPersonajes.length > 0) {
+              const main = this.misPersonajes.find(p => p.es_main);
+              this.personajeSeleccionado[e.codigo] = main ? main.codigo : this.misPersonajes[0].codigo;
+            }
+          });
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
       });
   }
 
-  // Comprueba si alguno de MIS personajes ya está en la lista de inscritos de este evento
   obtenerMiInscripcion(evento: any): any {
     if (!evento.inscritos || this.misPersonajes.length === 0) return null;
     
     for (let miPj of this.misPersonajes) {
       const inscrito = evento.inscritos.find((i: any) => i.codigo === miPj.codigo);
-      if (inscrito) return inscrito; // Devuelve con qué pj estoy apuntado
+      if (inscrito) return inscrito; 
     }
     return null;
   }
@@ -69,32 +72,36 @@ export class Inscripcion implements OnInit {
       return;
     }
 
-    this.procesando = true; // Bloqueamos la interfaz
+    this.procesando = true; 
 
     const body = { codigo_evento: codigoEvento, codigo_personaje: codPj };
     this.http.post('http://192.168.1.130:8000/api/eventos/inscribir', body, { headers: this.getHeaders() })
       .subscribe({
         next: () => {
-          this.cargarEventosProximos(); // Recarga la lista para que aparezcas
-          this.procesando = false; // Desbloqueamos
+          this.cargarEventosProximos(); 
+          this.procesando = false; 
+          this.cdr.detectChanges();
         },
         error: () => {
-          this.procesando = false; // Desbloqueamos si falla
+          this.procesando = false; 
+          this.cdr.detectChanges();
         }
       });
   }
 
   desapuntarse(codigoEvento: string, codigoPersonaje: string) {
-    this.procesando = true; // Bloqueamos la interfaz
+    this.procesando = true; 
 
     this.http.delete(`http://192.168.1.130:8000/api/eventos/desinscribir/${codigoEvento}/${codigoPersonaje}`, { headers: this.getHeaders() })
       .subscribe({
         next: () => {
           this.cargarEventosProximos();
-          this.procesando = false; // Desbloqueamos
+          this.procesando = false; 
+          this.cdr.detectChanges();
         },
         error: () => {
-          this.procesando = false; // Desbloqueamos si falla
+          this.procesando = false; 
+          this.cdr.detectChanges();
         }
       });
   }

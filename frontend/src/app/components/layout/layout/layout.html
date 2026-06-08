@@ -20,7 +20,7 @@
     </div>
 
     <div class="ribbon-content">
-      <div class="ribbon-btn" *ngFor="let btn of menus[menuActivo]" (click)="abrirSeccion(btn)" [routerLink]="btn.ruta">
+      <div class="ribbon-btn" *ngFor="let btn of menus[menuActivo]" (click)="abrirSeccion(btn)">
         <div class="btn-icon">
           <img [src]="btn.icono" alt="{{ btn.nombre }}" class="btn-image">
         </div>
@@ -34,8 +34,7 @@
       class="open-tab" 
       *ngFor="let pestana of pestanasAbiertas; let i = index"
       [class.active]="rutaActiva === pestana.ruta"
-      (click)="navegarA(pestana.ruta)"
-      [routerLink]="pestana.ruta">
+      (click)="navegarA(pestana.ruta)">
       {{ pestana.nombre }}
       <span class="close-btn" (click)="cerrarPestana(i, $event)">✖</span>
     </div>

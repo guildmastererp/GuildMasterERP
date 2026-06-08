@@ -37,7 +37,7 @@ export class Layout implements OnInit {
       { nombre: 'Guías', ruta: '/principal/miticas/guias', icono: '/images/ico_guias.png' }
     ],
     'Eventos': [
-      { nombre: 'Tablón ', ruta: '/principal/eventos/tablon', icono: '/images/ico_tablon.png' },
+      { nombre: 'Tablón', ruta: '/principal/eventos/tablon', icono: '/images/ico_tablon.png' },
       { nombre: 'Inscripción', ruta: '/principal/eventos/inscripcion', icono: '/images/ico_inscripciones.png' }
     ],
     'Configuración': [
@@ -109,7 +109,7 @@ export class Layout implements OnInit {
               this.menus['Comunidad'].push({ 
                 nombre: 'Gestión Puntos', 
                 ruta: '/principal/comunidad/gestion-puntos', 
-                icono: '/images/ico_lootRaid.png' // Puedes cambiar este icono por uno específico de puntos si lo tienes
+                icono: '/images/ico_lootRaid.png' 
               });
               
               // Forzamos a Angular a repintar la vista inmediatamente
@@ -130,7 +130,7 @@ export class Layout implements OnInit {
   /**
    * @description Gestiona la apertura de módulos desde el menú Ribbon.
    * Verifica la existencia de la sección en el histórico de pestañas abiertas; si no existe, 
-   * la registra en el arreglo dinámico. La redirección real se hace vía routerLink en el HTML.
+   * la registra en el arreglo dinámico. Finalmente, efectúa la navegación por Router.
    * @param item Objeto de configuración de la sección seleccionada (nombre, ruta, icono).
    */
   abrirSeccion(item: any) {
@@ -138,15 +138,16 @@ export class Layout implements OnInit {
     if (!existe) {
       this.pestanasAbiertas.push(item);
     }
+    // Añadida navegación real vía TypeScript
+    this.router.navigate([item.ruta]);
   }
 
   /**
-   * @description Realiza la navegación directa hacia una ruta específica del ERP.
-   * La redirección real se hace vía routerLink en el HTML, por lo que aquí ya no es necesario forzarla.
+   * @description Realiza la navegación hacia una pestaña ya abierta previamente.
    * @param ruta Cadena de texto con la dirección de navegación de destino.
    */
   navegarA(ruta: string) {
-    // Vacío porque la navegación la maneja ahora el directiva [routerLink] nativa de Angular
+    this.router.navigate([ruta]);
   }
 
   /**
@@ -158,7 +159,7 @@ export class Layout implements OnInit {
    */
   cerrarPestana(index: number, event: Event) {
     event.stopPropagation(); 
-    event.preventDefault(); // Evitamos que el clic se propague al routerLink subyacente
+    event.preventDefault();
     
     this.pestanasAbiertas.splice(index, 1);
 

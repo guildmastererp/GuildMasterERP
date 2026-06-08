@@ -1,5 +1,5 @@
 // #region IMPORTS
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 // #endregion
 
@@ -12,8 +12,8 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 export class Guias implements OnInit {
 
   // #region PROPIEDADES DE DATOS
-  guiasConMazmorras: any[] = []; // Array agrupado para pintar la vista
-  datosOriginales: any[] = []; // Copia de seguridad para los filtros
+  guiasConMazmorras: any[] = []; 
+  datosOriginales: any[] = []; 
 
   expansionesDisponibles: any[] = [];
   temporadasDisponibles: any[] = [];
@@ -28,7 +28,7 @@ export class Guias implements OnInit {
   filtroTemporada: string = '';
   // #endregion
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.cargarDatosMaestros();
@@ -46,46 +46,45 @@ export class Guias implements OnInit {
   cargarDatosMaestros() {
     this.cargando = true;
     
-    // Obtenemos la estructura base (expansiones y temporadas) y las guías
     this.http.get<any>('http://192.168.1.130:8000/api/miticas/estructura', { headers: this.getHeaders() })
       .subscribe({
         next: (estructura) => {
           this.expansionesDisponibles = estructura.expansiones;
           this.temporadasDisponibles = estructura.temporadas;
           this.cargarGuias();
+          this.cdr.detectChanges();
         },
         error: () => {
           this.errorCarga = true;
           this.cargando = false;
+          this.cdr.detectChanges();
         }
       });
   }
 
   cargarGuias() {
-    // LLamada al nuevo controlador que crearemos en Laravel para traer la tabla aux_guias
     this.http.get<any[]>('http://192.168.1.130:8000/api/miticas/guias-lista', { headers: this.getHeaders() })
       .subscribe({
         next: (guias) => {
           this.agruparDatos(guias);
           this.cargando = false;
+          this.cdr.detectChanges();
         },
         error: () => {
           this.errorCarga = true;
           this.cargando = false;
+          this.cdr.detectChanges();
         }
       });
   }
 
   agruparDatos(guiasRaw: any[]) {
-    // Agrupamos las guías por Mazmorra para que queden igual que las Clases de la otra pantalla
     const agrupado: any[] = [];
 
     guiasRaw.forEach(guia => {
-      // Buscamos si ya existe la mazmorra en nuestro array agrupado
       let mazmorraGrupo = agrupado.find(m => m.codigo === guia.codigoMitica);
 
       if (!mazmorraGrupo) {
-        // Si no existe, creamos el "contenedor" de esa mazmorra
         mazmorraGrupo = {
           codigo: guia.codigoMitica,
           nombre: guia.nombre_mazmorra,
@@ -96,12 +95,11 @@ export class Guias implements OnInit {
         agrupado.push(mazmorraGrupo);
       }
 
-      // Añadimos la guía a su mazmorra
       mazmorraGrupo.guias.push({
         id: guia.id,
         titulo: guia.titulo,
         url: guia.url,
-        tipo: guia.tipo || 'General' // Para poder poner iconos distintos (Rutas, Bosses, Trash...)
+        tipo: guia.tipo || 'General' 
       });
     });
 
@@ -129,14 +127,13 @@ export class Guias implements OnInit {
     if (this.filtroBusqueda) {
       const termino = this.filtroBusqueda.toLowerCase();
       resultado.forEach((mazmorra: any) => {
-        // Filtramos las guías internas que coincidan con la búsqueda
         mazmorra.guias = mazmorra.guias.filter((g: any) => g.titulo.toLowerCase().includes(termino));
       });
-      // Y luego borramos las mazmorras (o "clases" en el símil anterior) que se hayan quedado sin guías
       resultado = resultado.filter((m: any) => m.guias.length > 0 || m.nombre.toLowerCase().includes(termino));
     }
 
     this.guiasConMazmorras = resultado;
+    this.cdr.detectChanges();
   }
 
   limpiarFiltros() {

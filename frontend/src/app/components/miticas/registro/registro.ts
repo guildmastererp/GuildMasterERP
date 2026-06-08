@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+// #region IMPORTS
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+// #endregion
 
 @Component({
   selector: 'app-registro-miticas',
@@ -28,7 +30,7 @@ export class RegistroMiticas implements OnInit {
   filtroNivel: number | null = null;
   // #endregion
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
     this.comprobarRol();
@@ -61,7 +63,13 @@ export class RegistroMiticas implements OnInit {
 
   comprobarRol() {
     this.http.get<any>('http://192.168.1.130:8000/api/user', { headers: this.getHeaders() })
-      .subscribe(user => this.esAdmin = (user.codigo_rol === '0001' || user.codigo_rol === '0002'));
+      .subscribe({
+        next: (user) => {
+          this.esAdmin = (user.codigo_rol === '0001' || user.codigo_rol === '0002');
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
+      });
   }
 
   cargarEstructura() {
@@ -71,22 +79,39 @@ export class RegistroMiticas implements OnInit {
           this.expansiones = data.expansiones;
           this.temporadas = data.temporadas;
           this.miticas = data.miticas;
+          this.cdr.detectChanges();
         },
-        error: (err) => console.error("Error al cargar estructura:", err)
+        error: (err) => {
+          console.error("Error al cargar estructura:", err);
+          this.cdr.detectChanges();
+        }
       });
   }
 
   cargarJugadores() {
     this.http.get<any[]>('http://192.168.1.130:8000/api/aux-personajes', { headers: this.getHeaders() })
-      .subscribe(data => this.jugadoresDisponibles = data);
+      .subscribe({
+        next: (data) => {
+          this.jugadoresDisponibles = data;
+          this.cdr.detectChanges();
+        },
+        error: () => this.cdr.detectChanges()
+      });
   }
 
   cargarHistorial() {
     this.cargando = true;
     this.http.get<any[]>('http://192.168.1.130:8000/api/miticas', { headers: this.getHeaders() })
-      .subscribe(data => { 
-        this.historialMiticas = data; 
-        this.cargando = false; 
+      .subscribe({
+        next: (data) => { 
+          this.historialMiticas = data; 
+          this.cargando = false; 
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.cargando = false;
+          this.cdr.detectChanges();
+        }
       });
   }
   // #endregion
@@ -101,11 +126,13 @@ export class RegistroMiticas implements OnInit {
           alert(res.message); 
           this.cargarHistorial(); 
           this.sincronizandoIO = false;
+          this.cdr.detectChanges();
         },
         error: (err) => {
           console.error("Error al sincronizar con R.IO", err);
           alert('Hubo un error al intentar sincronizar con Raider.io.');
           this.sincronizandoIO = false;
+          this.cdr.detectChanges();
         }
       });
   }
