@@ -28,7 +28,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/mis-personajes', [PerfilController::class, 'misPersonajes']);
     Route::post('/añadir-personaje', [PerfilController::class, 'añadirPersonaje']);
     Route::post('/marcar-main', [PerfilController::class, 'marcarComoMain']);
+    
+    // Gestión de Puntos y Configuración de Oficiales (PersonajeController)
     Route::post('/actualizar-puntos', [PersonajeController::class, 'actualizarPuntos']);
+    Route::post('/actualizar-configuracion-oficial', [PersonajeController::class, 'actualizarConfiguracionOficial']); // <-- RUTA AÑADIDA AQUÍ
 
     // Combos de Perfil (PerfilController)
     Route::get('/aux-clases', [PerfilController::class, 'getClases']);

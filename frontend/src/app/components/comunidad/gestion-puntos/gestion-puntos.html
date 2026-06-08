@@ -3,15 +3,10 @@
   <div class="ribbon">
     <div class="ribbon-grupo">
       <span class="icono-tesoro">⚖️</span>
-      <label class="titulo-gestion">Tesorería de Puntos (DKP)</label>
+      <label class="titulo-gestion">Tesorería y Gestión del Roster</label>
     </div>
-
     <div class="buscador-grupo">
-      <input 
-        type="text" 
-        class="input-buscador" 
-        placeholder="Buscar personaje o reino..." 
-        [(ngModel)]="terminoBusqueda">
+      <input type="text" class="input-buscador" placeholder="Buscar personaje o reino..." [(ngModel)]="terminoBusqueda">
     </div>
   </div>
 
@@ -24,24 +19,61 @@
       
       <div class="card-gestion" *ngFor="let p of personajesFiltrados">
         
-        <div class="info-personaje">
-          <h3 class="personaje-nombre">{{ p.nombre }} <span *ngIf="p.es_main == 1" class="tag-main">MAIN</span></h3>
-          <p class="personaje-reino">
-            <span class="region-tag">{{ p.region | uppercase }}</span> {{ p.reino }}
-          </p>
-        </div>
-
-        <div class="bloque-tesoreria">
+        <div class="card-header">
+          <div class="info-personaje">
+            <h3 class="personaje-nombre">{{ p.nombre }} <span *ngIf="p.es_main == 1 || p.es_main === true" class="tag-main">MAIN</span></h3>
+            <p class="personaje-reino">
+              <span class="region-tag">{{ p.region | uppercase }}</span> {{ p.reino }}
+            </p>
+          </div>
           <div class="puntos-actuales">
             <span class="label">Total:</span>
             <span class="valor">{{ p.puntos }}</span>
           </div>
+        </div>
 
+        <!-- PANEL DE EDICIÓN DEL OFICIAL -->
+        <div class="config-oficial">
+          <div class="config-row">
+            <select class="select-admin" [(ngModel)]="p.clase" (change)="onClaseChange(p)">
+              <option value="">-- Clase --</option>
+              <option *ngFor="let c of auxClases" [value]="c.nombre">{{ c.nombre }}</option>
+            </select>
+            <select class="select-admin" [(ngModel)]="p.spec" (change)="guardarConfiguracion(p)">
+              <option value="">-- Spec --</option>
+              <option *ngFor="let s of getSpecsDeClase(p.clase)" [value]="s.nombre">{{ s.nombre }}</option>
+            </select>
+          </div>
+          
+          <div class="config-row">
+            <select class="select-admin" [(ngModel)]="p.profesion1" (change)="guardarConfiguracion(p)">
+              <option value="">-- Prof. 1 --</option>
+              <option *ngFor="let prof of profesionesPrincipales" [value]="prof.nombre">{{ prof.nombre }}</option>
+            </select>
+            <select class="select-admin" [(ngModel)]="p.profesion2" (change)="guardarConfiguracion(p)">
+              <option value="">-- Prof. 2 --</option>
+              <option *ngFor="let prof of profesionesPrincipales" [value]="prof.nombre">{{ prof.nombre }}</option>
+            </select>
+          </div>
+
+          <div class="config-row">
+            <select class="select-admin" [(ngModel)]="p.profesion_sec1" (change)="guardarConfiguracion(p)">
+              <option value="">-- Sec. 1 --</option>
+              <option *ngFor="let prof of profesionesSecundarias" [value]="prof.nombre">{{ prof.nombre }}</option>
+            </select>
+            <select class="select-admin" [(ngModel)]="p.profesion_sec2" (change)="guardarConfiguracion(p)">
+              <option value="">-- Sec. 2 --</option>
+              <option *ngFor="let prof of profesionesSecundarias" [value]="prof.nombre">{{ prof.nombre }}</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- OTORGAR PUNTOS -->
+        <div class="bloque-tesoreria">
+          <label class="label-puntos">Otorgar / Restar Puntos:</label>
           <div class="controles">
             <input type="number" class="input-puntos" [(ngModel)]="p.puntosInput" placeholder="0">
-            <button class="btn-otorgar" [disabled]="procesando || p.puntosInput == 0" (click)="otorgarPuntos(p)">
-              Aplicar
-            </button>
+            <button class="btn-otorgar" [disabled]="procesando || !p.puntosInput || p.puntosInput === 0" (click)="otorgarPuntos(p)">Aplicar</button>
           </div>
         </div>
 

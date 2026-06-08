@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+// #region IMPORTS
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { forkJoin } from 'rxjs';
+// #endregion
 
 @Component({
   selector: 'app-gestion-puntos',
@@ -14,31 +17,64 @@ export class GestionPuntos implements OnInit {
   cargando: boolean = true;
   procesando: boolean = false;
 
-  constructor(private http: HttpClient) {}
+  // Tablas maestras para los selects de oficiales
+  auxClases: any[] = [];
+  auxSpecs: any[] = [];
+  auxFunciones: any[] = [];
+  profesionesPrincipales: any[] = [];
+  profesionesSecundarias: any[] = [];
+
+  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
   ngOnInit(): void {
-    this.cargarPersonajes();
+    this.cargarDatosAuxiliares();
   }
 
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      'Accept': 'application/json'
+      'Accept': 'application/json',
+      'Content-Type': 'application/json'
+    });
+  }
+
+  // Cargamos los combos en paralelo (mismo sistema que perfil)
+  cargarDatosAuxiliares() {
+    this.cargando = true;
+    forkJoin({
+      clases: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-clases', { headers: this.getHeaders() }),
+      specs: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-specs', { headers: this.getHeaders() }),
+      profesiones: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-profesiones', { headers: this.getHeaders() }),
+      funciones: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-funciones', { headers: this.getHeaders() })
+    }).subscribe({
+      next: (res) => {
+        this.auxClases = res.clases;
+        this.auxSpecs = res.specs;
+        this.auxFunciones = res.funciones;
+        this.profesionesPrincipales = res.profesiones.filter(p => p.nivel === 'Principal');
+        this.profesionesSecundarias = res.profesiones.filter(p => p.nivel === 'Secundaria');
+        this.cargarPersonajes();
+      },
+      error: () => {
+        alert('Error al cargar datos auxiliares.');
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
   cargarPersonajes() {
-    this.cargando = true;
     this.http.get<any[]>('http://192.168.1.130:8000/api/aux-personajes', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
-          // Inicializamos una variable local en cada personaje para el input numérico
           this.personajes = data.map(p => ({ ...p, puntosInput: 0 }));
           this.cargando = false;
+          this.cdr.detectChanges(); // <-- Cambio visual instantáneo
         },
         error: (err) => {
           console.error('Error al cargar personajes', err);
           this.cargando = false;
+          this.cdr.detectChanges();
         }
       });
   }
@@ -49,6 +85,40 @@ export class GestionPuntos implements OnInit {
       p.nombre.toLowerCase().includes(this.terminoBusqueda.toLowerCase()) || 
       (p.reino && p.reino.toLowerCase().includes(this.terminoBusqueda.toLowerCase()))
     );
+  }
+
+  // Filtra las specs en el HTML dinámicamente según la clase que tenga el pj
+  getSpecsDeClase(claseNombre: string) {
+    const claseObj = this.auxClases.find(c => c.nombre === claseNombre);
+    return claseObj ? this.auxSpecs.filter(s => s.codigoClase === claseObj.codigo) : [];
+  }
+
+  onClaseChange(p: any) {
+    p.spec = ''; // Resetea la spec si cambias de clase
+    this.guardarConfiguracion(p);
+  }
+
+  // Guardado silencioso en background
+  guardarConfiguracion(p: any) {
+    const claseObj = this.auxClases.find(c => c.nombre === p.clase);
+    const specObj = this.auxSpecs.find(s => s.nombre === p.spec && s.codigoClase === claseObj?.codigo);
+    p.funcion = this.auxFunciones.find(f => f.codigo === specObj?.codigoFuncion)?.nombre || '';
+
+    const payload = {
+      codigo: p.codigo,
+      clase: p.clase || '',
+      spec: p.spec || '',
+      funcion: p.funcion,
+      profesion1: p.profesion1 || '',
+      profesion2: p.profesion2 || '',
+      profesion_sec1: p.profesion_sec1 || '',
+      profesion_sec2: p.profesion_sec2 || ''
+    };
+
+    this.http.post('http://192.168.1.130:8000/api/actualizar-configuracion-oficial', payload, { headers: this.getHeaders() })
+      .subscribe({
+        error: () => alert(`Fallo al guardar los datos de ${p.nombre}.`)
+      });
   }
 
   otorgarPuntos(personaje: any) {
@@ -63,15 +133,15 @@ export class GestionPuntos implements OnInit {
     this.http.post('http://192.168.1.130:8000/api/actualizar-puntos', payload, { headers: this.getHeaders() })
       .subscribe({
         next: (res: any) => {
-          // Actualizamos visualmente el personaje sin recargar la página entera
           personaje.puntos = res.nuevosPuntos;
-          personaje.puntosInput = 0; // Reseteamos el input
+          personaje.puntosInput = 0; 
           this.procesando = false;
-          alert(`Puntos actualizados. Nuevo total de ${personaje.nombre}: ${personaje.puntos}`);
+          this.cdr.detectChanges();
         },
-        error: (err) => {
+        error: () => {
           this.procesando = false;
-          alert('Hubo un error al actualizar los puntos. ¿Tienes rango de Oficial?');
+          alert('Hubo un error al actualizar los puntos.');
+          this.cdr.detectChanges();
         }
       });
   }
