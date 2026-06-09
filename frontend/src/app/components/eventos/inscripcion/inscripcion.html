@@ -22,7 +22,7 @@
         <div class="evento-info">
           <span class="tipo-tag">{{ e.nombre_tipo }}</span>
           <h3>{{ e.titulo }}</h3>
-          <p class="fecha">📅 {{ e.fecha_evento | date:'EEEE, dd MMMM - HH:mm':'':'es' | uppercase }}</p>
+          <p class="fecha">📅 {{ e.fecha_evento_limpia | date:'dd/MM/yyyy - HH:mm' }}</p>
           <p class="desc">{{ e.descripcion }}</p>
         </div>
 
@@ -44,7 +44,7 @@
 
           <div class="accion-container">
             
-            <ng-container *ngIf="!obtenerMiInscripcion(e)">
+            <ng-container *ngIf="!e.miInscripcion">
               <select [(ngModel)]="personajeSeleccionado[e.codigo]" class="select-pj" [disabled]="procesando">
                 <option *ngFor="let pj of misPersonajes" [value]="pj.codigo">{{ pj.nombre }} ({{ pj.clase }})</option>
               </select>
@@ -53,11 +53,11 @@
               </button>
             </ng-container>
 
-            <ng-container *ngIf="obtenerMiInscripcion(e) as miInscripcion">
+            <ng-container *ngIf="e.miInscripcion">
               <div class="estado-inscrito">
-                ✅ Apuntado con: <strong>{{ miInscripcion.nombre }}</strong>
+                ✅ Apuntado con: <strong>{{ e.miInscripcion.nombre }}</strong>
               </div>
-              <button class="btn-desapuntar" [disabled]="procesando" (click)="desapuntarse(e.codigo, miInscripcion.codigo)">
+              <button class="btn-desapuntar" [disabled]="procesando" (click)="desapuntarse(e.codigo, e.miInscripcion.codigo)">
                 {{ procesando ? '⏳ Procesando...' : 'Desapuntarse' }}
               </button>
             </ng-container>
