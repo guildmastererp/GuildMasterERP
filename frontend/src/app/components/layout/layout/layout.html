@@ -5,7 +5,9 @@
     </div>
     <div class="window-title">GUILD MASTER ERP</div>
     <div class="window-controls">
-      <span>—</span><span>□</span><span>X</span>
+      <span (click)="salirPantallaCompleta()" title="Pantalla normal">—</span>
+      <span (click)="entrarPantallaCompleta()" title="Pantalla completa">□</span>
+      <span (click)="abrirModalLogout()" title="Cerrar sesión">X</span>
     </div>
   </div>
 
@@ -51,6 +53,7 @@
     </div>
     
   </main>
+
   <div class="toast-container">
     <div 
       *ngFor="let toast of toasts" 
@@ -60,4 +63,16 @@
       <span class="toast-message">{{ toast.mensaje }}</span>
     </div>
   </div>
+
+  <div class="modal-logout-overlay" *ngIf="mostrarModalLogout">
+    <div class="modal-logout-content">
+      <h3>Cerrar Sesión</h3>
+      <p>¿Estás seguro de que deseas salir del ERP?</p>
+      <div class="modal-logout-actions">
+        <button class="btn-cancelar" (click)="cerrarModalLogout()">Cancelar</button>
+        <button class="btn-salir" (click)="cerrarSesion()">Salir</button>
+      </div>
+    </div>
+  </div>
+
 </div>

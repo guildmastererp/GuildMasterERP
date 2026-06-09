@@ -50,7 +50,10 @@ export class Layout implements OnInit {
   rutaActiva: string = '';
   objectKeys = Object.keys;
 
-  toasts: Toast[] = []; // <-- ARRAY DE NOTIFICACIONES
+  toasts: Toast[] = [];
+
+  // PROPIEDAD PARA EL MODAL DE CERRAR SESIÓN
+  mostrarModalLogout: boolean = false;
 
   // #endregion
 
@@ -60,7 +63,7 @@ export class Layout implements OnInit {
     private router: Router, 
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
-    private toastService: ToastService // <-- INYECTADO
+    private toastService: ToastService
   ) {}
 
   // #endregion
@@ -78,7 +81,7 @@ export class Layout implements OnInit {
       this.rutaActiva = event.urlAfterRedirects;
     });
 
-    // <-- SUSCRIPCIÓN AL SISTEMA DE TOASTS -->
+    // SUSCRIPCIÓN AL SISTEMA DE TOASTS
     this.toastService.toasts$.subscribe(toast => {
       this.toasts.push(toast);
       this.cdr.detectChanges();
@@ -156,6 +159,51 @@ export class Layout implements OnInit {
       const ultimaPestana = this.pestanasAbiertas[this.pestanasAbiertas.length - 1];
       this.router.navigate([ultimaPestana.ruta]);
     }
+  }
+
+    // #endregion
+
+    // #region CONTROLES DE VENTANA Y SESIÓN
+
+  entrarPantallaCompleta() {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen().catch(err => {
+        console.warn('Error al intentar iniciar pantalla completa:', err);
+      });
+    }
+  }
+
+  salirPantallaCompleta() {
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(err => {
+        console.warn('Error al salir de pantalla completa:', err);
+      });
+    }
+  }
+
+  abrirModalLogout() {
+    this.mostrarModalLogout = true;
+  }
+
+  cerrarModalLogout() {
+    this.mostrarModalLogout = false;
+  }
+
+  cerrarSesion() {
+    // 1. Cerramos la modal
+    this.mostrarModalLogout = false;
+    
+    // 2. Salimos de pantalla completa si estaba activa
+    this.salirPantallaCompleta();
+    
+    // 3. Borramos el token y limpiamos el array de pestañas abiertas por seguridad
+    localStorage.removeItem('token');
+    this.pestanasAbiertas = [];
+    
+    // 4. Redirigimos al Login y avisamos
+    this.router.navigate(['/login']);
+    this.toastService.showSuccess('Has cerrado sesión correctamente.');
   }
 
     // #endregion
