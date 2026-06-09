@@ -32,14 +32,14 @@
   </div>
 
   <div class="open-tabs-bar" *ngIf="pestanasAbiertas.length > 0">
-    <div 
-      class="open-tab" 
-      *ngFor="let pestana of pestanasAbiertas; let i = index"
-      [class.active]="rutaActiva === pestana.ruta"
-      (click)="navegarA(pestana.ruta)">
-      {{ pestana.nombre }}
-      <span class="close-btn" (click)="cerrarPestana(i, $event)">✖</span>
-    </div>
+<div 
+  class="open-tab" 
+  *ngFor="let pestana of pestanasAbiertas; let i = index"
+  [class.active]="rutaActiva === pestana.ruta"
+  (click)="navegarA(pestana.ruta)"
+  (auxclick)="cerrarPestana(i, $event)"> {{ pestana.nombre }}
+  <span class="close-btn" (click)="cerrarPestana(i, $event)">✖</span>
+</div>
   </div>
 
   <main class="main-content">
