@@ -237,3 +237,39 @@
   background-color: rgba(255, 77, 77, 0.05); 
 }
 /* #endregion */
+
+.card-ranking {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background-color: #fcfcfc;
+  border: 1px solid var(--gris-pestanas);
+  border-radius: 8px;
+  padding: 15px 20px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+  border-left: 5px solid var(--gris-pestanas);
+  /* AÑADE ESTO */
+  min-width: 0; 
+}
+
+.info-personaje {
+  /* CAMBIA ESTO */
+  flex: 1;
+  min-width: 0; /* Vital para que el flexbox respete el desbordamiento */
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden; /* Evita que nombres muy largos rompan la tarjeta */
+}
+
+.puntos-bloque {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: rgba(29, 38, 78, 0.05);
+  padding: 8px 15px;
+  border-radius: 8px;
+  /* AÑADE ESTO para que los puntos nunca se encojan */
+  flex-shrink: 0;
+}
