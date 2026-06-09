@@ -24,7 +24,7 @@ export class Organizacion implements OnInit {
   eventosRaid: any[] = [
     { id: 1, fecha: '2026-06-10', nombre: 'The Dreamrift', dificultad: 'Heroico' },
     { id: 2, fecha: '2026-06-11', nombre: 'The Dreamrift', dificultad: 'Heroico' },
-    { id: 3, array: '2026-06-15', nombre: 'The Voidspire', dificultad: 'Mítico' },
+    { id: 3, fecha: '2026-06-15', nombre: 'The Voidspire', dificultad: 'Mítico' }, // Corregido 'array' a 'fecha'
     { id: 4, fecha: '2026-06-17', nombre: 'March on Quel\'Danas', dificultad: 'Normal' }
   ];
   // #endregion
@@ -156,12 +156,10 @@ export class Organizacion implements OnInit {
   }
 
   eliminarRaid() {
-    const confirmacion = confirm('¿Estás seguro de que deseas cancelar esta raid?');
-    if (confirmacion) {
-      this.eventosRaid = this.eventosRaid.filter(r => r.id !== this.raidSeleccionada.id);
-      this.cerrarModal();
-      this.generarCalendario();
-    }
+    // SIN AVISO NI CONFIRMACIÓN
+    this.eventosRaid = this.eventosRaid.filter(r => r.id !== this.raidSeleccionada.id);
+    this.cerrarModal();
+    this.generarCalendario();
   }
   // #endregion
 
@@ -182,7 +180,7 @@ export class Organizacion implements OnInit {
 
   guardarRaid() {
     if (!this.nuevaRaid.fecha) {
-      alert('Debes seleccionar una fecha.');
+      alert('Debes seleccionar una fecha.'); // Esto lo he dejado por ser de formulario
       return;
     }
     

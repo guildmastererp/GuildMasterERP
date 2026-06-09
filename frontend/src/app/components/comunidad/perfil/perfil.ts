@@ -2,6 +2,7 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
+import { ToastService } from '../../../services/toast';
 // #endregion
 
 @Component({
@@ -42,7 +43,11 @@ export class Perfil implements OnInit {
   guardandoDatos: boolean = false;
   // #endregion
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private http: HttpClient, 
+    private cdr: ChangeDetectorRef,
+    private toast: ToastService // <-- INYECTADO
+  ) {}
 
   ngOnInit(): void {
     this.cargarDatosAuxiliares();
@@ -102,7 +107,6 @@ export class Perfil implements OnInit {
       });
   }
 
-  // Este método es disparado por (ngModelChange) en el HTML
   onCodigoCambiado(codigo: string) {
     const encontrado = this.personajes.find(p => String(p.codigo) === String(codigo));
     if (encontrado) {
@@ -111,12 +115,10 @@ export class Perfil implements OnInit {
   }
 
   actualizarPersonaje(personaje: any) {
-    // 1. Limpieza de estado para forzar refresco del *ngIf
     this.cargando = true;
     this.errorCarga = false;
     this.characterData = null;
     
-    // 2. Asignación de datos
     this.personajeSeleccionado = personaje;
     this.codigoSeleccionado = personaje.codigo; 
     
@@ -128,8 +130,6 @@ export class Perfil implements OnInit {
     this.editS2 = personaje.profesion_sec2 || '';
     
     this.onClaseChange();
-    
-    // 3. Petición externa (Raider.io)
     this.cargarPerfilRaiderIo(personaje.region, personaje.reino, personaje.nombre);
   }
 
@@ -158,20 +158,23 @@ export class Perfil implements OnInit {
       .subscribe({
         next: () => {
           this.guardandoDatos = false;
-          alert('Datos actualizados.');
+          this.toast.showSuccess('Configuración de personaje actualizada.'); // <-- TOAST ÉXITO
           Object.assign(this.personajeSeleccionado, payload);
           this.cdr.detectChanges();
         },
         error: () => {
           this.guardandoDatos = false;
-          alert('Error al guardar.');
+          this.toast.showError('Error al guardar la configuración.'); // <-- TOAST ERROR
         }
       });
   }
 
   marcarComoMain() {
     this.http.post('http://192.168.1.130:8000/api/marcar-main', { codigo: this.codigoSeleccionado }, { headers: this.getHeaders() })
-      .subscribe(() => { this.cargarListaPersonajes(); });
+      .subscribe(() => { 
+        this.toast.showSuccess('Personaje principal actualizado.');
+        this.cargarListaPersonajes(); 
+      });
   }
 
   agregarNuevoPersonaje() {
@@ -181,11 +184,12 @@ export class Perfil implements OnInit {
       .subscribe({
         next: () => {
           this.nuevoLinkRaiderIo = '';
+          this.toast.showSuccess('Nuevo personaje reclutado con éxito.'); // <-- TOAST ÉXITO
           this.cargarDatosAuxiliares();
         },
         error: () => {
           this.cargando = false;
-          alert('Error al añadir personaje.');
+          this.toast.showError('Error al añadir el personaje. Verifica la URL.'); // <-- TOAST ERROR
         }
       });
   }
@@ -196,7 +200,6 @@ export class Perfil implements OnInit {
       return;
     }
 
-    // Normalización para Raider.io (sin acentos, minúsculas, espacios a guiones)
     const rLimpia = region.toLowerCase().trim();
     const rLimpio = reino.toLowerCase()
                          .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -208,7 +211,6 @@ export class Perfil implements OnInit {
     
     this.http.get(`${baseUrl}?${params}`).subscribe({
       next: (data: any) => {
-        // Filtrado de progresiones irrelevantes
         if (data.raid_progression) {
           const raidsActuales = Object.keys(data.raid_progression).filter(key => 
             !key.startsWith('tier-') && key !== 'world-of-warcraft-remix-mists-of-pandaria'

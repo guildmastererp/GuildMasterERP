@@ -1,6 +1,7 @@
 // #region IMPORTS
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ToastService } from '../../../services/toast'; // <-- IMPORT DEL SERVICIO
 // #endregion
 
 @Component({
@@ -30,7 +31,11 @@ export class RegistroMiticas implements OnInit {
   filtroNivel: number | null = null;
   // #endregion
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private http: HttpClient, 
+    private cdr: ChangeDetectorRef,
+    private toast: ToastService // <-- INYECTADO
+  ) {}
 
   ngOnInit(): void {
     this.comprobarRol();
@@ -123,14 +128,14 @@ export class RegistroMiticas implements OnInit {
     this.http.post<any>('http://192.168.1.130:8000/api/miticas/sincronizar', {}, { headers: this.getHeaders() })
       .subscribe({
         next: (res) => {
-          alert(res.message); 
+          this.toast.showSuccess(res.message); // <-- TOAST ÉXITO
           this.cargarHistorial(); 
           this.sincronizandoIO = false;
           this.cdr.detectChanges();
         },
         error: (err) => {
           console.error("Error al sincronizar con R.IO", err);
-          alert('Hubo un error al intentar sincronizar con Raider.io.');
+          this.toast.showError('Hubo un error al intentar sincronizar con Raider.io.'); // <-- TOAST ERROR
           this.sincronizandoIO = false;
           this.cdr.detectChanges();
         }

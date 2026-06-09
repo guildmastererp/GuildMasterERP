@@ -42,7 +42,7 @@ export class Roster implements OnInit {
             this.esAdmin = true;
             this.cargarDatos();
           }
-          this.cdr.detectChanges(); // Forzamos el repintado
+          this.cdr.detectChanges();
         },
         error: () => {
           this.cargandoRol = false;
@@ -79,7 +79,7 @@ export class Roster implements OnInit {
       });
   }
 
-  // 3. LÓGICA DEL BUSCADOR (Filtra a los que ya están en el roster)
+  // 3. LÓGICA DEL BUSCADOR
   get resultadosBuscador() {
     if (!this.terminoBusqueda) return [];
 
@@ -99,8 +99,8 @@ export class Roster implements OnInit {
     this.http.post('http://192.168.1.130:8000/api/roster/add', { codigoPersonaje: personaje.codigo }, { headers: this.getHeaders() })
       .subscribe({
         next: () => {
-          this.terminoBusqueda = ''; // Limpiamos buscador
-          this.cargarRoster(); // Refrescamos lista
+          this.terminoBusqueda = ''; 
+          this.cargarRoster(); 
           this.procesando = false;
           this.cdr.detectChanges();
         },
@@ -112,20 +112,19 @@ export class Roster implements OnInit {
   }
 
   expulsarDelRoster(personaje: any) {
-    if (confirm(`¿Estás seguro de sacar a ${personaje.nombre} del roster?`)) {
-      this.procesando = true;
-      this.http.delete(`http://192.168.1.130:8000/api/roster/remove/${personaje.codigo}`, { headers: this.getHeaders() })
-        .subscribe({
-          next: () => {
-            this.cargarRoster();
-            this.procesando = false;
-            this.cdr.detectChanges();
-          },
-          error: () => {
-            this.procesando = false;
-            this.cdr.detectChanges();
-          }
-        });
-    }
+    // SIN AVISO NI CONFIRMACIÓN
+    this.procesando = true;
+    this.http.delete(`http://192.168.1.130:8000/api/roster/remove/${personaje.codigo}`, { headers: this.getHeaders() })
+      .subscribe({
+        next: () => {
+          this.cargarRoster();
+          this.procesando = false;
+          this.cdr.detectChanges();
+        },
+        error: () => {
+          this.procesando = false;
+          this.cdr.detectChanges();
+        }
+      });
   }
 }

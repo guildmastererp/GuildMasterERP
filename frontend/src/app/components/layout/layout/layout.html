@@ -51,4 +51,13 @@
     </div>
     
   </main>
+  <div class="toast-container">
+    <div 
+      *ngFor="let toast of toasts" 
+      class="toast {{ toast.tipo }}" 
+      (click)="removerToast(toast.id)">
+      <span class="toast-icon">{{ toast.tipo === 'success' ? '✔' : '⚠' }}</span>
+      <span class="toast-message">{{ toast.mensaje }}</span>
+    </div>
+  </div>
 </div>
