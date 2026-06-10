@@ -1,6 +1,8 @@
+// #region IMPORTS
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { forkJoin } from 'rxjs';
+// #endregion
 
 @Component({
   selector: 'app-inscripcion-eventos',
@@ -9,24 +11,73 @@ import { forkJoin } from 'rxjs';
   standalone: false
 })
 export class Inscripcion implements OnInit {
-  
+
+  // #region PROPIEDADES DE DATOS
   eventosProximos: any[] = [];
   misPersonajes: any[] = [];
-  
+
   personajeSeleccionado: { [codigoEvento: string]: string } = {};
   procesando: boolean = false;
+  // #endregion
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  // #region CONSTRUCTOR
+  constructor(
+    private http: HttpClient, 
+    private cdr: ChangeDetectorRef
+  ) {}
+  // #endregion
 
-  ngOnInit() {
+  // #region CICLO DE VIDA
+  /**
+   * Ciclo de vida de inicialización.
+   * Dispara la carga concurrente de personajes y próximos eventos
+   * al montar el componente.
+   * * @returns {void}
+   */
+  ngOnInit(): void {
     this.cargarDatosIniciales(); 
   }
+  // #endregion
 
-  private getHeaders() {
-    return new HttpHeaders({ 'Authorization': `Bearer ${localStorage.getItem('token')}`, 'Accept': 'application/json' });
+  // #region UTILIDADES
+  /**
+   * Genera las cabeceras HTTP de autorización.
+   * * @private
+   * @returns {HttpHeaders}
+   */
+  private getHeaders(): HttpHeaders {
+    return new HttpHeaders({ 
+      'Authorization': `Bearer ${localStorage.getItem('token')}`, 
+      'Accept': 'application/json' 
+    });
   }
 
-  cargarDatosIniciales() {
+  /**
+   * Método auxiliar para determinar localmente si el usuario ya está inscrito
+   * en un evento con alguno de sus personajes.
+   * * @private
+   * @param {any} evento - El evento a comprobar.
+   * @param {any[]} misPjs - Lista de personajes del usuario.
+   * @returns {any|null} El registro de inscripción encontrado o null.
+   */
+  private obtenerInscripcionLocal(evento: any, misPjs: any[]): any {
+    if (!evento.inscritos || misPjs.length === 0) return null;
+    for (let miPj of misPjs) {
+      const inscrito = evento.inscritos.find((i: any) => i.codigo === miPj.codigo);
+      if (inscrito) return inscrito; 
+    }
+    return null;
+  }
+  // #endregion
+
+  // #region CARGA DE DATOS
+  /**
+   * Carga inicial de datos. Obtiene en paralelo la lista de personajes y
+   * la lista de eventos para asegurar que la vista tenga toda la información necesaria.
+   * Realiza pre-formateo de fechas y precálculo de inscripciones.
+   * * @returns {void}
+   */
+  cargarDatosIniciales(): void {
     const peticionPersonajes = this.http.get<any[]>('http://192.168.1.130:8000/api/mis-personajes', { headers: this.getHeaders() });
     const peticionEventos = this.http.get<any[]>('http://192.168.1.130:8000/api/eventos/proximos', { headers: this.getHeaders() });
 
@@ -37,13 +88,10 @@ export class Inscripcion implements OnInit {
       next: (res) => {
         this.misPersonajes = res.personajes;
         
-        // Formateamos los eventos antes de dárselos al HTML
         this.eventosProximos = res.eventos.map((e: any) => {
-          // 1. Arreglamos la fecha de Laravel (espacio por T) para que Angular no falle
           if (e.fecha_evento) {
             e.fecha_evento_limpia = e.fecha_evento.replace(' ', 'T');
           }
-          // 2. Pre-calculamos la inscripción para no saturar el HTML
           e.miInscripcion = this.obtenerInscripcionLocal(e, this.misPersonajes);
           return e;
         });
@@ -61,7 +109,12 @@ export class Inscripcion implements OnInit {
     });
   }
 
-  cargarEventosProximos() {
+  /**
+   * Recarga la lista de eventos sin recargar los personajes.
+   * Utilizado tras acciones de inscripción o desinscripción.
+   * * @returns {void}
+   */
+  cargarEventosProximos(): void {
     this.http.get<any[]>('http://192.168.1.130:8000/api/eventos/proximos', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
@@ -75,18 +128,15 @@ export class Inscripcion implements OnInit {
         error: () => this.cdr.detectChanges()
       });
   }
+  // #endregion
 
-  // Método auxiliar interno que no llamamos desde el HTML
-  private obtenerInscripcionLocal(evento: any, misPjs: any[]): any {
-    if (!evento.inscritos || misPjs.length === 0) return null;
-    for (let miPj of misPjs) {
-      const inscrito = evento.inscritos.find((i: any) => i.codigo === miPj.codigo);
-      if (inscrito) return inscrito; 
-    }
-    return null;
-  }
-
-  inscribirse(codigoEvento: string) {
+  // #region GESTIÓN DE INSCRIPCIONES
+  /**
+   * Registra la inscripción del personaje seleccionado en un evento.
+   * * @param {string} codigoEvento - Identificador del evento.
+   * * @returns {void}
+   */
+  inscribirse(codigoEvento: string): void {
     const codPj = this.personajeSeleccionado[codigoEvento];
     if (!codPj) {
       alert("Selecciona un personaje primero.");
@@ -109,7 +159,13 @@ export class Inscripcion implements OnInit {
       });
   }
 
-  desapuntarse(codigoEvento: string, codigoPersonaje: string) {
+  /**
+   * Elimina la inscripción de un personaje en un evento específico.
+   * * @param {string} codigoEvento - Identificador del evento.
+   * * @param {string} codigoPersonaje - Identificador del personaje.
+   * * @returns {void}
+   */
+  desapuntarse(codigoEvento: string, codigoPersonaje: string): void {
     this.procesando = true; 
 
     this.http.delete(`http://192.168.1.130:8000/api/eventos/desinscribir/${codigoEvento}/${codigoPersonaje}`, { headers: this.getHeaders() })
@@ -124,4 +180,5 @@ export class Inscripcion implements OnInit {
         }
       });
   }
+  // #endregion
 }

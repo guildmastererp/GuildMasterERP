@@ -1,5 +1,7 @@
+// #region IMPORTS
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+// #endregion
 
 @Component({
   selector: 'app-tablon',
@@ -9,21 +11,17 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 })
 export class Tablon implements OnInit {
 
-  // #region PROPIEDADES BÁSICAS Y CALENDARIO
+  // #region PROPIEDADES: ESTADO Y CALENDARIO
   esAdmin: boolean = false;
   fechaActual: Date = new Date();
   mesNombre: string = '';
   anioActual: number = 0;
   diasSemanas: string[] = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
   calendarioDias: any[] = [];
-  // #endregion
 
-  // #region DATOS DEL BACKEND
   eventos: any[] = []; 
   tipos: any[] = []; 
-  // #endregion
 
-  // #region PROPIEDADES DE MODALES
   modalAbierta: boolean = false;
   eventoSeleccionado: any = null;
 
@@ -31,14 +29,33 @@ export class Tablon implements OnInit {
   nuevoEvento: any = { titulo: '', descripcion: '', fecha_evento: '', codigoTipo: '' };
   // #endregion
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  // #region CONSTRUCTOR
+  constructor(
+    private http: HttpClient, 
+    private cdr: ChangeDetectorRef
+  ) {}
+  // #endregion
 
+  // #region CICLO DE VIDA
+  /**
+   * Ciclo de vida de inicialización.
+   * Verifica los permisos del usuario, carga las categorías de eventos 
+   * y obtiene el listado general de eventos para renderizar el calendario.
+   * * @returns {void}
+   */
   ngOnInit(): void {
     this.comprobarRol();
     this.cargarTipos();
     this.cargarDatos(); 
   }
+  // #endregion
 
+  // #region UTILIDADES
+  /**
+   * Construye las cabeceras HTTP de autorización.
+   * * @private
+   * @returns {HttpHeaders}
+   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -46,7 +63,12 @@ export class Tablon implements OnInit {
     });
   }
 
-  comprobarRol() {
+  /**
+   * Verifica el rol del usuario autenticado para determinar si tiene
+   * privilegios de administrador (códigos 0001 o 0002).
+   * * @returns {void}
+   */
+  comprobarRol(): void {
     this.http.get<any>('http://192.168.1.130:8000/api/user', { headers: this.getHeaders() })
       .subscribe({
         next: (user) => {
@@ -56,9 +78,14 @@ export class Tablon implements OnInit {
         error: () => this.cdr.detectChanges()
       });
   }
+  // #endregion
 
   // #region CARGA DE DATOS
-  cargarTipos() {
+  /**
+   * Obtiene los tipos de eventos disponibles en el servidor para el formulario de creación.
+   * * @returns {void}
+   */
+  cargarTipos(): void {
     this.http.get<any[]>('http://192.168.1.130:8000/api/eventos/tipos', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
@@ -69,7 +96,11 @@ export class Tablon implements OnInit {
       });
   }
 
-  cargarDatos() {
+  /**
+   * Recupera todos los eventos programados y dispara la generación de la matriz del calendario.
+   * * @returns {void}
+   */
+  cargarDatos(): void {
     this.http.get<any[]>('http://192.168.1.130:8000/api/eventos', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
@@ -83,12 +114,22 @@ export class Tablon implements OnInit {
   // #endregion
 
   // #region LÓGICA DEL CALENDARIO
-  cambiarMes(offset: number) {
+  /**
+   * Ajusta el mes actual basado en un desplazamiento (offset) y regenera la vista.
+   * * @param {number} offset - Cantidad de meses a avanzar o retroceder.
+   * * @returns {void}
+   */
+  cambiarMes(offset: number): void {
     this.fechaActual.setMonth(this.fechaActual.getMonth() + offset);
     this.generarCalendario();
   }
 
-  generarCalendario() {
+  /**
+   * Calcula y construye la estructura de datos que representa el calendario mensual.
+   * Gestiona el padding inicial (días del mes anterior) y filtra los eventos por fecha.
+   * * @returns {void}
+   */
+  generarCalendario(): void {
     this.calendarioDias = [];
     const anio = this.fechaActual.getFullYear();
     const mes = this.fechaActual.getMonth();
@@ -119,6 +160,10 @@ export class Tablon implements OnInit {
     this.cdr.detectChanges();
   }
 
+  /**
+   * Comprueba si la fecha pasada como argumento corresponde al día actual del sistema.
+   * * @returns {boolean}
+   */
   comprobarSiEsHoy(anio: number, mes: number, dia: number): boolean {
     const hoy = new Date();
     return hoy.getDate() === dia && hoy.getMonth() === mes && hoy.getFullYear() === anio;
@@ -126,7 +171,12 @@ export class Tablon implements OnInit {
   // #endregion
 
   // #region LÓGICA MODAL INFO Y ELIMINAR
-  abrirModal(evento: any) {
+  /**
+   * Abre el modal de información para un evento específico.
+   * * @param {any} evento - El evento seleccionado.
+   * * @returns {void}
+   */
+  abrirModal(evento: any): void {
     if (evento) {
       this.eventoSeleccionado = evento;
       this.modalAbierta = true;
@@ -134,13 +184,21 @@ export class Tablon implements OnInit {
     }
   }
 
-  cerrarModal() {
+  /**
+   * Cierra el modal de información y resetea el evento seleccionado.
+   * * @returns {void}
+   */
+  cerrarModal(): void {
     this.modalAbierta = false;
     this.eventoSeleccionado = null;
     this.cdr.detectChanges();
   }
 
-  eliminarEvento() {
+  /**
+   * Elimina un evento de la base de datos tras confirmación del usuario.
+   * * @returns {void}
+   */
+  eliminarEvento(): void {
     if (confirm('¿Estás seguro de que deseas cancelar este evento?')) {
       this.http.delete(`http://192.168.1.130:8000/api/eventos/remove/${this.eventoSeleccionado.id}`, { headers: this.getHeaders() })
         .subscribe({
@@ -155,18 +213,30 @@ export class Tablon implements OnInit {
   // #endregion
 
   // #region LÓGICA MODAL CREAR
-  abrirModalCrear() {
+  /**
+   * Inicializa el objeto de nuevo evento y abre el modal de creación.
+   * * @returns {void}
+   */
+  abrirModalCrear(): void {
     this.nuevoEvento = { titulo: '', descripcion: '', fecha_evento: '', codigoTipo: this.tipos[0]?.codigo || '' };
     this.modalCrearAbierta = true;
     this.cdr.detectChanges();
   }
 
-  cerrarModalCrear() {
+  /**
+   * Cierra el modal de creación de eventos.
+   * * @returns {void}
+   */
+  cerrarModalCrear(): void {
     this.modalCrearAbierta = false;
     this.cdr.detectChanges();
   }
 
-  guardarEvento() {
+  /**
+   * Envía el nuevo evento al servidor. Valida los campos mínimos requeridos.
+   * * @returns {void}
+   */
+  guardarEvento(): void {
     if (!this.nuevoEvento.fecha_evento || !this.nuevoEvento.titulo) {
       alert('Debes indicar un título y una fecha.');
       return;
