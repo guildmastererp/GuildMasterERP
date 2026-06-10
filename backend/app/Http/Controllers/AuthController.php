@@ -10,8 +10,15 @@ use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    // #region AUTENTICACIÓN Y REGISTRO
-
+    /**
+     * Registra un nuevo usuario en el sistema junto con su personaje principal.
+     * Extrae los datos de la URL de Raider.io proporcionada, cruza la información 
+     * con las tablas auxiliares de región y reino, y guarda tanto el personaje 
+     * como la cuenta de usuario de forma segura mediante una transacción de base de datos.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function register(Request $request)
     {
         $request->validate([
@@ -24,7 +31,6 @@ class AuthController extends Controller
 
         return DB::transaction(function () use ($request) {
             
-            // 1. Extraemos los datos de la URL
             $url = $request->input('raiderio_url');
             preg_match('~raider\.io/characters/([^/]+)/([^/]+)/([^/]+)~i', $url, $matches);
             
@@ -32,16 +38,13 @@ class AuthController extends Controller
             $reinoUrl  = strtolower($matches[2]);
             $nombrePj  = ucfirst(strtolower($matches[3]));
 
-            // 2. Buscamos el código de la Región (EU, US...)
             $regionDb = DB::table('aux_region')->whereRaw('LOWER(nombre) = ?', [$regionUrl])->first();
             $codigoRegion = $regionDb ? $regionDb->codigo : null;
 
-            // 3. Buscamos el código del Reino salvando los guiones y apóstrofes
             $todosLosReinos = DB::table('aux_reino')->get();
             $codigoReino = null;
             
             foreach ($todosLosReinos as $reino) {
-                // Convertimos "Zul'jin" a "zuljin" y "Dun Modr" a "dun-modr" para comparar
                 $nombreLimpio = Str::slug(str_replace("'", "", $reino->nombre));
                 
                 if ($nombreLimpio === $reinoUrl) {
@@ -50,12 +53,10 @@ class AuthController extends Controller
                 }
             }
             
-            // 4. Generamos ID autoincremental
             $ultimo = DB::table('aux_personajes')->orderBy('id', 'desc')->first();
             $nuevoId = $ultimo ? ($ultimo->id + 1) : 1;
             $codigoGenerado = str_pad($nuevoId, 4, '0', STR_PAD_LEFT);
 
-            // 5. Guardamos en la BD usando códigos en vez de textos
             DB::table('aux_personajes')->insert([
                 'codigo'         => $codigoGenerado,
                 'nombre'         => $nombrePj,
@@ -66,7 +67,6 @@ class AuthController extends Controller
                 'user_battletag' => $request->input('battletag')
             ]);
 
-            // 6. Creamos el usuario
             $user = User::create([
                 'battletag'   => $request->input('battletag'),
                 'name'        => $request->input('name'),
@@ -75,7 +75,7 @@ class AuthController extends Controller
                 'codigo_main' => $codigoGenerado,
             ]);
 
-            $user->load('personajes'); // Recargamos para devolver al front si hace falta
+            $user->load('personajes');
 
             return response()->json([
                 'status'  => 'success',
@@ -85,6 +85,14 @@ class AuthController extends Controller
         });
     }
 
+    /**
+     * Autentica a un usuario existente y genera su token de acceso.
+     * Valida las credenciales proporcionadas (email y contraseña) y, de ser correctas, 
+     * emite un token de Sanctum para autorizar futuras peticiones a la API.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function login(Request $request)
     {
         $request->validate([
@@ -92,7 +100,6 @@ class AuthController extends Controller
             'password' => 'required',
         ]);
 
-        // Buscamos el usuario de forma simple, sin forzar relaciones
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password)) {
@@ -110,5 +117,4 @@ class AuthController extends Controller
             'user'         => $user
         ], 200);
     }
-    // #endregion
 }

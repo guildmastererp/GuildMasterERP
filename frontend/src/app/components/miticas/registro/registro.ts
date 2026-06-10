@@ -128,14 +128,14 @@ export class RegistroMiticas implements OnInit {
     this.http.post<any>('http://192.168.1.130:8000/api/miticas/sincronizar', {}, { headers: this.getHeaders() })
       .subscribe({
         next: (res) => {
-          this.toast.showSuccess(res.message); // <-- TOAST ÉXITO
+          this.toast.showSuccess(res.message);
           this.cargarHistorial(); 
           this.sincronizandoIO = false;
           this.cdr.detectChanges();
         },
         error: (err) => {
           console.error("Error al sincronizar con R.IO", err);
-          this.toast.showError('Hubo un error al intentar sincronizar con Raider.io.'); // <-- TOAST ERROR
+          this.toast.showError('Hubo un error al intentar sincronizar con Raider.io.'); 
           this.sincronizandoIO = false;
           this.cdr.detectChanges();
         }

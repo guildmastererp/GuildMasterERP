@@ -7,6 +7,13 @@ use Illuminate\Support\Facades\DB;
 
 class EventosController extends Controller
 {
+    /**
+     * Obtiene el listado completo de todos los eventos programados.
+     * Realiza un cruce con la tabla auxiliar de tipos de evento para incluir
+     * el nombre del tipo y los ordena cronológicamente.
+     *
+     * @return \Illuminate\Support\Collection
+     */
     public function getEventos()
     {
         return DB::table('eventos')
@@ -16,6 +23,14 @@ class EventosController extends Controller
             ->get();
     }
 
+    /**
+     * Añade un nuevo evento al calendario.
+     * Genera automáticamente un código secuencial de 4 dígitos para el 
+     * nuevo registro antes de insertarlo en la base de datos.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function addEvento(Request $request)
     {
         $ultimoCodigo = DB::table('eventos')->max('codigo');
@@ -32,15 +47,36 @@ class EventosController extends Controller
         return response()->json(['message' => 'Evento creado.']);
     }
 
-    public function getTipos() { return DB::table('aux_tipoEvento')->get(); }
+    /**
+     * Obtiene el listado de tipos de evento disponibles.
+     * Utilizado para cargar las opciones en los desplegables de creación de eventos.
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function getTipos() 
+    { 
+        return DB::table('aux_tipoEvento')->get(); 
+    }
 
+    /**
+     * Elimina un evento específico del sistema.
+     *
+     * @param int $id El identificador interno (ID) del evento a borrar.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteEvento($id)
-{
-    DB::table('eventos')->where('id', $id)->delete();
-    return response()->json(['message' => 'Evento eliminado']);
-}
+    {
+        DB::table('eventos')->where('id', $id)->delete();
+        return response()->json(['message' => 'Evento eliminado']);
+    }
 
-public function getProximosConInscritos()
+    /**
+     * Recupera los eventos futuros (cuya fecha es mayor o igual a hoy) e incluye
+     * el listado detallado de los personajes inscritos en cada uno de ellos.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getProximosConInscritos()
     {
         $hoy = now()->format('Y-m-d H:i:s');
         
@@ -51,7 +87,6 @@ public function getProximosConInscritos()
             ->orderBy('fecha_evento', 'asc')
             ->get();
 
-        // Por cada evento, buscamos quién se ha apuntado
         foreach ($eventos as $evento) {
             $evento->inscritos = DB::table('evento_inscripciones')
                 ->join('aux_personajes', 'evento_inscripciones.codigo_personaje', '=', 'aux_personajes.codigo')
@@ -63,15 +98,20 @@ public function getProximosConInscritos()
         return response()->json($eventos);
     }
 
-public function inscribirse(Request $request)
+    /**
+     * Registra a un personaje en un evento concreto.
+     * Comprueba primero que no exista una inscripción previa para evitar duplicados.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function inscribirse(Request $request)
     {
-        // 1. Comprobamos si la inscripción ya existe en la BBDD
         $existe = DB::table('evento_inscripciones')
             ->where('codigo_evento', $request->codigo_evento)
             ->where('codigo_personaje', $request->codigo_personaje)
             ->exists();
 
-        // 2. Solo insertamos si NO existe previamente
         if (!$existe) {
             DB::table('evento_inscripciones')->insert([
                 'codigo_evento' => $request->codigo_evento,
@@ -82,13 +122,20 @@ public function inscribirse(Request $request)
         return response()->json(['message' => 'Inscrito correctamente']);
     }
 
+    /**
+     * Anula la inscripción de un personaje en un evento.
+     *
+     * @param string $evento El código del evento.
+     * @param string $personaje El código del personaje a desapuntar.
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function desinscribirse($evento, $personaje)
     {
         DB::table('evento_inscripciones')
             ->where('codigo_evento', $evento)
             ->where('codigo_personaje', $personaje)
             ->delete();
+            
         return response()->json(['message' => 'Desapuntado con éxito']);
     }
-    
 }

@@ -1,87 +1,143 @@
-/* #region AUTHENTICATION STYLES (LOGIN / REGISTRO) */
+/* #region INICIO DE SESIÓN */
 
-.login-container {
-  max-width: 400px;
-  margin: 100px auto;
-  padding: 30px;
-  background: var(--azul-oscuro); /* Cambiado al azul corporativo principal */
-  border: 2px solid var(--amarillo-dorado); /* Borde dorado premium estilo ventana de escritorio */
-  border-radius: 8px;
-  color: var(--blanco); /* Texto general en blanco para alto contraste */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-  text-align: center;
+.login-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: var(--gris-pestanas); 
 }
 
-h2 { 
-  margin-bottom: 20px; 
-  color: var(--amarillo-dorado); /* Tu color dorado (Heredará la fuente Morpheus automáticamente) */
+.login-card {
+  background-color: var(--azul-oscuro); 
+  padding: 40px;
+  border-radius: 8px;
+  border: 2px solid var(--amarillo-dorado); 
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 400px; /* Un poco más estrecho que el registro para estilizarlo */
+  color: var(--blanco);
+}
+
+/* #region ENCABEZADOS Y TEXTOS */
+
+.title {
+  margin: 0 0 10px 0;
+  text-align: center;
+  color: var(--amarillo-dorado); 
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
-/* #region FORMULARIO E INPUTS */
+.subtitle {
+  text-align: center;
+  margin-bottom: 30px;
+  font-size: 0.9rem;
+  color: #a0aabf; 
+}
+
+/* #endregion */
+
+/* #region CAMPOS DE FORMULARIO */
+
+.form-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--blanco);
+}
 
 input {
   width: 100%;
   padding: 12px;
-  margin: 10px 0;
-  background: var(--blanco); /* Fondo blanco para una legibilidad excelente de los datos */
+  background-color: var(--blanco); 
+  color: var(--azul-oscuro); 
   border: 2px solid transparent;
-  color: var(--azul-oscuro); /* El texto que escribe el usuario sale en azul oscuro */
   border-radius: 4px;
-  box-sizing: border-box; /* Importante para que el padding no rompa el ancho */
+  box-sizing: border-box;
   transition: all 0.2s ease-in-out;
 }
 
 input:focus {
   outline: none;
-  border-color: var(--amarillo-dorado); /* Al pinchar en el input, se ilumina en dorado */
+  border-color: var(--amarillo-dorado); 
   box-shadow: 0 0 8px rgba(199, 169, 56, 0.4);
 }
 
 /* #endregion */
 
-/* #region BOTONES DE ACCIÓN */
+/* #region ALERTAS Y MENSAJES DE ESTADO */
+
+.alert.error {
+  background-color: rgba(255, 107, 107, 0.1);
+  border-left: 4px solid var(--rojo-cerrar); 
+  padding: 10px;
+  margin-bottom: 20px;
+  font-size: 0.9rem;
+  color: var(--rojo-cerrar);
+  text-align: left;
+}
+
+/* #endregion */
+
+/* #region BOTONES Y ACCIONES */
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: 30px;
+}
 
 button {
-  width: 100%;
   padding: 12px;
-  margin-top: 15px;
-  background: var(--amarillo-dorado); /* Botón principal en dorado brillante */
   border: none;
   border-radius: 4px;
-  color: var(--azul-oscuro); /* Texto en azul oscuro para máxima claridad */
   font-weight: bold;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-button:hover:not(:disabled) {
-  filter: brightness(1.1); /* Efecto sutil de iluminación al pasar el cursor */
+/* Botón Iniciar Sesión */
+.btn-primary {
+  background-color: var(--amarillo-dorado);
+  color: var(--azul-oscuro);
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.1);
   transform: translateY(-1px);
 }
 
-button:active:not(:disabled) {
+.btn-primary:active:not(:disabled) {
   transform: translateY(1px);
 }
 
-button:disabled { 
-  background: #555555; /* Gris oscuro neutro para indicar deshabilitado */
+.btn-primary:disabled {
+  background-color: #555555;
   color: #a0a0a0;
-  cursor: not-allowed; 
+  cursor: not-allowed;
   box-shadow: none;
   transform: none;
 }
 
-/* #endregion */
+/* Botón Crear Cuenta / Olvidé contraseña */
+.btn-secondary {
+  background-color: transparent;
+  color: var(--amarillo-dorado);
+  border: 2px solid var(--amarillo-dorado);
+  box-shadow: none;
+}
 
-/* #region MENSAJES DE ERROR Y ALERTAS */
-
-.error-msg {
-  color: var(--rojo-cerrar); /* Enlazado directamente con tu variable de rojo corporativo */
-  margin-top: 15px;
-  font-size: 0.9em;
-  font-weight: bold;
+.btn-secondary:hover {
+  background-color: rgba(199, 169, 56, 0.1);
+  filter: brightness(1.1);
 }
 
 /* #endregion */

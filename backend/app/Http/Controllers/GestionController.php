@@ -8,6 +8,14 @@ use Illuminate\Support\Facades\DB;
 
 class GestionController extends Controller
 {
+    /**
+     * Actualiza la dirección de correo electrónico del usuario.
+     * * Valida que el nuevo correo tenga un formato válido y que no esté
+     * registrado previamente por otro usuario en la plataforma.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updateEmail(Request $request)
     {
         $request->validate([
@@ -21,6 +29,14 @@ class GestionController extends Controller
         return response()->json(['message' => 'Correo electrónico actualizado correctamente.']);
     }
 
+    /**
+     * Actualiza la contraseña de acceso a la cuenta del usuario.
+     * * Requiere la verificación exitosa de la contraseña actual antes de 
+     * proceder a cifrar y guardar la nueva contraseña.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function updatePassword(Request $request)
     {
         $request->validate([
@@ -40,14 +56,20 @@ class GestionController extends Controller
         return response()->json(['message' => 'Contraseña actualizada correctamente.']);
     }
 
+    /**
+     * Elimina de forma permanente la cuenta del usuario y sus datos.
+     * * Ejecuta una transacción en la base de datos para garantizar que se 
+     * borren todos los personajes vinculados a su Battletag junto con el usuario.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteAccount(Request $request)
     {
         $user = $request->user();
 
         DB::transaction(function () use ($user) {
-            // Borramos los personajes vinculados al battletag
             DB::table('aux_personajes')->where('user_battletag', $user->battletag)->delete();
-            // Borramos al usuario
             $user->delete();
         });
 

@@ -8,8 +8,14 @@ use Illuminate\Support\Str;
 
 class PerfilController extends Controller
 {
-    // #region GESTIÓN DE PERSONAJES DEL USUARIO (ROSTER)
-
+    /**
+     * Obtiene la lista de personajes asociados al usuario autenticado.
+     * Realiza un JOIN para devolver los nombres reales del reino y la región,
+     * además de los puntos acumulados por cada personaje.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function misPersonajes(Request $request)
     {
         // Hacemos JOIN para devolver los nombres reales de reino y región, y traemos los puntos
@@ -23,6 +29,14 @@ class PerfilController extends Controller
         return response()->json($personajes);
     }
 
+    /**
+     * Añade un nuevo personaje (alter) a la cuenta del usuario.
+     * Procesa una URL de Raider.io para extraer la región, reino y nombre del personaje,
+     * cruzando los datos con las tablas auxiliares para generar el nuevo registro.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function añadirPersonaje(Request $request)
     {
         $request->validate([
@@ -70,6 +84,14 @@ class PerfilController extends Controller
         ], 201);
     }
 
+    /**
+     * Marca un personaje específico como el principal (main) del usuario.
+     * Actualiza el código main en el usuario y gestiona el estado booleano
+     * 'es_main' entre todos los personajes asociados a la cuenta.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function marcarComoMain(Request $request)
     {
         $request->validate([
@@ -98,37 +120,60 @@ class PerfilController extends Controller
         ]);
     }
 
-    // #endregion
-
-    // #region DATOS AUXILIARES (COMBOS DEL PERFIL)
-
+    /**
+     * Recupera el listado completo y ordenado alfabéticamente de las clases de personajes.
+     * Utilizado para poblar los menús desplegables en el perfil.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getClases()
     {
         return response()->json(DB::table('aux_clase')->orderBy('nombre', 'asc')->get());
     }
 
+    /**
+     * Recupera el listado completo y ordenado alfabéticamente de las especializaciones (specs).
+     * Utilizado para poblar los menús desplegables en el perfil.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getSpecs()
     {
         return response()->json(DB::table('aux_spec')->orderBy('nombre', 'asc')->get());
     }
 
+    /**
+     * Recupera el listado completo y ordenado alfabéticamente de las profesiones.
+     * Utilizado para poblar los menús desplegables en el perfil.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getProfesiones()
     {
         return response()->json(DB::table('aux_profesion')->orderBy('nombre', 'asc')->get());
     }
 
+    /**
+     * Recupera el listado completo y ordenado alfabéticamente de las funciones de combate (Tanque, Healer, DPS).
+     * Utilizado para poblar los menús desplegables en el perfil.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getFunciones()
     {
         return response()->json(DB::table('aux_funcion')->orderBy('nombre', 'asc')->get());
     }
 
-    // #endregion
-
-    // #region ACTUALIZACIÓN MANUAL DE DATOS
-
+    /**
+     * Actualiza manualmente la configuración técnica de un personaje.
+     * Permite guardar cambios en la clase, especialización, función y profesiones
+     * (tanto principales como secundarias) del personaje indicado.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function actualizarDatosPersonaje(Request $request)
     {
-        // Validamos los 4 campos nuevos
         $request->validate([
             'codigo' => 'required|string',
             'clase' => 'nullable|string',
@@ -158,6 +203,4 @@ class PerfilController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Error al guardar.'], 500);
         }
     }
-
-    // #endregion
 }

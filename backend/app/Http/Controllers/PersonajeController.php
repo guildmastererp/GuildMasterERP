@@ -7,6 +7,14 @@ use Illuminate\Support\Facades\DB;
 
 class PersonajeController extends Controller
 {
+    /**
+     * Obtiene la lista completa de todos los personajes registrados en el sistema.
+     * * Realiza cruces con las tablas auxiliares de reino y región para devolver
+     * la información detallada y formateada de cada personaje.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getAllAuxPersonajes(Request $request)
     {
         try {
@@ -33,6 +41,14 @@ class PersonajeController extends Controller
         }
     }
 
+    /**
+     * Actualiza (incrementa o decrementa) los puntos de un personaje específico.
+     * * Valida que el usuario que ejecuta la acción tenga privilegios de Master
+     * u Oficial antes de aplicar los cambios en la base de datos.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function actualizarPuntos(Request $request)
     {
         $user = $request->user();
@@ -63,10 +79,18 @@ class PersonajeController extends Controller
         }
     }
 
-    // NUEVO MÉTODO PARA QUE LOS OFICIALES EDITEN A CUALQUIERA
+    /**
+     * Permite a los administradores editar la configuración técnica de cualquier personaje.
+     * * Requiere validación de rango (Master u Oficial) y permite sobrescribir los datos
+     * de clase, especialización, función y profesiones registrados.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function actualizarConfiguracionOficial(Request $request)
     {
         $user = $request->user();
+        
         if (!in_array($user->codigo_rol, ['0001', '0002'])) {
             return response()->json(['message' => 'Rango insuficiente.'], 403);
         }

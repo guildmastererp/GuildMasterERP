@@ -8,7 +8,13 @@ use Illuminate\Support\Facades\Http;
 
 class MiticasController extends Controller
 {
-    // Obtener todos los registros para el Grid
+    /**
+     * Obtiene el historial completo de los registros de míticas.
+     * * Realiza cruces con las tablas de personajes y míticas para devolver
+     * los nombres reales en lugar de los códigos, ordenados por fecha descendente.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getRegistros()
     {
         $registros = DB::table('aux_registroMiticas')
@@ -26,7 +32,13 @@ class MiticasController extends Controller
         return response()->json($registros);
     }
 
-    // Estructura para los combos del formulario
+    /**
+     * Obtiene la estructura de datos maestros para los formularios y filtros.
+     * * Devuelve los listados completos de expansiones, temporadas y 
+     * mazmorras míticas registradas en la base de datos.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getEstructura()
     {
         return response()->json([
@@ -36,7 +48,14 @@ class MiticasController extends Controller
         ]);
     }
 
-    // Añadir un nuevo registro manual
+    /**
+     * Añade un nuevo registro de mítica completada de forma manual.
+     * * Valida los permisos del usuario (requiere rol de Master u Oficial) y
+     * genera un código autoincremental de 4 dígitos para el nuevo registro.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function addRegistro(Request $request)
     {
         $user = $request->user();
@@ -67,11 +86,17 @@ class MiticasController extends Controller
         return response()->json(['message' => 'Mítica registrada correctamente.']);
     }
 
-    // Sincronización Mágica con Raider.IO (Abierta a todos los usuarios logueados)
+    /**
+     * Sincroniza dinámicamente el historial de míticas usando la API de Raider.IO.
+     * * Consulta los datos recientes para todos los personajes del roster, cruza la 
+     * información con la base de datos local y añade automáticamente los registros nuevos.
+     * Genera un reporte detallado de las inserciones y posibles errores de mapeo.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function sincronizarRaiderIo(Request $request)
     {
-        // ELIMINADO EL BLOQUEO DE ROL PARA PERMITIR A CUALQUIERA SINCRONIZAR
-        
         $personajes = DB::table('aux_personajes')
             ->join('aux_reino', 'aux_personajes.codigoReino', '=', 'aux_reino.codigo')
             ->select('aux_personajes.*', 'aux_reino.nombre as nombre_reino')
@@ -86,7 +111,6 @@ class MiticasController extends Controller
             'mazmorras_no_cruzadas' => []
         ];
 
-        // Diccionario: Nombre API Raider.io => Nombre limpio en tu BD
         $mapeoNombres = [
             'Magisters\' Terrace' => 'Magisters\' Terrace',
             'Maisara Caverns' => 'Maisara Caverns',
@@ -152,7 +176,6 @@ class MiticasController extends Controller
             }
         }
 
-        // Construir un mensaje detallado
         $mensajeDetalle = "Sincronización completada. Nuevas: " . $stats['insertadas'] . ". \n";
         $mensajeDetalle .= "Personajes R.IO OK: " . $stats['personajes_encontrados'] . ". \n";
         
@@ -167,7 +190,13 @@ class MiticasController extends Controller
         return response()->json(['message' => $mensajeDetalle]);
     }
 
-    // Eliminar registro
+    /**
+     * Elimina un registro específico del historial de míticas.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @param int $id 
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function deleteRegistro(Request $request, $id)
     {
         DB::table('aux_registroMiticas')->where('id', $id)->delete();

@@ -7,8 +7,14 @@ use Illuminate\Support\Facades\DB;
 
 class OrganizacionRaidController extends Controller
 {
-    // #region GESTIÓN DEL ROSTER
-    
+    /**
+     * Obtiene la lista actual de personajes que conforman el roster de la raid.
+     * Realiza un cruce con la tabla de personajes para recuperar y devolver 
+     * el nombre, la clase y la función de combate de cada integrante, 
+     * ordenados alfabéticamente por su rol (DPS, Healer, Tanque).
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getRoster()
     {
         $roster = DB::table('aux_roster_actual')
@@ -19,6 +25,4 @@ class OrganizacionRaidController extends Controller
 
         return response()->json($roster);
     }
-
-    // #endregion
 }
