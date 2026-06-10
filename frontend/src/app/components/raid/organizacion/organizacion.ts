@@ -105,13 +105,23 @@ export class Organizacion implements OnInit {
       });
   }
 
-  /**
+/**
    * Calcula el total de tanques, healers y dps para la vista de organización.
+   * Se normalizan las cadenas (trim y toUpperCase/toLowerCase) para evitar 
+   * que los espacios en blanco o diferencias de mayúsculas rompan el conteo.
    */
   calcularComposicion(): void {
-    this.totalTanques = this.rosterActual.filter(j => j.funcion === 'Tanque').length;
-    this.totalHealers = this.rosterActual.filter(j => j.funcion === 'Healer').length;
-    this.totalDPS = this.rosterActual.filter(j => j.funcion === 'DPS').length;
+    this.totalTanques = this.rosterActual.filter(j => 
+      j.funcion && j.funcion.trim().toLowerCase() === 'tanque'
+    ).length;
+
+    this.totalHealers = this.rosterActual.filter(j => 
+      j.funcion && (j.funcion.trim().toLowerCase() === 'sanador' || j.funcion.trim().toLowerCase() === 'healer')
+    ).length;
+
+    this.totalDPS = this.rosterActual.filter(j => 
+      j.funcion && j.funcion.trim().toUpperCase() === 'DPS'
+    ).length;
   }
   // #endregion
 

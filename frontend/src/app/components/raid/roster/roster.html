@@ -42,9 +42,7 @@
         
         <div class="card-personaje roster-card" *ngFor="let r of rosterActual">
           <div class="info-rol">
-            <span class="icono-rol" *ngIf="r.funcion === 'Tanque'">🛡️</span>
-            <span class="icono-rol" *ngIf="r.funcion === 'Healer'">💚</span>
-            <span class="icono-rol" *ngIf="r.funcion === 'DPS'">⚔️</span>
+            <span class="icono-rol">{{ obtenerIconoRol(r.funcion) }}</span>
           </div>
           <div class="info">
             <span class="nombre">{{ r.nombre }}</span>

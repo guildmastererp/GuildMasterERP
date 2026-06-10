@@ -105,8 +105,8 @@
   display: flex;
   flex-direction: column;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+  overflow: hidden; 
 }
-
 .panel h3 {
   margin: 0 0 15px 0;
   color: var(--azul-oscuro);
@@ -130,14 +130,34 @@
   border-color: var(--azul-claro);
 }
 
+/* Scroll para Listas */
 .lista-resultados,
 .lista-roster {
-  flex: 1;
+  flex: 1; 
+  min-height: 0; 
   overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding-right: 5px;
+  padding-right: 8px;
+}
+
+/* Personalización del Scrollbar */
+.lista-resultados::-webkit-scrollbar,
+.lista-roster::-webkit-scrollbar {
+  width: 6px;
+}
+
+.lista-resultados::-webkit-scrollbar-thumb,
+.lista-roster::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 4px;
+}
+
+.lista-resultados::-webkit-scrollbar-track,
+.lista-roster::-webkit-scrollbar-track {
+  background-color: transparent;
 }
 
 .mensaje-vacio {

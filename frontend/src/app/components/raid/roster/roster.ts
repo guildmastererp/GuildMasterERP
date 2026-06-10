@@ -178,4 +178,21 @@ export class Roster implements OnInit {
       });
   }
   // #endregion
+
+  // #region UTILIDADES DE VISTA
+  /**
+   * Devuelve el emoji correspondiente normalizando el texto de la función
+   * para evitar fallos por mayúsculas, minúsculas o espacios en blanco.
+   */
+  obtenerIconoRol(funcion: string): string {
+    if (!funcion) return '❔';
+    const f = funcion.trim().toLowerCase();
+    
+    if (f === 'tanque') return '🛡️';
+    if (f === 'sanador' || f === 'healer') return '💚';
+    if (f === 'dps') return '⚔️';
+    
+    return '❔';
+  }
+  // #endregion
 }
