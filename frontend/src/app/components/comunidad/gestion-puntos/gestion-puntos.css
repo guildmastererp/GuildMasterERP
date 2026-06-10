@@ -1,44 +1,237 @@
-:host { display: block; width: 100%; height: 100%; }
+/* #region CONFIGURACIÓN RAÍZ */
+:host { 
+  display: block; 
+  width: 100%; 
+  height: 100%; 
+}
 
-.gestion-container { width: 100%; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; color: var(--azul-oscuro); }
+.gestion-container { 
+  width: 100%; 
+  height: 100%; 
+  box-sizing: border-box; 
+  display: flex; 
+  flex-direction: column; 
+  gap: 20px; 
+  color: var(--azul-oscuro); 
+}
+/* #endregion */
 
-.ribbon { background-color: var(--azul-claro); border-radius: 8px; padding: 16px 20px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; box-shadow: 0 4px 8px rgba(29, 38, 78, 0.15); }
-.titulo-gestion { font-weight: 900; color: var(--amarillo-dorado); font-size: 20px; text-transform: uppercase; }
-.icono-tesoro { font-size: 24px; margin-right: 10px; }
+/* #region RIBBON (BARRA SUPERIOR) */
+.ribbon { 
+  background-color: var(--azul-claro); 
+  border-radius: 8px; 
+  padding: 16px 20px; 
+  display: flex; 
+  flex-wrap: wrap; 
+  align-items: center; 
+  justify-content: space-between; 
+  box-shadow: 0 4px 8px rgba(29, 38, 78, 0.15); 
+}
 
-.input-buscador { width: 300px; padding: 8px 15px; border: none; border-radius: 6px; font-size: 14px; outline: none; }
+.titulo-gestion { 
+  font-weight: 900; 
+  color: var(--amarillo-dorado); 
+  font-size: 20px; 
+  text-transform: uppercase; 
+}
 
-.resultados-container { background-color: var(--blanco); border-radius: 8px; padding: 25px; flex: 1; overflow-y: auto; box-shadow: 0 4px 10px rgba(29, 38, 78, 0.08); border: 1px solid var(--gris-pestanas); }
+.icono-tesoro { 
+  font-size: 24px; 
+  margin-right: 10px; 
+}
 
-.grid-gestion { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 20px; }
+.input-buscador { 
+  width: 300px; 
+  padding: 8px 15px; 
+  border: none; 
+  border-radius: 6px; 
+  font-size: 14px; 
+  outline: none; 
+}
+/* #endregion */
+
+/* #region CONTENEDOR PRINCIPAL Y SCROLL */
+
+.resultados-container { 
+  background-color: var(--blanco); 
+  border-radius: 8px; 
+  padding: 25px; 
+  flex: 1; 
+  overflow-y: auto; 
+  box-shadow: 0 4px 10px rgba(29, 38, 78, 0.08); 
+  border: 1px solid var(--gris-pestanas); 
+}
+/* #endregion */
+
+/* #region GRID Y TARJETAS DE PERSONAJE */
+
+.grid-gestion { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); 
+  gap: 20px; 
+}
 
 .card-gestion { 
-  display: flex; flex-direction: column; align-items: stretch; gap: 15px;
-  background-color: #fcfcfc; border: 1px solid var(--gris-pestanas); border-radius: 8px; padding: 15px; transition: all 0.2s ease; border-left: 5px solid var(--azul-oscuro); 
+  display: flex; 
+  flex-direction: column; 
+  align-items: stretch; 
+  gap: 15px;
+  background-color: #fcfcfc; 
+  border: 1px solid var(--gris-pestanas); 
+  border-radius: 8px; 
+  padding: 15px; 
+  transition: all 0.2s ease; 
+  border-left: 5px solid var(--azul-oscuro); 
 }
-.card-gestion:hover { box-shadow: 0 4px 8px rgba(29, 38, 78, 0.1); border-left-color: var(--amarillo-dorado); }
 
-.card-header { display: flex; justify-content: space-between; align-items: center; }
-.personaje-nombre { margin: 0 0 5px 0; font-size: 18px; font-weight: 900; }
-.tag-main { font-size: 10px; background-color: var(--azul-oscuro); color: white; padding: 2px 6px; border-radius: 4px; vertical-align: middle; margin-left: 5px;}
-.personaje-reino { margin: 0; color: var(--azul-claro); font-size: 13px; }
-.region-tag { background-color: var(--gris-pestanas); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+.card-gestion:hover { 
+  box-shadow: 0 4px 8px rgba(29, 38, 78, 0.1); 
+  border-left-color: var(--amarillo-dorado); 
+}
 
-/* NUEVO: Bloque de configuración del oficial */
-.config-oficial { display: flex; flex-direction: column; gap: 8px; background: rgba(29, 38, 78, 0.03); padding: 10px; border-radius: 6px; border: 1px dashed #ccc; }
-.config-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.select-admin { width: 100%; padding: 6px; font-size: 12px; border: 1px solid var(--gris-pestanas); border-radius: 4px; outline: none; background: white; font-family: inherit; }
-.select-admin:focus { border-color: var(--azul-claro); }
+.card-header { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+}
 
-.bloque-tesoreria { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--gris-pestanas); padding-top: 12px; }
-.puntos-actuales { font-size: 14px; color: var(--azul-claro); }
-.puntos-actuales .valor { font-size: 22px; font-weight: 900; color: var(--azul-oscuro); margin-left: 5px; }
-.label-puntos { font-size: 12px; font-weight: bold; color: var(--azul-oscuro); }
+.personaje-nombre { 
+  margin: 0 0 5px 0; 
+  font-size: 18px; 
+  font-weight: 900; 
+}
 
-.controles { display: flex; gap: 8px; }
-.input-puntos { width: 70px; padding: 6px; border: 1px solid var(--gris-pestanas); border-radius: 4px; text-align: center; font-weight: bold; font-family: inherit;}
-.btn-otorgar { background-color: var(--azul-oscuro); color: white; border: none; border-radius: 4px; padding: 6px 15px; cursor: pointer; font-weight: bold; transition: 0.2s; }
-.btn-otorgar:hover:not(:disabled) { background-color: var(--amarillo-dorado); color: var(--azul-oscuro); }
-.btn-otorgar:disabled { opacity: 0.5; cursor: not-allowed; }
+.tag-main { 
+  font-size: 10px; 
+  background-color: var(--azul-oscuro); 
+  color: white; 
+  padding: 2px 6px; 
+  border-radius: 4px; 
+  vertical-align: middle; 
+  margin-left: 5px;
+}
 
-.estado-carga { padding: 40px; text-align: center; color: var(--azul-claro); font-weight: bold; font-size: 16px; }
+.personaje-reino { 
+  margin: 0; 
+  color: var(--azul-claro); 
+  font-size: 13px; 
+}
+
+.region-tag { 
+  background-color: var(--gris-pestanas); 
+  padding: 2px 6px; 
+  border-radius: 4px; 
+  font-size: 11px; 
+  font-weight: bold; 
+}
+/* #endregion */
+
+/* #region CONFIGURACIÓN OFICIAL (EDICIÓN) */
+
+.config-oficial { 
+  display: flex; 
+  flex-direction: column; 
+  gap: 8px; 
+  background: rgba(29, 38, 78, 0.03); 
+  padding: 10px; 
+  border-radius: 6px; 
+  border: 1px dashed #ccc; 
+}
+
+.config-row { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 10px; 
+}
+
+.select-admin { 
+  width: 100%; 
+  padding: 6px; 
+  font-size: 12px; 
+  border: 1px solid var(--gris-pestanas); 
+  border-radius: 4px; 
+  outline: none; 
+  background: white; 
+  font-family: inherit; 
+}
+
+.select-admin:focus { 
+  border-color: var(--azul-claro); 
+}
+/* #endregion */
+
+/* #region TESORERÍA Y PUNTOS */
+
+.bloque-tesoreria { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  border-top: 1px solid var(--gris-pestanas); 
+  padding-top: 12px; 
+}
+
+.puntos-actuales { 
+  font-size: 14px; 
+  color: var(--azul-claro); 
+}
+
+.puntos-actuales .valor { 
+  font-size: 22px; 
+  font-weight: 900; 
+  color: var(--azul-oscuro); 
+  margin-left: 5px; 
+}
+
+.label-puntos { 
+  font-size: 12px; 
+  font-weight: bold; 
+  color: var(--azul-oscuro); 
+}
+
+.controles { 
+  display: flex; 
+  gap: 8px; 
+}
+
+.input-puntos { 
+  width: 70px; 
+  padding: 6px; 
+  border: 1px solid var(--gris-pestanas); 
+  border-radius: 4px; 
+  text-align: center; 
+  font-weight: bold; 
+  font-family: inherit;
+}
+
+.btn-otorgar { 
+  background-color: var(--azul-oscuro); 
+  color: white; 
+  border: none; 
+  border-radius: 4px; 
+  padding: 6px 15px; 
+  cursor: pointer; 
+  font-weight: bold; 
+  transition: 0.2s; 
+}
+
+.btn-otorgar:hover:not(:disabled) { 
+  background-color: var(--amarillo-dorado); 
+  color: var(--azul-oscuro); 
+}
+
+.btn-otorgar:disabled { 
+  opacity: 0.5; 
+  cursor: not-allowed; 
+}
+/* #endregion */
+
+/* #region ESTADOS DE CARGA */
+
+.estado-carga { 
+  padding: 40px; 
+  text-align: center; 
+  color: var(--azul-claro); 
+  font-weight: bold; 
+  font-size: 16px; 
+}
+/* #endregion */

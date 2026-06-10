@@ -30,13 +30,32 @@ export class Buscador implements OnInit {
   funcionesDisponibles: string[] = [];
   // #endregion
 
-  // CORRECCIÓN: Inyección de ChangeDetectorRef
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  // #region CONSTRUCTOR
+  constructor(
+    private http: HttpClient, 
+    private cdr: ChangeDetectorRef
+  ) {}
+  // #endregion
 
+  // #region CICLO DE VIDA
+  /**
+   * Ciclo de vida de inicialización del componente.
+   * Dispara la carga completa del censo de personajes de la hermandad 
+   * en el momento en que se monta la vista.
+   * * @returns {void}
+   */
   ngOnInit(): void {
     this.cargarTodosLosPersonajes();
   }
+  // #endregion
 
+  // #region UTILIDADES
+  /**
+   * Genera y devuelve las cabeceras HTTP de autorización estándar.
+   * Inyecta el token JWT almacenado localmente para permitir el acceso a la API.
+   * * @private
+   * @returns {HttpHeaders}
+   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -44,8 +63,16 @@ export class Buscador implements OnInit {
       'Content-Type': 'application/json'
     });
   }
+  // #endregion
 
-  cargarTodosLosPersonajes() {
+  // #region CARGA Y PROCESAMIENTO DE DATOS
+  /**
+   * Obtiene el listado maestro de todos los personajes registrados en el sistema.
+   * Normaliza la respuesta del servidor en caso de variaciones en la estructura del JSON,
+   * y desencadena la extracción de filtros dinámicos si se encuentran datos.
+   * * @returns {void}
+   */
+  cargarTodosLosPersonajes(): void {
     this.cargando = true;
     this.errorCarga = false;
 
@@ -65,19 +92,24 @@ export class Buscador implements OnInit {
           }
 
           this.cargando = false;
-          // CORRECCIÓN: Forzar el repintado de la vista
           this.cdr.detectChanges();
         },
         error: (err) => {
           this.errorCarga = true;
           this.cargando = false;
-          // CORRECCIÓN: Forzar el repintado de la vista
           this.cdr.detectChanges();
         }
       });
   }
 
-  private extraerFiltrosDinamicos() {
+  /**
+   * Analiza la lista actual de personajes para extraer valores únicos.
+   * Puebla automáticamente los arrays utilizados en los menús desplegables 
+   * (reinos, regiones, specs, etc.) basándose exclusivamente en los datos reales existentes.
+   * * @private
+   * @returns {void}
+   */
+  private extraerFiltrosDinamicos(): void {
     this.reinosDisponibles = [...new Set(this.personajes.map(p => p.reino))].filter(Boolean) as string[];
     this.regionesDisponibles = [...new Set(this.personajes.map(p => p.region))].filter(Boolean) as string[];
     this.specsDisponibles = [...new Set(this.personajes.map(p => p.spec))].filter(Boolean) as string[];
@@ -87,7 +119,15 @@ export class Buscador implements OnInit {
     const todasLasProfesiones = this.personajes.flatMap(p => [p.profesion1, p.profesion2, p.profesion_sec1, p.profesion_sec2]);
     this.profesionesDisponibles = [...new Set(todasLasProfesiones)].filter(Boolean) as string[];
   }
+  // #endregion
 
+  // #region FILTRADO Y BÚSQUEDA
+  /**
+   * Getter dinámico que evalúa la lista de personajes contra todos los criterios de búsqueda activos.
+   * Comprueba coincidencias de texto parcial en el nombre y coincidencias exactas en los selectores.
+   * Escanea los 4 slots de profesión de cada personaje para validar el filtro de profesiones.
+   * * @returns {any[]} Array de personajes que cumplen con todas las condiciones actuales.
+   */
   get personajesFiltrados(): any[] {
     if (!this.personajes) return [];
 
@@ -98,7 +138,6 @@ export class Buscador implements OnInit {
       const coincideSpec = this.filtroSpec ? p.spec === this.filtroSpec : true;
       const coincideFuncion = this.filtroFuncion ? p.funcion === this.filtroFuncion : true;
       
-      // CORRECCIÓN: Comprobamos si la profesión buscada está en alguno de los 4 slots del personaje
       let coincideProfesion = true;
       if (this.filtroProfesion) {
         coincideProfesion = (p.profesion1 === this.filtroProfesion) || 
@@ -111,7 +150,12 @@ export class Buscador implements OnInit {
     });
   }
 
-  limpiarFiltros() {
+  /**
+   * Restablece todos los parámetros de filtrado a su estado inicial.
+   * Vacía los inputs y selectores de la vista, mostrando nuevamente el censo completo.
+   * * @returns {void}
+   */
+  limpiarFiltros(): void {
     this.filtroNombre = '';
     this.filtroReino = '';
     this.filtroRegion = '';
@@ -120,4 +164,5 @@ export class Buscador implements OnInit {
     this.filtroFuncion = '';
     this.cdr.detectChanges();
   }
+  // #endregion
 }

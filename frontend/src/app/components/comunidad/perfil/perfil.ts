@@ -13,7 +13,7 @@ import { ToastService } from '../../../services/toast';
 })
 export class Perfil implements OnInit {
 
-  // #region PROPIEDADES DE ESTADO Y PERSONAJES
+  // #region PROPIEDADES
   personajes: any[] = [];
   personajeSeleccionado: any = null;
   codigoSeleccionado: string = ''; 
@@ -23,9 +23,7 @@ export class Perfil implements OnInit {
   cargando: boolean = true;
   errorCarga: boolean = false;
   mensajeError: string = 'Invocando datos desde las Tierras Sombrías...';
-  // #endregion
 
-  // #region PROPIEDADES DE TABLAS AUXILIARES Y EDICIÓN
   auxClases: any[] = [];
   auxSpecs: any[] = [];
   auxProfesiones: any[] = [];
@@ -43,17 +41,33 @@ export class Perfil implements OnInit {
   guardandoDatos: boolean = false;
   // #endregion
 
+  // #region CONSTRUCTOR
   constructor(
     private http: HttpClient, 
     private cdr: ChangeDetectorRef,
-    private toast: ToastService // <-- INYECTADO
+    private toast: ToastService 
   ) {}
+  // #endregion
 
+  // #region CICLO DE VIDA
+  /**
+   * Ciclo de vida de inicialización del componente.
+   * Dispara la carga concurrente de los datos maestros (clases, specs, etc.) 
+   * necesarios para renderizar el perfil y sus formularios.
+   * * @returns {void}
+   */
   ngOnInit(): void {
     this.cargarDatosAuxiliares();
   }
+  // #endregion
 
   // #region UTILIDADES
+  /**
+   * Genera las cabeceras HTTP de autorización estándar para las peticiones API.
+   * Recupera e inyecta el token JWT almacenado en el LocalStorage.
+   * * @private
+   * @returns {HttpHeaders}
+   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -62,7 +76,13 @@ export class Perfil implements OnInit {
     });
   }
 
-  mostrarError(m: string) {
+  /**
+   * Gestiona la presentación de errores críticos en la interfaz.
+   * Detiene el estado de carga y muestra el mensaje proporcionado.
+   * * @param {string} m - El mensaje de error a mostrar.
+   * @returns {void}
+   */
+  mostrarError(m: string): void {
     this.mensajeError = m;
     this.errorCarga = true;
     this.cargando = false;
@@ -71,7 +91,13 @@ export class Perfil implements OnInit {
   // #endregion
 
   // #region GESTIÓN DE PERSONAJES
-  cargarDatosAuxiliares() {
+  /**
+   * Recupera de forma paralela los catálogos auxiliares (clases, especializaciones, profesiones).
+   * Al finalizar con éxito, separa las profesiones por nivel y desencadena 
+   * la obtención de los personajes del usuario.
+   * * @returns {void}
+   */
+  cargarDatosAuxiliares(): void {
     this.cargando = true;
     forkJoin({
       clases: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-clases', { headers: this.getHeaders() }),
@@ -91,7 +117,13 @@ export class Perfil implements OnInit {
     });
   }
 
-  cargarListaPersonajes() {
+  /**
+   * Obtiene la lista completa de personajes (alters y main) vinculados al usuario.
+   * Si existen registros, auto-selecciona el personaje principal por defecto 
+   * para cargar sus detalles en la interfaz.
+   * * @returns {void}
+   */
+  cargarListaPersonajes(): void {
     this.http.get<any[]>('http://192.168.1.130:8000/api/mis-personajes', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
@@ -107,14 +139,26 @@ export class Perfil implements OnInit {
       });
   }
 
-  onCodigoCambiado(codigo: string) {
+  /**
+   * Escucha los cambios del selector de personajes en la interfaz.
+   * Busca el objeto correspondiente al código seleccionado e inicia su actualización en vista.
+   * * @param {string} codigo - El identificador único del personaje seleccionado.
+   * @returns {void}
+   */
+  onCodigoCambiado(codigo: string): void {
     const encontrado = this.personajes.find(p => String(p.codigo) === String(codigo));
     if (encontrado) {
       this.actualizarPersonaje(encontrado);
     }
   }
 
-  actualizarPersonaje(personaje: any) {
+  /**
+   * Prepara el formulario de edición y la vista principal con los datos de un personaje específico.
+   * Resetea estados previos y lanza la consulta asíncrona a Raider.io para obtener métricas frescas.
+   * * @param {any} personaje - Objeto con los datos del personaje provenientes del backend.
+   * @returns {void}
+   */
+  actualizarPersonaje(personaje: any): void {
     this.cargando = true;
     this.errorCarga = false;
     this.characterData = null;
@@ -133,13 +177,24 @@ export class Perfil implements OnInit {
     this.cargarPerfilRaiderIo(personaje.region, personaje.reino, personaje.nombre);
   }
 
-  onClaseChange() {
+  /**
+   * Actualiza dinámicamente las especializaciones disponibles en el desplegable 
+   * en base a la clase que el usuario haya seleccionado en el modo de edición.
+   * * @returns {void}
+   */
+  onClaseChange(): void {
     const claseObj = this.auxClases.find(c => c.nombre === this.editClase);
     this.specsFiltradas = claseObj ? this.auxSpecs.filter(s => s.codigoClase === claseObj.codigo) : [];
     if (!this.specsFiltradas.find(s => s.nombre === this.editSpec)) this.editSpec = '';
   }
 
-  guardarConfiguracionPersonaje() {
+  /**
+   * Empaqueta y envía al servidor los ajustes manuales de clase, especialización y profesiones.
+   * Resuelve automáticamente la función (Tanque, Healer, DPS) basándose en la especialización.
+   * Muestra notificaciones Toast informando del resultado de la operación.
+   * * @returns {void}
+   */
+  guardarConfiguracionPersonaje(): void {
     const claseObj = this.auxClases.find(c => c.nombre === this.editClase);
     const specObj = this.auxSpecs.find(s => s.nombre === this.editSpec && s.codigoClase === claseObj?.codigo);
     const funcionAuto = this.auxFunciones.find(f => f.codigo === specObj?.codigoFuncion)?.nombre || '';
@@ -169,7 +224,12 @@ export class Perfil implements OnInit {
       });
   }
 
-  marcarComoMain() {
+  /**
+   * Designa al personaje actualmente seleccionado en la vista como el personaje principal.
+   * Envía la solicitud a la API y recarga la lista para reflejar los cambios globales.
+   * * @returns {void}
+   */
+  marcarComoMain(): void {
     this.http.post('http://192.168.1.130:8000/api/marcar-main', { codigo: this.codigoSeleccionado }, { headers: this.getHeaders() })
       .subscribe(() => { 
         this.toast.showSuccess('Personaje principal actualizado.');
@@ -177,7 +237,12 @@ export class Perfil implements OnInit {
       });
   }
 
-  agregarNuevoPersonaje() {
+  /**
+   * Intenta registrar un nuevo personaje alter a la cuenta basándose en una URL de Raider.io.
+   * Despliega alertas Toast para notificar el éxito o el fallo de la importación.
+   * * @returns {void}
+   */
+  agregarNuevoPersonaje(): void {
     if (!this.nuevoLinkRaiderIo) return;
     this.cargando = true;
     this.http.post('http://192.168.1.130:8000/api/añadir-personaje', { raiderio_url: this.nuevoLinkRaiderIo }, { headers: this.getHeaders() })
@@ -194,7 +259,16 @@ export class Perfil implements OnInit {
       });
   }
 
-  cargarPerfilRaiderIo(region: string, reino: string, nombre: string) {
+  /**
+   * Consulta la API pública de Raider.io para extraer información en tiempo real 
+   * sobre el progreso de mazmorras y bandas del personaje especificado.
+   * Limpia los parámetros de entrada y purga datos de expansiones/eventos irrelevantes.
+   * * @param {string} region - La región del servidor (e.g., 'eu').
+   * @param {string} reino - El nombre del reino o servidor.
+   * @param {string} nombre - El nombre del personaje en el juego.
+   * @returns {void}
+   */
+  cargarPerfilRaiderIo(region: string, reino: string, nombre: string): void {
     if (!region || !reino || !nombre) {
       this.cargando = false;
       return;
@@ -229,4 +303,5 @@ export class Perfil implements OnInit {
       }
     });
   }
+  // #endregion
 }

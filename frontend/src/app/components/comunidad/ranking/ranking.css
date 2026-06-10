@@ -21,6 +21,7 @@
 /* #endregion */
 
 /* #region RIBBON */
+
 .ribbon {
   width: 100%;
   box-sizing: border-box;
@@ -31,7 +32,7 @@
   display: flex;
   flex-wrap: wrap; 
   align-items: center; 
-  justify-content: space-between; /* Empuja el botón a la derecha */
+  justify-content: space-between;
   box-shadow: 0 4px 8px rgba(29, 38, 78, 0.15); 
 }
 
@@ -74,6 +75,7 @@
 /* #endregion */
 
 /* #region CONTENEDOR PRINCIPAL Y SCROLL */
+
 .resultados-container {
   width: 100%;
   box-sizing: border-box;
@@ -94,6 +96,7 @@
 /* #endregion */
 
 /* #region GRID DEL RANKING */
+
 .grid-ranking {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -111,6 +114,7 @@
   transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0,0,0,0.02);
   border-left: 5px solid var(--gris-pestanas);
+  min-width: 0; 
 }
 
 .card-ranking:hover {
@@ -130,9 +134,11 @@
 
 .info-personaje {
   flex: 1;
+  min-width: 0; 
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow: hidden; 
 }
 
 .personaje-nombre {
@@ -177,6 +183,7 @@
   background-color: rgba(29, 38, 78, 0.05);
   padding: 8px 15px;
   border-radius: 8px;
+  flex-shrink: 0; 
 }
 
 .puntos-icono {
@@ -191,6 +198,7 @@
 /* #endregion */
 
 /* #region ESTILOS PARA EL TOP 3 */
+
 .top-1 {
   background: linear-gradient(135deg, #fffcf0 0%, #fff 100%);
   border-left-color: #ffd700;
@@ -213,6 +221,7 @@
 /* #endregion */
 
 /* #region ESTADOS DE CARGA Y ERROR */
+
 .estado-carga, .estado-error {
   width: 100%;
   box-sizing: border-box;
@@ -237,39 +246,3 @@
   background-color: rgba(255, 77, 77, 0.05); 
 }
 /* #endregion */
-
-.card-ranking {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  background-color: #fcfcfc;
-  border: 1px solid var(--gris-pestanas);
-  border-radius: 8px;
-  padding: 15px 20px;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-  border-left: 5px solid var(--gris-pestanas);
-  /* AÑADE ESTO */
-  min-width: 0; 
-}
-
-.info-personaje {
-  /* CAMBIA ESTO */
-  flex: 1;
-  min-width: 0; /* Vital para que el flexbox respete el desbordamiento */
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  overflow: hidden; /* Evita que nombres muy largos rompan la tarjeta */
-}
-
-.puntos-bloque {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background-color: rgba(29, 38, 78, 0.05);
-  padding: 8px 15px;
-  border-radius: 8px;
-  /* AÑADE ESTO para que los puntos nunca se encojan */
-  flex-shrink: 0;
-}

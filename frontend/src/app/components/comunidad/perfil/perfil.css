@@ -1,3 +1,4 @@
+/* #region CONFIGURACIÓN RAÍZ */
 :host {
   display: block;
   width: 100%;
@@ -17,8 +18,9 @@
   background-color: transparent; 
   color: var(--azul-oscuro);
 }
+/* #endregion */
 
-/* --- RIBBONS (FILAS DE FILTROS) --- */
+/* #region RIBBON Y CONTROLES */
 .ribbon {
   width: 100%;
   box-sizing: border-box;
@@ -27,10 +29,10 @@
   padding: 16px 20px; 
   margin: 0; 
   display: flex;
-  flex-direction: row; /* CAMBIADO: Ahora se colocan en fila horizontal */
-  flex-wrap: wrap; /* CAMBIADO: Si la pantalla es pequeña, bajan de línea solos */
+  flex-direction: row; 
+  flex-wrap: wrap; 
   align-items: center; 
-  gap: 30px; /* Espacio entre los bloques (ej. entre Personaje y Añadir) */
+  gap: 30px; 
   box-shadow: 0 4px 8px rgba(29, 38, 78, 0.15); 
 }
 
@@ -38,7 +40,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  width: auto; /* CAMBIADO: Quitamos el 100% para que no fuercen un salto de línea */
+  width: auto; 
 }
 
 .selector-main {
@@ -76,7 +78,7 @@
 }
 
 .ribbon-grupo select {
-  min-width: 180px; /* Reducido un poco para que quepan bien los 3 combos en una sola línea */
+  min-width: 180px; 
 }
 
 .ribbon-grupo select:focus,
@@ -85,6 +87,7 @@
   box-shadow: 0 0 0 2px rgba(199, 169, 56, 0.4); 
 }
 
+/* Botones genéricos de la barra */
 .btn-ribbon {
   background-color: var(--azul-oscuro);
   color: var(--amarillo-dorado);
@@ -112,11 +115,11 @@
   transform: translateY(1px);
 }
 
-/* --- BOTÓN DE GUARDAR CONFIGURACIÓN --- */
+/* Botón de guardado específico */
 .btn-guardar {
   background-color: #2e7d32; 
   color: var(--blanco);
-  margin-left: auto; /* IMPORTANTE: Esto empuja el botón siempre a la esquina derecha de la fila */
+  margin-left: auto; 
 }
 
 .btn-guardar:hover {
@@ -131,8 +134,9 @@
   transform: none;
   box-shadow: none;
 }
+/* #endregion */
 
-/* --- RESTO DEL DISEÑO DE LA PÁGINA --- */
+/* #region CONTENEDOR PRINCIPAL Y SCROLL */
 .datos-personaje {
   width: 100%;
   box-sizing: border-box;
@@ -146,6 +150,14 @@
   box-shadow: 0 4px 10px rgba(29, 38, 78, 0.08);
   border: 1px solid var(--gris-pestanas);
 }
+
+.datos-personaje::-webkit-scrollbar { width: 8px; }
+.datos-personaje::-webkit-scrollbar-track { background: var(--gris-pestanas); border-radius: 4px; }
+.datos-personaje::-webkit-scrollbar-thumb { background: var(--azul-claro); border-radius: 4px; }
+.datos-personaje::-webkit-scrollbar-thumb:hover { background: var(--azul-oscuro); }
+/* #endregion */
+
+/* #region CABECERA DEL PERSONAJE */
 
 .cabecera-personaje {
   display: flex;
@@ -199,6 +211,9 @@
 }
 .tag-facccion.horda { background-color: #8c1616; }
 .tag-facccion.alianza { background-color: #144b82; }
+/* #endregion */
+
+/* #region ESTADÍSTICAS Y SCORE */
 
 .stats-grid {
   display: grid;
@@ -245,7 +260,9 @@
 .rio-score {
   color: #a335ee; 
 }
+/* #endregion */
 
+/* #region PROGRESO DE RAID */
 .raid-progression h3 {
   color: var(--azul-oscuro);
   font-size: 22px;
@@ -303,7 +320,9 @@
 .kill-tag.normal { background-color: #1eff00; color: #004d00; }
 .kill-tag.heroico { background-color: #0070ff; }
 .kill-tag.mitico { background-color: #ff8000; }
+/* #endregion */
 
+/* #region ESTADOS DE CARGA Y ERROR */
 .estado-carga, .estado-error {
   width: 100%;
   box-sizing: border-box;
@@ -327,18 +346,4 @@
   color: var(--rojo-cerrar);
   background-color: rgba(255, 77, 77, 0.05); 
 }
-
-.datos-personaje::-webkit-scrollbar {
-  width: 8px;
-}
-.datos-personaje::-webkit-scrollbar-track {
-  background: var(--gris-pestanas); 
-  border-radius: 4px;
-}
-.datos-personaje::-webkit-scrollbar-thumb {
-  background: var(--azul-claro); 
-  border-radius: 4px;
-}
-.datos-personaje::-webkit-scrollbar-thumb:hover {
-  background: var(--azul-oscuro); 
-}
+/* #endregion */

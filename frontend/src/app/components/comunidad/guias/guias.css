@@ -20,7 +20,7 @@
 }
 /* #endregion */
 
-/* #region RIBBON (FILTROS) */
+/* #region RIBBON  */
 .ribbon {
   width: 100%;
   box-sizing: border-box;
@@ -95,6 +95,7 @@
 /* #endregion */
 
 /* #region CONTENEDOR PRINCIPAL Y SCROLL */
+
 .resultados-container {
   width: 100%;
   box-sizing: border-box;
@@ -120,6 +121,11 @@
   color: var(--azul-claro);
   font-size: 14px;
 }
+
+.resultados-container::-webkit-scrollbar { width: 8px; }
+.resultados-container::-webkit-scrollbar-track { background: var(--gris-pestanas); border-radius: 4px; }
+.resultados-container::-webkit-scrollbar-thumb { background: var(--azul-claro); border-radius: 4px; }
+.resultados-container::-webkit-scrollbar-thumb:hover { background: var(--azul-oscuro); }
 /* #endregion */
 
 /* #region TARJETAS DE CLASE Y BOTONES DE SPEC */
@@ -182,9 +188,9 @@
 }
 
 .btn-spec:hover {
-  background-color: rgba(199, 169, 56, 0.1); /* Efecto dorado suave */
+  background-color: rgba(199, 169, 56, 0.1); 
   border-color: var(--amarillo-dorado);
-  transform: translateX(4px); /* Pequeño desplazamiento interactivo */
+  transform: translateX(4px); 
 }
 
 .spec-icono {
@@ -198,6 +204,7 @@
 /* #endregion */
 
 /* #region ESTADO VACÍO Y CARGAS */
+
 .estado-vacio {
   display: flex;
   flex-direction: column;
@@ -237,10 +244,4 @@
   color: var(--rojo-cerrar);
   background-color: rgba(255, 77, 77, 0.05); 
 }
-
-/* Scrollbar */
-.resultados-container::-webkit-scrollbar { width: 8px; }
-.resultados-container::-webkit-scrollbar-track { background: var(--gris-pestanas); border-radius: 4px; }
-.resultados-container::-webkit-scrollbar-thumb { background: var(--azul-claro); border-radius: 4px; }
-.resultados-container::-webkit-scrollbar-thumb:hover { background: var(--azul-oscuro); }
 /* #endregion */

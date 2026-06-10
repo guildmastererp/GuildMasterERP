@@ -12,6 +12,7 @@ import { forkJoin } from 'rxjs';
 })
 export class GestionPuntos implements OnInit {
 
+  // #region PROPIEDADES
   personajes: any[] = [];
   terminoBusqueda: string = '';
   cargando: boolean = true;
@@ -22,13 +23,34 @@ export class GestionPuntos implements OnInit {
   auxFunciones: any[] = [];
   profesionesPrincipales: any[] = [];
   profesionesSecundarias: any[] = [];
+  // #endregion
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  // #region CONSTRUCTOR
+  constructor(
+    private http: HttpClient, 
+    private cdr: ChangeDetectorRef
+  ) {}
+  // #endregion
 
+  // #region CICLO DE VIDA
+  /**
+   * Ciclo de vida de inicialización del componente.
+   * Inicia la carga de datos maestros requeridos para construir 
+   * los desplegables de configuración de la tabla.
+   * * @returns {void}
+   */
   ngOnInit(): void {
     this.cargarDatosAuxiliares();
   }
+  // #endregion
 
+  // #region UTILIDADES
+  /**
+   * Genera las cabeceras HTTP de autorización para las peticiones API.
+   * Recupera el token JWT almacenado localmente.
+   * * @private
+   * @returns {HttpHeaders}
+   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -37,7 +59,29 @@ export class GestionPuntos implements OnInit {
     });
   }
 
-  cargarDatosAuxiliares() {
+  /**
+   * Getter dinámico que devuelve la lista de personajes filtrada.
+   * Se basa en el texto introducido en el buscador, comprobando coincidencias 
+   * tanto en el nombre del personaje como en su reino.
+   * * @returns {any[]}
+   */
+  get personajesFiltrados(): any[] {
+    if (!this.terminoBusqueda) return this.personajes;
+    return this.personajes.filter(p => 
+      p.nombre.toLowerCase().includes(this.terminoBusqueda.toLowerCase()) || 
+      (p.reino && p.reino.toLowerCase().includes(this.terminoBusqueda.toLowerCase()))
+    );
+  }
+  // #endregion
+
+  // #region CARGA DE DATOS
+  /**
+   * Obtiene simultáneamente los catálogos auxiliares (clases, especializaciones, etc.).
+   * Filtra las profesiones por nivel y, una vez resueltas todas las peticiones, 
+   * desencadena la carga del listado de personajes.
+   * * @returns {void}
+   */
+  cargarDatosAuxiliares(): void {
     this.cargando = true;
     forkJoin({
       clases: this.http.get<any[]>('http://192.168.1.130:8000/api/aux-clases', { headers: this.getHeaders() }),
@@ -61,7 +105,13 @@ export class GestionPuntos implements OnInit {
     });
   }
 
-  cargarPersonajes() {
+  /**
+   * Recupera el registro completo de todos los personajes almacenados.
+   * Inicializa la propiedad virtual `puntosInput` a 0 para cada personaje 
+   * con el fin de manejar de forma independiente las modificaciones en la interfaz.
+   * * @returns {void}
+   */
+  cargarPersonajes(): void {
     this.http.get<any[]>('http://192.168.1.130:8000/api/aux-personajes', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
@@ -76,26 +126,41 @@ export class GestionPuntos implements OnInit {
         }
       });
   }
+  // #endregion
 
-  get personajesFiltrados() {
-    if (!this.terminoBusqueda) return this.personajes;
-    return this.personajes.filter(p => 
-      p.nombre.toLowerCase().includes(this.terminoBusqueda.toLowerCase()) || 
-      (p.reino && p.reino.toLowerCase().includes(this.terminoBusqueda.toLowerCase()))
-    );
-  }
-
-  getSpecsDeClase(claseNombre: string) {
+  // #region GESTIÓN Y EDICIÓN
+  /**
+   * Filtra y devuelve las especializaciones asociadas a una clase concreta.
+   * Utilizado para poblar dinámicamente el desplegable de especializaciones 
+   * cuando un oficial edita a un personaje.
+   * * @param {string} claseNombre - El nombre de la clase a consultar.
+   * @returns {any[]}
+   */
+  getSpecsDeClase(claseNombre: string): any[] {
     const claseObj = this.auxClases.find(c => c.nombre === claseNombre);
     return claseObj ? this.auxSpecs.filter(s => s.codigoClase === claseObj.codigo) : [];
   }
 
-  onClaseChange(p: any) {
+  /**
+   * Escucha el evento de cambio en el selector de clase de un personaje.
+   * Resetea su especialización actual para evitar inconsistencias y dispara 
+   * el autoguardado de la configuración.
+   * * @param {any} p - El objeto del personaje que está siendo editado.
+   * @returns {void}
+   */
+  onClaseChange(p: any): void {
     p.spec = ''; 
     this.guardarConfiguracion(p);
   }
 
-  guardarConfiguracion(p: any) {
+  /**
+   * Procesa la información editada de un personaje y la envía al servidor.
+   * Deduce automáticamente la función de combate (Tanque, DPS, Sanador) cruzando 
+   * la especialización seleccionada con las tablas auxiliares antes de enviar el payload.
+   * * @param {any} p - El objeto del personaje modificado.
+   * @returns {void}
+   */
+  guardarConfiguracion(p: any): void {
     const claseObj = this.auxClases.find(c => c.nombre === p.clase);
     const specObj = this.auxSpecs.find(s => s.nombre === p.spec && s.codigoClase === claseObj?.codigo);
     p.funcion = this.auxFunciones.find(f => f.codigo === specObj?.codigoFuncion)?.nombre || '';
@@ -117,7 +182,14 @@ export class GestionPuntos implements OnInit {
       });
   }
 
-  otorgarPuntos(personaje: any) {
+  /**
+   * Incrementa o decrementa la puntuación (ej. DKP) de un personaje específico.
+   * Evita envíos nulos o con valor 0. Actualiza la vista en tiempo real tras la 
+   * respuesta exitosa de la API y resetea el input de ese personaje.
+   * * @param {any} personaje - El objeto del personaje al que se modificarán los puntos.
+   * @returns {void}
+   */
+  otorgarPuntos(personaje: any): void {
     if (!personaje.puntosInput || personaje.puntosInput === 0) return;
 
     this.procesando = true;
@@ -138,4 +210,5 @@ export class GestionPuntos implements OnInit {
         }
       });
   }
+  // #endregion
 }
