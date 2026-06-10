@@ -1,6 +1,11 @@
-/* #region ESTRUCTURA PRINCIPAL DEL FRAMEWORK */
+/* #region CONFIGURACIÓN RAÍZ */
 
-/* Contenedor principal estilo Ventana de Escritorio */
+:host { 
+  display: block; 
+  width: 100%; 
+  height: 100%; 
+}
+
 .erp-window {
   display: flex;
   flex-direction: column;
@@ -11,10 +16,9 @@
   border: 2px solid var(--azul-oscuro);
   box-sizing: border-box;
 }
-
 /* #endregion */
 
-/* #region CABECERA DE LA VENTANA (WINDOW HEADER) */
+/* #region CABECERA  */
 
 .window-header {
   display: flex;
@@ -47,8 +51,6 @@
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
 }
 
-/* #region BOTONES DE CONTROL (MINIMIZAR, MAXIMIZAR, CERRAR) */
-
 .window-controls {
   display: flex;
   gap: 8px;
@@ -78,20 +80,15 @@
   background-color: var(--rojo-cerrar-hover);
   color: var(--blanco);
 }
-
 /* #endregion */
 
-/* #endregion */
-
-/* #region NAVEGACIÓN SUPERIOR (MENÚ RIBBON) */
+/* #region NAVEGACIÓN */
 
 .ribbon-menu {
   display: flex;
   flex-direction: column;
   border-bottom: 4px solid var(--amarillo-dorado);
 }
-
-/* #region CATEGORÍAS DEL RIBBON (TABS) */
 
 .ribbon-tabs {
   display: flex;
@@ -113,10 +110,6 @@
   background-color: var(--azul-claro);
   color: var(--amarillo-dorado);
 }
-
-/* #endregion */
-
-/* #region BOTONES DE ACCIÓN INTERNOS (CONTENT) */
 
 .ribbon-content {
   display: flex;
@@ -155,7 +148,6 @@
   font-size: 1.5rem;
   margin-bottom: 5px;
   transition: transform 0.2s;
-  color: var(--blanco);
 }
 
 .btn-image {
@@ -172,12 +164,9 @@
   text-align: center;
   color: var(--blanco);
 }
-
 /* #endregion */
 
-/* #endregion */
-
-/* #region GESTIÓN DE VISTAS (BARRA DE PESTAÑAS INFERIORES) */
+/* #region GESTIÓN DE VISTAS  */
 
 .open-tabs-bar {
   display: flex;
@@ -202,7 +191,6 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  cursor: pointer;
   user-select: none; 
   outline: none;
 }
@@ -221,10 +209,9 @@
 .open-tab.active .close-btn {
   color: var(--amarillo-dorado);
 }
-
 /* #endregion */
 
-/* #region ÁREA DE CONTENIDO CENTRAL (WORKSPACE) */
+/* #region ÁREA DE CONTENIDO  */
 
 .main-content {
   flex-grow: 1;
@@ -235,7 +222,14 @@
   overflow: hidden;
 }
 
-/* #region ESTADO VACÍO / PANTALLA DE BIENVENIDA (EMPTY STATE) */
+.router-wrapper {
+  padding: 2px;
+  flex: 1;
+  box-sizing: border-box; 
+  display: flex; 
+  flex-direction: column;
+  overflow: hidden;
+}
 
 .empty-state {
   display: flex;
@@ -247,35 +241,12 @@
   color: var(--azul-oscuro);
 }
 
-.empty-state h1 {
-  font-size: 2.5rem;
-  margin-bottom: 10px;
-}
-
-.empty-state p {
-  margin-bottom: 30px;
-}
-
-.empty-state img {
-  max-width: 500px;
-  opacity: 0.9;
-}
-
+.empty-state h1 { font-size: 2.5rem; margin-bottom: 10px; }
+.empty-state p { margin-bottom: 30px; }
+.empty-state img { max-width: 500px; opacity: 0.9; }
 /* #endregion */
 
-/* #region CONTENEDOR DINÁMICO DE RUTAS (ROUTER ROUTER-OUTLET) */
-
-.router-wrapper {
-  padding: 2px;
-  flex: 1;
-  box-sizing: border-box; 
-  display: flex; 
-  flex-direction: column;
-  overflow: hidden;
-}
-
-
-/* #region SISTEMA DE NOTIFICACIONES (TOASTS) */
+/* #region SISTEMA DE NOTIFICACIONES  */
 
 .toast-container {
   position: absolute;
@@ -285,7 +256,7 @@
   flex-direction: column;
   gap: 12px;
   z-index: 9999;
-  pointer-events: none; /* Para que no bloquee clics detrás, excepto en el propio toast */
+  pointer-events: none;
 }
 
 .toast {
@@ -303,18 +274,10 @@
   animation: slideInBottom 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) forwards;
 }
 
-.toast.success {
-  border-left: 6px solid #10b981; /* Verde esmeralda */
-}
+.toast.success { border-left: 6px solid #10b981; }
+.toast.error { border-left: 6px solid #ef4444; }
 
-.toast.error {
-  border-left: 6px solid #ef4444; /* Rojo error */
-}
-
-.toast-icon {
-  font-size: 1.2rem;
-}
-
+.toast-icon { font-size: 1.2rem; }
 .toast.success .toast-icon { color: #10b981; }
 .toast.error .toast-icon { color: #ef4444; }
 
@@ -329,12 +292,8 @@
   0% { transform: translateX(120%); opacity: 0; }
   100% { transform: translateX(0); opacity: 1; }
 }
-
 /* #endregion */
 
-/* #endregion */
-
-/* #endregion */
 /* #region MODAL CERRAR SESIÓN */
 
 .modal-logout-overlay {
@@ -352,33 +311,20 @@
 }
 
 .modal-logout-content {
-  background-color: var(--blanco, #ffffff);
+  background-color: var(--blanco);
   padding: 25px 30px;
   border-radius: 8px;
   text-align: center;
-  border-top: 5px solid var(--rojo-cerrar, #e74c3c);
+  border-top: 5px solid var(--rojo-cerrar);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
   min-width: 320px;
   animation: popIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.modal-logout-content h3 {
-  color: var(--azul-oscuro, #1d264e);
-  margin-top: 0;
-  font-size: 1.5rem;
-}
+.modal-logout-content h3 { color: var(--azul-oscuro); margin-top: 0; font-size: 1.5rem; }
+.modal-logout-content p { color: #555; margin-bottom: 25px; font-weight: bold; }
 
-.modal-logout-content p {
-  color: #555;
-  margin-bottom: 25px;
-  font-weight: bold;
-}
-
-.modal-logout-actions {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-}
+.modal-logout-actions { display: flex; justify-content: center; gap: 15px; }
 
 .btn-cancelar {
   background-color: #e2e8f0;
@@ -391,12 +337,10 @@
   transition: background-color 0.2s;
 }
 
-.btn-cancelar:hover {
-  background-color: #cbd5e1;
-}
+.btn-cancelar:hover { background-color: #cbd5e1; }
 
 .btn-salir {
-  background-color: var(--rojo-cerrar, #e74c3c);
+  background-color: var(--rojo-cerrar);
   color: white;
   border: none;
   padding: 10px 25px;
@@ -406,13 +350,10 @@
   transition: background-color 0.2s;
 }
 
-.btn-salir:hover {
-  background-color: #c0392b;
-}
+.btn-salir:hover { background-color: #c0392b; }
 
 @keyframes popIn {
   0% { transform: scale(0.9); opacity: 0; }
   100% { transform: scale(1); opacity: 1; }
 }
-
 /* #endregion */

@@ -1,11 +1,9 @@
 // #region IMPORTS
-
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { filter } from 'rxjs/operators';
 import { ToastService, Toast } from '../../../services/toast'; 
-
 // #endregion
 
 @Component({
@@ -16,10 +14,11 @@ import { ToastService, Toast } from '../../../services/toast';
 })
 export class Layout implements OnInit {
   
-  // #region PROPIEDADES
-
+  // #region PROPIEDADES 
   menuActivo: string = 'Comunidad';
   esAdmin: boolean = false;
+  rutaActiva: string = '';
+  pestanasAbiertas: any[] = [];
 
   menus: any = {
     'Comunidad': [
@@ -45,34 +44,27 @@ export class Layout implements OnInit {
       { nombre: 'Ajustes cuenta', ruta: '/principal/configuracion/ajustes', icono: '/images/miniLogo.png' }
     ]
   };
-
-  pestanasAbiertas: any[] = [];
-  rutaActiva: string = '';
   objectKeys = Object.keys;
 
   toasts: Toast[] = [];
-
-  // PROPIEDAD PARA EL MODAL DE CERRAR SESIÓN
   mostrarModalLogout: boolean = false;
-
   // #endregion
 
   // #region CONSTRUCTOR
-
   constructor(
     private router: Router, 
     private http: HttpClient,
     private cdr: ChangeDetectorRef,
     private toastService: ToastService
   ) {}
-
   // #endregion
 
-  // #region METODOS
-
-    // #region HOOKS
-    
-  ngOnInit() {
+  // #region CICLO DE VIDA
+  /**
+   * Inicializa las suscripciones a eventos de navegación y al servicio de toasts.
+   * También verifica los permisos del usuario para ajustar el menú dinámicamente.
+   */
+  ngOnInit(): void {
     this.comprobarRolUsuario();
 
     this.router.events.pipe(
@@ -81,26 +73,31 @@ export class Layout implements OnInit {
       this.rutaActiva = event.urlAfterRedirects;
     });
 
-    // SUSCRIPCIÓN AL SISTEMA DE TOASTS
     this.toastService.toasts$.subscribe(toast => {
       this.toasts.push(toast);
       this.cdr.detectChanges();
-      
-      // Se elimina solo tras 3.5 segundos
       setTimeout(() => this.removerToast(toast.id), 3500);
     });
   }
-    // #endregion
+  // #endregion
 
-    // #region CONTROL DE TOASTS
-  removerToast(id: number) {
+  // #region GESTIÓN DE NOTIFICACIONES
+  /**
+   * Elimina un mensaje de notificación (Toast) de la lista activa.
+   * @param id - Identificador único del toast a eliminar.
+   */
+  removerToast(id: number): void {
     this.toasts = this.toasts.filter(t => t.id !== id);
     this.cdr.detectChanges();
   }
-    // #endregion
+  // #endregion
 
-    // #region CONTROL DE ROLES Y PERMISOS
-
+  // #region SEGURIDAD Y PERMISOS
+  /**
+   * Genera las cabeceras HTTP de autorización estándar.
+   * @private
+   * @returns {HttpHeaders}
+   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -108,7 +105,12 @@ export class Layout implements OnInit {
     });
   }
 
-  comprobarRolUsuario() {
+  /**
+   * Consulta el backend para validar el rol del usuario actual.
+   * Si el usuario es administrador (0001 o 0002), añade dinámicamente
+   * la opción de "Gestión Puntos" al menú de Comunidad.
+   */
+  comprobarRolUsuario(): void {
     this.http.get<any>('http://192.168.1.130:8000/api/user', { headers: this.getHeaders() })
       .subscribe({
         next: (user) => {
@@ -130,12 +132,14 @@ export class Layout implements OnInit {
         }
       });
   }
+  // #endregion
 
-    // #endregion
-
-    // #region MÉTODOS DE NAVEGACIÓN
-
-  abrirSeccion(item: any) {
+  // #region NAVEGACIÓN
+  /**
+   * Gestiona la apertura de una nueva pestaña en el layout.
+   * Evita duplicar pestañas si el usuario hace clic en el mismo menú.
+   */
+  abrirSeccion(item: any): void {
     const existe = this.pestanasAbiertas.find(p => p.ruta === item.ruta);
     if (!existe) {
       this.pestanasAbiertas.push(item);
@@ -143,11 +147,16 @@ export class Layout implements OnInit {
     this.router.navigate([item.ruta]);
   }
 
-  navegarA(ruta: string) {
+  /** Navegación directa por ruta. */
+  navegarA(ruta: string): void {
     this.router.navigate([ruta]);
   }
 
-  cerrarPestana(index: number, event: Event) {
+  /**
+   * Cierra la pestaña abierta. Si es la última, redirige a la vista principal.
+   * De lo contrario, navega a la pestaña inmediatamente anterior.
+   */
+  cerrarPestana(index: number, event: Event): void {
     event.stopPropagation(); 
     event.preventDefault();
     
@@ -160,12 +169,11 @@ export class Layout implements OnInit {
       this.router.navigate([ultimaPestana.ruta]);
     }
   }
+  // #endregion
 
-    // #endregion
-
-    // #region CONTROLES DE VENTANA Y SESIÓN
-
-  entrarPantallaCompleta() {
+  // #region SESIÓN Y UI
+  /** Activa el modo pantalla completa del navegador. */
+  entrarPantallaCompleta(): void {
     const elem = document.documentElement;
     if (elem.requestFullscreen) {
       elem.requestFullscreen().catch(err => {
@@ -174,7 +182,8 @@ export class Layout implements OnInit {
     }
   }
 
-  salirPantallaCompleta() {
+  /** Desactiva el modo pantalla completa. */
+  salirPantallaCompleta(): void {
     if (document.fullscreenElement) {
       document.exitFullscreen().catch(err => {
         console.warn('Error al salir de pantalla completa:', err);
@@ -182,31 +191,27 @@ export class Layout implements OnInit {
     }
   }
 
-  abrirModalLogout() {
+  abrirModalLogout(): void {
     this.mostrarModalLogout = true;
   }
 
-  cerrarModalLogout() {
+  cerrarModalLogout(): void {
     this.mostrarModalLogout = false;
   }
 
-  cerrarSesion() {
-    // 1. Cerramos la modal
+  /**
+   * Finaliza la sesión del usuario: limpia el token, el estado de pestañas,
+   * sale de pantalla completa y redirige al login con notificación.
+   */
+  cerrarSesion(): void {
     this.mostrarModalLogout = false;
-    
-    // 2. Salimos de pantalla completa si estaba activa
     this.salirPantallaCompleta();
     
-    // 3. Borramos el token y limpiamos el array de pestañas abiertas por seguridad
     localStorage.removeItem('token');
     this.pestanasAbiertas = [];
     
-    // 4. Redirigimos al Login y avisamos
     this.router.navigate(['/login']);
     this.toastService.showSuccess('Has cerrado sesión correctamente.');
   }
-
-    // #endregion
-
   // #endregion
 }
