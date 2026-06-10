@@ -10,6 +10,9 @@ import { Registro } from './components/auth/registro/registro';
 // Estructura Estructural Base
 import { Layout } from './components/layout/layout/layout';
 
+// Guarda de Seguridad (Funcional)
+import { authGuard } from './guards/auth-guard'; 
+
 // Módulo de Comunidad
 import { Perfil } from './components/comunidad/perfil/perfil';
 import { Ranking } from './components/comunidad/ranking/ranking';
@@ -37,8 +40,6 @@ import { Ajustes } from './components/configuracion/ajustes/ajustes';
 
 /**
  * @description Configuración de rutas principal.
- * Utiliza el componente 'Layout' como padre para todas las rutas del sistema ERP,
- * asegurando la persistencia de la interfaz de usuario en el acceso privado.
  */
 const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -48,6 +49,8 @@ const routes: Routes = [
   { 
     path: 'principal', 
     component: Layout, 
+    canActivate: [authGuard],      // <-- PROTEGE LA RUTA PADRE
+    canActivateChild: [authGuard], // <-- PROTEGE EL ACCESO DIRECTO A LAS HIJAS
     children: [
       // Sub-rutas de Comunidad
       { path: 'comunidad/perfil', component: Perfil },
@@ -75,11 +78,9 @@ const routes: Routes = [
   },
   
   { path: '**', redirectTo: '/login' }
-  // #endregion
 ];
 
 // #region MÓDULO DE ENRUTAMIENTO
-
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]

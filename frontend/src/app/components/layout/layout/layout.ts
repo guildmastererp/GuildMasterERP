@@ -60,17 +60,30 @@ export class Layout implements OnInit {
   // #endregion
 
   // #region CICLO DE VIDA
-  /**
-   * Inicializa las suscripciones a eventos de navegación y al servicio de toasts.
-   * También verifica los permisos del usuario para ajustar el menú dinámicamente.
-   */
   ngOnInit(): void {
     this.comprobarRolUsuario();
 
+    // 1. RECUPERAR PESTAÑAS TRAS UN F5
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const tabsGuardadas = sessionStorage.getItem('pestanasAbiertas');
+      if (tabsGuardadas) {
+        this.pestanasAbiertas = JSON.parse(tabsGuardadas);
+      }
+    }
+
+    // 2. ESCUCHAR CAMBIOS DE RUTA
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: any) => {
       this.rutaActiva = event.urlAfterRedirects;
+
+      // Si navegamos a una ruta hija y la pestaña no existe, la creamos (ej. acceso directo por URL)
+      if (this.rutaActiva !== '/principal') {
+        const existe = this.pestanasAbiertas.find(p => p.ruta === this.rutaActiva);
+        if (!existe) {
+          this.abrirPestanaDesdeUrl(this.rutaActiva);
+        }
+      }
     });
 
     this.toastService.toasts$.subscribe(toast => {
@@ -82,10 +95,6 @@ export class Layout implements OnInit {
   // #endregion
 
   // #region GESTIÓN DE NOTIFICACIONES
-  /**
-   * Elimina un mensaje de notificación (Toast) de la lista activa.
-   * @param id - Identificador único del toast a eliminar.
-   */
   removerToast(id: number): void {
     this.toasts = this.toasts.filter(t => t.id !== id);
     this.cdr.detectChanges();
@@ -93,11 +102,6 @@ export class Layout implements OnInit {
   // #endregion
 
   // #region SEGURIDAD Y PERMISOS
-  /**
-   * Genera las cabeceras HTTP de autorización estándar.
-   * @private
-   * @returns {HttpHeaders}
-   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -105,11 +109,6 @@ export class Layout implements OnInit {
     });
   }
 
-  /**
-   * Consulta el backend para validar el rol del usuario actual.
-   * Si el usuario es administrador (0001 o 0002), añade dinámicamente
-   * la opción de "Gestión Puntos" al menú de Comunidad.
-   */
   comprobarRolUsuario(): void {
     this.http.get<any>('http://192.168.1.130:8000/api/user', { headers: this.getHeaders() })
       .subscribe({
@@ -127,40 +126,31 @@ export class Layout implements OnInit {
             }
           }
         },
-        error: (err) => {
-          console.error('Error al obtener el rol del usuario', err);
-        }
+        error: (err) => console.error('Error al obtener el rol del usuario', err)
       });
   }
   // #endregion
 
-  // #region NAVEGACIÓN
-  /**
-   * Gestiona la apertura de una nueva pestaña en el layout.
-   * Evita duplicar pestañas si el usuario hace clic en el mismo menú.
-   */
+  // #region NAVEGACIÓN Y PESTAÑAS
   abrirSeccion(item: any): void {
     const existe = this.pestanasAbiertas.find(p => p.ruta === item.ruta);
     if (!existe) {
       this.pestanasAbiertas.push(item);
+      this.guardarEstadoPestanas(); // Guardamos el estado
     }
     this.router.navigate([item.ruta]);
   }
 
-  /** Navegación directa por ruta. */
   navegarA(ruta: string): void {
     this.router.navigate([ruta]);
   }
 
-  /**
-   * Cierra la pestaña abierta. Si es la última, redirige a la vista principal.
-   * De lo contrario, navega a la pestaña inmediatamente anterior.
-   */
   cerrarPestana(index: number, event: Event): void {
     event.stopPropagation(); 
     event.preventDefault();
     
     this.pestanasAbiertas.splice(index, 1);
+    this.guardarEstadoPestanas(); // Guardamos el estado tras cerrar
 
     if (this.pestanasAbiertas.length === 0) {
       this.router.navigate(['/principal']);
@@ -169,46 +159,69 @@ export class Layout implements OnInit {
       this.router.navigate([ultimaPestana.ruta]);
     }
   }
-  // #endregion
 
-  // #region SESIÓN Y UI
-  /** Activa el modo pantalla completa del navegador. */
-  entrarPantallaCompleta(): void {
-    const elem = document.documentElement;
-    if (elem.requestFullscreen) {
-      elem.requestFullscreen().catch(err => {
-        console.warn('Error al intentar iniciar pantalla completa:', err);
-      });
+  /**
+   * Guarda el array de pestañas actuales en la memoria temporal del navegador.
+   * Esto sobrevive a los F5 (refrescar página).
+   */
+  private guardarEstadoPestanas(): void {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      sessionStorage.setItem('pestanasAbiertas', JSON.stringify(this.pestanasAbiertas));
     }
-  }
-
-  /** Desactiva el modo pantalla completa. */
-  salirPantallaCompleta(): void {
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(err => {
-        console.warn('Error al salir de pantalla completa:', err);
-      });
-    }
-  }
-
-  abrirModalLogout(): void {
-    this.mostrarModalLogout = true;
-  }
-
-  cerrarModalLogout(): void {
-    this.mostrarModalLogout = false;
   }
 
   /**
-   * Finaliza la sesión del usuario: limpia el token, el estado de pestañas,
-   * sale de pantalla completa y redirige al login con notificación.
+   * Crea una pestaña automáticamente si el usuario ingresa por URL directa
    */
+  private abrirPestanaDesdeUrl(url: string): void {
+    let tabEncontrada = false;
+    for (const cat of this.objectKeys(this.menus)) {
+      const item = this.menus[cat].find((m: any) => url.includes(m.ruta));
+      if (item) {
+        this.pestanasAbiertas.push(item);
+        tabEncontrada = true;
+        break;
+      }
+    }
+    
+    // Fallback por si la ruta no está en el menú (ej. subrutas o edición)
+    if (!tabEncontrada) {
+      const partes = url.split('/');
+      const nombreAprox = partes[partes.length - 1];
+      this.pestanasAbiertas.push({
+        nombre: nombreAprox.charAt(0).toUpperCase() + nombreAprox.slice(1),
+        ruta: url,
+        icono: '/images/miniLogo.png'
+      });
+    }
+    this.guardarEstadoPestanas();
+  }
+  // #endregion
+
+  // #region SESIÓN Y UI
+  entrarPantallaCompleta(): void {
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
+  }
+
+  salirPantallaCompleta(): void {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+  }
+
+  abrirModalLogout(): void { this.mostrarModalLogout = true; }
+  cerrarModalLogout(): void { this.mostrarModalLogout = false; }
+
   cerrarSesion(): void {
+    localStorage.removeItem('token');
+    
+    // Limpiamos las pestañas guardadas al salir
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      sessionStorage.removeItem('pestanasAbiertas');
+    }
+    
+    this.pestanasAbiertas = [];
     this.mostrarModalLogout = false;
     this.salirPantallaCompleta();
-    
-    localStorage.removeItem('token');
-    this.pestanasAbiertas = [];
     
     this.router.navigate(['/login']);
     this.toastService.showSuccess('Has cerrado sesión correctamente.');
