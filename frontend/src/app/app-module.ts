@@ -7,6 +7,9 @@ import { RouterModule, Routes } from '@angular/router';
 // Componente Raíz
 import { AppComponent } from './app';
 
+// Guards
+import { authGuard } from './guards/auth-guard';
+
 // Componentes de Autenticación
 import { Login } from './components/auth/login/login';
 import { Registro as RegistroAuth } from './components/auth/registro/registro';
@@ -45,6 +48,7 @@ const routes: Routes = [
   { 
     path: 'principal', 
     component: Layout, 
+    canActivate: [authGuard],
     children: [
       { path: 'comunidad/perfil', component: Perfil },
       { path: 'comunidad/ranking', component: Ranking },
