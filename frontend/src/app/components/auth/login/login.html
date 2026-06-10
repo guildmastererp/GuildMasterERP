@@ -39,7 +39,7 @@
         <button 
           type="submit" 
           class="btn-primary" 
-          [disabled]="!loginForm.form.valid || cargando">
+          [disabled]="cargando">
           <span *ngIf="!cargando">Entrar</span>
           <span *ngIf="cargando">Conectando...</span>
         </button>
