@@ -67,16 +67,11 @@ class MiticasController extends Controller
         return response()->json(['message' => 'Mítica registrada correctamente.']);
     }
 
-    // Sincronización Mágica con Raider.IO (100% Dinámica)
+    // Sincronización Mágica con Raider.IO (Abierta a todos los usuarios logueados)
     public function sincronizarRaiderIo(Request $request)
     {
-        $user = $request->user();
-        if (!in_array($user->codigo_rol, ['0001', '0002'])) {
-            return response()->json(['message' => 'Sin permisos.'], 403);
-        }
-
-        // Hacemos un JOIN para obtener el nombre del reino directamente de la tabla aux_reino
-        // Asegúrate de que la columna se llame 'codigoReino' en tu tabla aux_personajes
+        // ELIMINADO EL BLOQUEO DE ROL PARA PERMITIR A CUALQUIERA SINCRONIZAR
+        
         $personajes = DB::table('aux_personajes')
             ->join('aux_reino', 'aux_personajes.codigoReino', '=', 'aux_reino.codigo')
             ->select('aux_personajes.*', 'aux_reino.nombre as nombre_reino')
@@ -91,8 +86,7 @@ class MiticasController extends Controller
             'mazmorras_no_cruzadas' => []
         ];
 
-        // DICCIONARIO de traducción de mazmorras (Ajustar nombres exactos si hace falta)
-// Diccionario: Nombre API Raider.io => Nombre limpio en tu BD
+        // Diccionario: Nombre API Raider.io => Nombre limpio en tu BD
         $mapeoNombres = [
             'Magisters\' Terrace' => 'Magisters\' Terrace',
             'Maisara Caverns' => 'Maisara Caverns',
@@ -105,10 +99,9 @@ class MiticasController extends Controller
         ];
 
         foreach ($personajes as $p) {
-            // El API de Raider.io ahora lee la región fija (EU) y el reino variable para cada personaje
             $response = Http::timeout(10)->get('https://raider.io/api/v1/characters/profile', [
                 'region' => 'eu', 
-                'realm'  => strtolower($p->nombre_reino), // Dinámico y formateado
+                'realm'  => strtolower($p->nombre_reino),
                 'name'   => strtolower($p->nombre),
                 'fields' => 'mythic_plus_recent_runs'
             ]);
