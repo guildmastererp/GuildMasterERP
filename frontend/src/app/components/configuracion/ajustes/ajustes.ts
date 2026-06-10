@@ -1,6 +1,8 @@
+// #region IMPORTS
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Router } from '@angular/router';
+// #endregion
 
 @Component({
   selector: 'app-ajustes',
@@ -10,32 +12,59 @@ import { Router } from '@angular/router';
 })
 export class Ajustes implements OnInit {
 
-  // Datos del usuario actual
+  // #region PROPIEDADES 
   usuarioActual: any = null;
 
-  // Formularios
   nuevoEmail: string = '';
   passActual: string = '';
   passNueva: string = '';
   passConfirmar: string = '';
 
-  // Estados
   cargando: boolean = false;
+  // #endregion
 
-  constructor(private http: HttpClient, private router: Router, private cdr: ChangeDetectorRef) {}
+  // #region CONSTRUCTOR
+  constructor(
+    private http: HttpClient, 
+    private router: Router, 
+    private cdr: ChangeDetectorRef
+  ) {}
+  // #endregion
 
+  // #region CICLO DE VIDA
+  /**
+   * Ciclo de vida de inicialización.
+   * Recupera la información del usuario autenticado para rellenar 
+   * el formulario de perfil.
+   * * @returns {void}
+   */
   ngOnInit(): void {
     this.obtenerDatosUsuario();
   }
+  // #endregion
 
+  // #region UTILIDADES
+  /**
+   * Genera las cabeceras HTTP necesarias para las peticiones autenticadas.
+   * Utiliza el token Bearer almacenado en el LocalStorage.
+   * * @private
+   * @returns {HttpHeaders}
+   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
       'Accept': 'application/json'
     });
   }
+  // #endregion
 
-  obtenerDatosUsuario() {
+  // #region GESTIÓN DE CUENTA
+  /**
+   * Obtiene los datos del perfil del usuario logueado actualmente.
+   * Inicializa las propiedades del formulario con la información recibida.
+   * * @returns {void}
+   */
+  obtenerDatosUsuario(): void {
     this.http.get<any>('http://192.168.1.130:8000/api/user', { headers: this.getHeaders() })
       .subscribe({
         next: (user) => {
@@ -47,7 +76,11 @@ export class Ajustes implements OnInit {
       });
   }
 
-  actualizarEmail() {
+  /**
+   * Envía la solicitud para actualizar la dirección de correo electrónico.
+   * * @returns {void}
+   */
+  actualizarEmail(): void {
     if (!this.nuevoEmail) return;
     this.cargando = true;
     
@@ -66,7 +99,12 @@ export class Ajustes implements OnInit {
       });
   }
 
-  actualizarPassword() {
+  /**
+   * Envía la solicitud para cambiar la contraseña actual del usuario.
+   * Valida la coincidencia entre la nueva contraseña y su confirmación.
+   * * @returns {void}
+   */
+  actualizarPassword(): void {
     if (!this.passActual || !this.passNueva || !this.passConfirmar) return;
     this.cargando = true;
 
@@ -94,7 +132,13 @@ export class Ajustes implements OnInit {
       });
   }
 
-  borrarCuenta() {
+  /**
+   * Solicita la eliminación irreversible de la cuenta y sus datos vinculados.
+   * Tras la confirmación del usuario, limpia el almacenamiento local, 
+   * invalida la sesión y redirige al login.
+   * * @returns {void}
+   */
+  borrarCuenta(): void {
     const confirmacion = confirm('ATENCIÓN: Esta acción es irreversible. Se borrará tu cuenta, tu personaje principal y todos tus alters. ¿Estás absolutamente seguro?');
     
     if (confirmacion) {
@@ -116,4 +160,5 @@ export class Ajustes implements OnInit {
         });
     }
   }
+  // #endregion
 }
