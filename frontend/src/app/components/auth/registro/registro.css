@@ -1,5 +1,10 @@
 /* #region REGISTRO DE CUENTAS */
-
+/**
+ * Contenedor principal y tarjeta base del registro.
+ * Se encarga de centrar el contenido en la pantalla completa (100vh) 
+ * y de darle el estilo de "ventana flotante" corporativa con el 
+ * fondo azul oscuro y el borde dorado.
+ */
 .registro-container {
   display: flex;
   justify-content: center;
@@ -18,9 +23,14 @@
   max-width: 450px;
   color: var(--blanco);
 }
+/* #endregion */
 
 /* #region ENCABEZADOS Y TEXTOS */
-
+/**
+ * Tipografía principal de la tarjeta.
+ * Controla el título principal (GuildMasterERP) con efecto de sombra
+ * y el subtítulo secundario explicativo.
+ */
 .title {
   margin: 0 0 10px 0;
   text-align: center;
@@ -34,11 +44,14 @@
   font-size: 0.9rem;
   color: #a0aabf; 
 }
-
 /* #endregion */
 
 /* #region CAMPOS DE FORMULARIO */
-
+/**
+ * Estilos para las etiquetas y cajas de texto (inputs).
+ * Define el alto contraste (fondo blanco, texto azul) y el efecto 
+ * de iluminación dorada cuando el usuario hace clic (focus) en un campo.
+ */
 .form-group {
   margin-bottom: 20px;
 }
@@ -67,11 +80,14 @@ input:focus {
   border-color: var(--amarillo-dorado); 
   box-shadow: 0 0 8px rgba(199, 169, 56, 0.4);
 }
-
 /* #endregion */
 
 /* #region ALERTAS Y MENSAJES DE ESTADO */
-
+/**
+ * Clases dinámicas para la retroalimentación visual del usuario.
+ * Controla los textos de error en campos específicos y la caja 
+ * de alerta global del formulario cuando falla el backend.
+ */
 .error-text {
   display: block;
   color: var(--rojo-cerrar); 
@@ -96,11 +112,14 @@ input:focus {
   font-size: 0.9rem;
   color: var(--rojo-cerrar);
 }
-
 /* #endregion */
 
 /* #region BOTONES Y ACCIONES */
-
+/**
+ * Estilos de interacción y llamadas a la acción (CTAs).
+ * Incluye los estados de hover (pasar el ratón), active (clic) y 
+ * disabled (deshabilitado mientras carga o si el formulario es inválido).
+ */
 .actions {
   display: flex;
   flex-direction: column;
@@ -153,7 +172,4 @@ button {
   background-color: rgba(199, 169, 56, 0.1);
   filter: brightness(1.1);
 }
-
-/* #endregion */
-
 /* #endregion */

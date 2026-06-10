@@ -1,7 +1,7 @@
 // #region IMPORTS
 import { Component, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { HttpClient } from '@angular/common/http'; // Asegúrate de tenerlo por consistencia
+import { HttpClient } from '@angular/common/http';
 // #endregion
 
 @Component({
@@ -34,7 +34,14 @@ export class Registro {
   // #endregion
 
   // #region MÉTODOS
-  procesarUrl() {
+
+  /**
+   * Procesa y valida la URL de Raider.io introducida por el usuario.
+   * Extrae el nombre del personaje y su reino basándose en la estructura de la ruta.
+   * Si la URL no es válida o no tiene el formato esperado, activa el flag de error.
+   * * @returns {void}
+   */
+  procesarUrl(): void {
     this.errorUrl = false;
     this.nombreExtraido = '';
     this.reinoExtraido = '';
@@ -57,7 +64,14 @@ export class Registro {
     }
   }
 
-  async registrarUsuario() {
+  /**
+   * Envía la solicitud de registro al backend con los datos del formulario.
+   * Realiza una validación previa de la URL extraída y gestiona los estados de carga.
+   * En caso de éxito, redirige al inicio de sesión; si falla, captura y muestra
+   * los errores específicos de validación (email duplicado, BattleTag en uso, etc.).
+   * * @returns {Promise<void>}
+   */
+  async registrarUsuario(): Promise<void> {
     if (this.errorUrl || !this.nombreExtraido) {
       this.errorBackend = 'Introduce un enlace de Raider.io válido primero.';
       return;
@@ -88,7 +102,6 @@ export class Registro {
       this.cargando = false;
 
       if (response.ok) {
-        // CORRECCIÓN: Redirección al Login tras registro exitoso
         alert('Cuenta creada con éxito. Redirigiendo a inicio de sesión...');
         this.router.navigate(['/login']);
       } else {
@@ -114,8 +127,13 @@ export class Registro {
     this.cdr.detectChanges();
   }
 
-  volverAlLogin() {
+  /**
+   * Cancela el proceso de registro y redirige al usuario a la vista de inicio de sesión.
+   * * @returns {void}
+   */
+  volverAlLogin(): void {
     this.router.navigate(['/login']);
   }
+
   // #endregion
 }

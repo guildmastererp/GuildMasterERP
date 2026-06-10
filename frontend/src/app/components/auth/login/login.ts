@@ -7,7 +7,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 @Component({
   selector: 'app-login',
   templateUrl: './login.html',
-  styleUrls: ['./login.css'], // Asumo que usas los mismos estilos base que en el registro
+  styleUrls: ['./login.css'], 
   standalone: false
 })
 export class Login {
@@ -27,7 +27,16 @@ export class Login {
   // #endregion
 
   // #region MÉTODOS
-  iniciarSesion() {
+
+  /**
+   * Procesa la solicitud de inicio de sesión del usuario.
+   * Valida localmente que los campos no estén vacíos antes de enviar la petición.
+   * Gestiona el estado de carga y, en caso de recibir una respuesta exitosa del servidor,
+   * almacena el token de acceso en el LocalStorage para autenticar futuras llamadas API,
+   * redirigiendo finalmente a la ventana principal del ERP.
+   * * @returns {void}
+   */
+  iniciarSesion(): void {
     // 1. Freno si los campos están vacíos (evita enviar peticiones en blanco)
     if (!this.email || !this.pass) {
       this.errorBackend = 'Por favor, rellena tu correo y contraseña.';
@@ -78,8 +87,13 @@ export class Login {
     });
   }
 
-  irAlRegistro() {
+  /**
+   * Navega hacia la ruta de registro para crear una cuenta nueva.
+   * * @returns {void}
+   */
+  irAlRegistro(): void {
     this.router.navigate(['/registro']);
   }
+
   // #endregion
 }

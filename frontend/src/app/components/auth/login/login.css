@@ -15,7 +15,7 @@
   border: 2px solid var(--amarillo-dorado); 
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
   width: 100%;
-  max-width: 400px; /* Un poco más estrecho que el registro para estilizarlo */
+  max-width: 400px; 
   color: var(--blanco);
 }
 
@@ -104,7 +104,6 @@ button {
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
 }
 
-/* Botón Iniciar Sesión */
 .btn-primary {
   background-color: var(--amarillo-dorado);
   color: var(--azul-oscuro);
@@ -127,7 +126,6 @@ button {
   transform: none;
 }
 
-/* Botón Crear Cuenta / Olvidé contraseña */
 .btn-secondary {
   background-color: transparent;
   color: var(--amarillo-dorado);
