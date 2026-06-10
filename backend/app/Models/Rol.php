@@ -10,11 +10,28 @@ class Role extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description'];
+    // #region PROPIEDADES
+    
+    protected $fillable = [
+        'name', 
+        'description'
+    ];
+    
+    // #endregion
 
-    // Un rol tiene muchos usuarios (ej: el rol "Raider" lo tienen 20 personas)
+    // #region MÉTODOS
+
+    /**
+     * Obtiene todos los usuarios que tienen asignado este rol.
+     * Establece una relación 1:N donde un rol específico puede estar 
+     * vinculado a múltiples cuentas de usuario.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
     public function users(): HasMany
     {
         return $this->hasMany(User::class);
     }
+
+    // #endregion
 }

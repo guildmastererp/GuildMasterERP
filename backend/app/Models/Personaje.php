@@ -9,10 +9,10 @@ class Personaje extends Model
 {
     use HasFactory;
 
-    // Nombre de la tabla en la base de datos
+    // #region PROPIEDADES
+    
     protected $table = 'aux_personajes';
 
-    // Campos que se pueden rellenar masivamente
     protected $fillable = [
         'codigo',
         'nombre',
@@ -20,10 +20,22 @@ class Personaje extends Model
         'region',
         'es_main',
     ];
+    
+    // #endregion
 
-    // Opcional: Relación inversa (si quieres ver qué usuario tiene este personaje)
+    // #region MÉTODOS
+
+    /**
+     * Obtiene la cuenta de usuario propietaria de este personaje.
+     * Establece una relación inversa para identificar a qué usuario 
+     * pertenece este registro, vinculándolo a través del 'codigo_main'.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function user()
     {
         return $this->belongsTo(User::class, 'codigo_main', 'codigo');
     }
+
+    // #endregion
 }
