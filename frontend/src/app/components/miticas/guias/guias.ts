@@ -20,20 +20,36 @@ export class Guias implements OnInit {
 
   cargando: boolean = true;
   errorCarga: boolean = false;
-  // #endregion
 
-  // #region PROPIEDADES DE FILTRO
   filtroBusqueda: string = '';
   filtroExpansion: string = '';
   filtroTemporada: string = '';
   // #endregion
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  // #region CONSTRUCTOR
+  constructor(
+    private http: HttpClient, 
+    private cdr: ChangeDetectorRef
+  ) {}
+  // #endregion
 
+  // #region CICLO DE VIDA
+  /**
+   * Ciclo de vida de inicialización.
+   * Lanza la carga de datos maestros al montar el componente.
+   * * @returns {void}
+   */
   ngOnInit(): void {
     this.cargarDatosMaestros();
   }
+  // #endregion
 
+  // #region UTILIDADES
+  /**
+   * Genera las cabeceras HTTP de autorización estándar.
+   * @private
+   * @returns {HttpHeaders}
+   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -41,9 +57,15 @@ export class Guias implements OnInit {
       'Content-Type': 'application/json'
     });
   }
+  // #endregion
 
   // #region CARGA Y AGRUPACIÓN DE DATOS
-  cargarDatosMaestros() {
+  /**
+   * Obtiene la estructura de expansiones y temporadas desde la API.
+   * Posteriormente, encadena la carga de las guías.
+   * * @returns {void}
+   */
+  cargarDatosMaestros(): void {
     this.cargando = true;
     
     this.http.get<any>('http://192.168.1.130:8000/api/miticas/estructura', { headers: this.getHeaders() })
@@ -62,7 +84,11 @@ export class Guias implements OnInit {
       });
   }
 
-  cargarGuias() {
+  /**
+   * Obtiene la lista cruda de guías y dispara el proceso de agrupación.
+   * * @returns {void}
+   */
+  cargarGuias(): void {
     this.http.get<any[]>('http://192.168.1.130:8000/api/miticas/guias-lista', { headers: this.getHeaders() })
       .subscribe({
         next: (guias) => {
@@ -78,7 +104,13 @@ export class Guias implements OnInit {
       });
   }
 
-  agruparDatos(guiasRaw: any[]) {
+  /**
+   * Transforma el listado plano de guías en un objeto agrupado por mazmorra.
+   * Incluye la lógica para asociar el código de expansión mediante la búsqueda en temporadas.
+   * * @param {any[]} guiasRaw - Datos crudos recibidos de la API.
+   * * @returns {void}
+   */
+  agruparDatos(guiasRaw: any[]): void {
     const agrupado: any[] = [];
 
     guiasRaw.forEach(guia => {
@@ -109,11 +141,20 @@ export class Guias implements OnInit {
   // #endregion
 
   // #region FILTRADO DE LA VISTA
-  get temporadasFiltradas() { 
+  /**
+   * Getter que devuelve únicamente las temporadas correspondientes a la expansión seleccionada.
+   * * @returns {any[]} Array de temporadas filtradas.
+   */
+  get temporadasFiltradas(): any[] { 
     return this.temporadasDisponibles.filter(t => t.codigoExpa == this.filtroExpansion); 
   }
 
-  aplicarFiltros() {
+  /**
+   * Aplica los filtros de expansión, temporada y búsqueda sobre los datos originales.
+   * Realiza una copia profunda (deep clone) para evitar mutaciones no deseadas.
+   * * @returns {void}
+   */
+  aplicarFiltros(): void {
     let resultado = JSON.parse(JSON.stringify(this.datosOriginales));
 
     if (this.filtroExpansion) {
@@ -136,7 +177,11 @@ export class Guias implements OnInit {
     this.cdr.detectChanges();
   }
 
-  limpiarFiltros() {
+  /**
+   * Restablece los filtros a su estado por defecto y recarga la vista completa.
+   * * @returns {void}
+   */
+  limpiarFiltros(): void {
     this.filtroExpansion = '';
     this.filtroTemporada = '';
     this.filtroBusqueda = '';
@@ -145,7 +190,12 @@ export class Guias implements OnInit {
   // #endregion
 
   // #region ACCIONES
-  abrirGuia(url: string) {
+  /**
+   * Abre la URL de la guía en una nueva pestaña del navegador.
+   * * @param {string} url - Dirección web de la guía.
+   * * @returns {void}
+   */
+  abrirGuia(url: string): void {
     if(url) {
       window.open(url, '_blank');
     }

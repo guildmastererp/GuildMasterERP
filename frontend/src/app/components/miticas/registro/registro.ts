@@ -1,7 +1,7 @@
 // #region IMPORTS
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { ToastService } from '../../../services/toast'; // <-- IMPORT DEL SERVICIO
+import { ToastService } from '../../../services/toast';
 // #endregion
 
 @Component({
@@ -11,41 +11,49 @@ import { ToastService } from '../../../services/toast'; // <-- IMPORT DEL SERVIC
   standalone: false
 })
 export class RegistroMiticas implements OnInit {
-  // #region PROPIEDADES DE SEGURIDAD Y ESTADO
+
+  // #region PROPIEDADES DE ESTADO
   esAdmin: boolean = false;
   cargando: boolean = true;
   sincronizandoIO: boolean = false;
-  // #endregion
 
-  // #region DATOS DEL COMPONENTE
   historialMiticas: any[] = [];
   jugadoresDisponibles: any[] = [];
-  
   expansiones: any[] = [];
   temporadas: any[] = [];
   miticas: any[] = [];
-  // #endregion
 
-  // #region FILTROS DE VISTA
   filtroMazmorra: string = '';
   filtroNivel: number | null = null;
   // #endregion
 
+  // #region CONSTRUCTOR
   constructor(
     private http: HttpClient, 
     private cdr: ChangeDetectorRef,
-    private toast: ToastService // <-- INYECTADO
+    private toast: ToastService
   ) {}
+  // #endregion
 
+  // #region CICLO DE VIDA
+  /**
+   * Inicializa el componente cargando los datos maestros, el historial
+   * y comprobando los privilegios del usuario actual.
+   */
   ngOnInit(): void {
     this.comprobarRol();
     this.cargarJugadores();
     this.cargarEstructura();
     this.cargarHistorial();
   }
+  // #endregion
 
-  // #region LÓGICA DE FILTRADO PARA LA VISTA
-  get historialFiltrado() {
+  // #region GETTERS DE FILTRADO
+  /**
+   * Getter que aplica los filtros actuales (mazmorra y nivel) al historial de míticas.
+   * * @returns {any[]} Array filtrado de registros de míticas.
+   */
+  get historialFiltrado(): any[] {
     return this.historialMiticas.filter(r => {
       const matchMazmorra = this.filtroMazmorra 
         ? r.mitica_nombre.toLowerCase().includes(this.filtroMazmorra.toLowerCase()) 
@@ -59,6 +67,11 @@ export class RegistroMiticas implements OnInit {
   // #endregion
 
   // #region SERVICIOS Y SEGURIDAD
+  /**
+   * Genera las cabeceras HTTP necesarias, incluyendo el token de sesión.
+   * * @private
+   * @returns {HttpHeaders}
+   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({ 
       'Authorization': `Bearer ${localStorage.getItem('token')}`, 
@@ -66,7 +79,11 @@ export class RegistroMiticas implements OnInit {
     });
   }
 
-  comprobarRol() {
+  /**
+   * Valida si el usuario actual posee permisos de administrador.
+   * * @returns {void}
+   */
+  comprobarRol(): void {
     this.http.get<any>('http://192.168.1.130:8000/api/user', { headers: this.getHeaders() })
       .subscribe({
         next: (user) => {
@@ -76,8 +93,14 @@ export class RegistroMiticas implements OnInit {
         error: () => this.cdr.detectChanges()
       });
   }
+  // #endregion
 
-  cargarEstructura() {
+  // #region CARGA DE DATOS
+  /**
+   * Obtiene la estructura jerárquica de contenido (Expansiones, Temporadas, Mazmorras).
+   * * @returns {void}
+   */
+  cargarEstructura(): void {
     this.http.get<any>('http://192.168.1.130:8000/api/miticas/estructura', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
@@ -93,7 +116,11 @@ export class RegistroMiticas implements OnInit {
       });
   }
 
-  cargarJugadores() {
+  /**
+   * Carga el listado de jugadores/personajes disponibles en el ERP.
+   * * @returns {void}
+   */
+  cargarJugadores(): void {
     this.http.get<any[]>('http://192.168.1.130:8000/api/aux-personajes', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
@@ -104,7 +131,11 @@ export class RegistroMiticas implements OnInit {
       });
   }
 
-  cargarHistorial() {
+  /**
+   * Obtiene el historial de registros de míticas desde el backend.
+   * * @returns {void}
+   */
+  cargarHistorial(): void {
     this.cargando = true;
     this.http.get<any[]>('http://192.168.1.130:8000/api/miticas', { headers: this.getHeaders() })
       .subscribe({
@@ -122,7 +153,13 @@ export class RegistroMiticas implements OnInit {
   // #endregion
 
   // #region SINCRONIZACIÓN
-  sincronizarConRaiderIO() {
+  /**
+   * Lanza el proceso de sincronización con la API de Raider.io.
+   * Muestra notificaciones al usuario sobre el éxito o fallo de la operación
+   * y recarga el historial al finalizar.
+   * * @returns {void}
+   */
+  sincronizarConRaiderIO(): void {
     this.sincronizandoIO = true;
     
     this.http.post<any>('http://192.168.1.130:8000/api/miticas/sincronizar', {}, { headers: this.getHeaders() })
