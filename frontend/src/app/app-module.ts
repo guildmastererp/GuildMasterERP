@@ -26,7 +26,7 @@ import { Organizacion } from './components/raid/organizacion/organizacion';
 import { Roster } from './components/raid/roster/roster';
 import { Loot } from './components/raid/loot/loot';
 
-// Módulo de Míticas (AQUÍ ESTÁ LA CORRECCIÓN DEL NOMBRE)
+// Módulo de Míticas
 import { RegistroMiticas } from './components/miticas/registro/registro';
 import { Guias as GuiasMiticas } from './components/miticas/guias/guias';
 
