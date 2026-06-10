@@ -1,56 +1,281 @@
-:host { display: block; width: 100%; height: 100%; }
+/* #region CONFIGURACIÓN RAÍZ */
 
-.loot-container {
-  width: 100%; height: 100%; box-sizing: border-box; display: flex; flex-direction: column; gap: 20px; color: var(--azul-oscuro);
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 
-/* Ribbon */
-.ribbon { background-color: var(--azul-claro); border-radius: 8px; padding: 16px 20px; display: flex; align-items: center; box-shadow: 0 4px 8px rgba(29, 38, 78, 0.15); }
-.ribbon-grupo { display: flex; align-items: center; }
-.icono-ribbon { font-size: 24px; margin-right: 10px; }
-.titulo-ribbon { font-weight: 900; color: var(--amarillo-dorado); font-size: 20px; text-transform: uppercase; }
+.loot-container {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  color: var(--azul-oscuro);
+}
 
-/* Panel de Administración */
-.panel-admin { background-color: white; border: 1px solid var(--amarillo-dorado); border-radius: 8px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-.panel-admin h3 { margin: 0 0 15px 0; color: var(--amarillo-dorado); font-size: 16px; text-transform: uppercase; }
+/* #endregion */
 
-.formulario-loot { display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap; }
-.form-group { display: flex; flex-direction: column; gap: 5px; }
-.item-group { flex: 1; min-width: 200px; }
+/* #region RIBBON  */
 
-.form-group label { font-size: 12px; font-weight: bold; color: var(--azul-oscuro); text-transform: uppercase; }
-.form-group input, .form-group select { padding: 10px; border: 1px solid var(--gris-pestanas); border-radius: 6px; font-size: 14px; outline: none; }
-.form-group input:focus, .form-group select:focus { border-color: var(--azul-claro); }
+.ribbon {
+  background-color: var(--azul-claro);
+  border-radius: 8px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 8px rgba(29, 38, 78, 0.15);
+}
 
-.btn-otorgar { background-color: var(--azul-oscuro); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.2s; height: 40px; }
-.btn-otorgar:hover:not(:disabled) { background-color: var(--amarillo-dorado); color: var(--azul-oscuro); }
-.btn-otorgar:disabled { opacity: 0.5; cursor: wait; }
+.ribbon-grupo {
+  display: flex;
+  align-items: center;
+}
 
-/* Historial y Tabla */
-.panel-historial { background-color: white; border: 1px solid var(--gris-pestanas); border-radius: 8px; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-.estado-carga { padding: 40px; text-align: center; color: var(--azul-claro); font-weight: bold; }
+.icono-ribbon {
+  font-size: 24px;
+  margin-right: 10px;
+}
 
-.tabla-contenedor { flex: 1; overflow-y: auto; padding: 20px; }
+.titulo-ribbon {
+  font-weight: 900;
+  color: var(--amarillo-dorado);
+  font-size: 20px;
+  text-transform: uppercase;
+}
 
-.tabla-loot { width: 100%; border-collapse: collapse; text-align: left; }
-.tabla-loot th { background-color: rgba(29, 38, 78, 0.05); color: var(--azul-oscuro); font-weight: 900; padding: 12px 15px; text-transform: uppercase; font-size: 13px; border-bottom: 2px solid var(--gris-pestanas); position: sticky; top: 0; z-index: 10;}
-.tabla-loot td { padding: 12px 15px; border-bottom: 1px solid var(--gris-pestanas); vertical-align: middle; }
-.tabla-loot tr:hover td { background-color: #fcfcfc; }
+/* #endregion */
 
-.col-fecha { font-size: 13px; color: var(--azul-claro); width: 100px; }
-.col-item { font-weight: bold; color: #a335ee; font-size: 15px; }
-.icono-item { filter: grayscale(0.2); }
+/* #region PANEL DE ADMINISTRACIÓN  */
 
-.col-jugador { display: flex; flex-direction: column; }
-.nombre-jugador { font-weight: 900; font-size: 14px; color: var(--azul-oscuro); }
-.clase-jugador { font-size: 11px; color: var(--azul-claro); }
+.panel-admin {
+  background-color: white;
+  border: 1px solid var(--amarillo-dorado);
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
 
-.col-accion { width: 40px; text-align: center; }
-.btn-borrar { background-color: transparent; border: none; color: #cc0000; cursor: pointer; font-size: 14px; padding: 5px; border-radius: 4px; transition: 0.2s; }
-.btn-borrar:hover:not(:disabled) { background-color: #ffe6e6; }
+.panel-admin h3 {
+  margin: 0 0 15px 0;
+  color: var(--amarillo-dorado);
+  font-size: 16px;
+  text-transform: uppercase;
+}
 
-.filtros-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-.bosses-selector { margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 6px; }
-.checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 5px; margin-top: 5px; }
-.checkbox-grid label { display: block; padding: 5px; background: white; border: 1px solid #ddd; cursor: pointer; border-radius: 4px; }
-.checkbox-grid label.active { background: var(--azul-oscuro); color: white; border-color: var(--azul-oscuro); }
+.formulario-loot {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.item-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.form-group label {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--azul-oscuro);
+  text-transform: uppercase;
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px;
+  border: 1px solid var(--gris-pestanas);
+  border-radius: 6px;
+  font-size: 14px;
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: var(--azul-claro);
+}
+
+.btn-otorgar {
+  background-color: var(--azul-oscuro);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  height: 40px;
+}
+
+.btn-otorgar:hover:not(:disabled) {
+  background-color: var(--amarillo-dorado);
+  color: var(--azul-oscuro);
+}
+
+.btn-otorgar:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+/* #endregion */
+
+/* #region FILTROS Y SELECCIÓN */
+
+.filtros-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.bosses-selector {
+  margin-bottom: 15px;
+  padding: 10px;
+  background: #f9f9f9;
+  border-radius: 6px;
+}
+
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.checkbox-grid label {
+  display: block;
+  padding: 5px;
+  background: white;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.checkbox-grid label.active {
+  background: var(--azul-oscuro);
+  color: white;
+  border-color: var(--azul-oscuro);
+}
+
+/* #endregion */
+
+/* #region TABLA DE HISTORIAL */
+
+.panel-historial {
+  background-color: white;
+  border: 1px solid var(--gris-pestanas);
+  border-radius: 8px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tabla-contenedor {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.tabla-loot {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.tabla-loot th {
+  background-color: rgba(29, 38, 78, 0.05);
+  color: var(--azul-oscuro);
+  font-weight: 900;
+  padding: 12px 15px;
+  text-transform: uppercase;
+  font-size: 13px;
+  border-bottom: 2px solid var(--gris-pestanas);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tabla-loot td {
+  padding: 12px 15px;
+  border-bottom: 1px solid var(--gris-pestanas);
+  vertical-align: middle;
+}
+
+.tabla-loot tr:hover td {
+  background-color: #fcfcfc;
+}
+
+.col-fecha {
+  font-size: 13px;
+  color: var(--azul-claro);
+  width: 100px;
+}
+
+.col-item {
+  font-weight: bold;
+  color: #a335ee;
+  font-size: 15px;
+}
+
+.icono-item {
+  filter: grayscale(0.2);
+}
+
+.col-jugador {
+  display: flex;
+  flex-direction: column;
+}
+
+.nombre-jugador {
+  font-weight: 900;
+  font-size: 14px;
+  color: var(--azul-oscuro);
+}
+
+.clase-jugador {
+  font-size: 11px;
+  color: var(--azul-claro);
+}
+
+.col-accion {
+  width: 40px;
+  text-align: center;
+}
+
+.btn-borrar {
+  background-color: transparent;
+  border: none;
+  color: #cc0000;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 5px;
+  border-radius: 4px;
+  transition: 0.2s;
+}
+
+.btn-borrar:hover:not(:disabled) {
+  background-color: #ffe6e6;
+}
+
+/* #endregion */
+
+/* #region ESTADOS DE CARGA */
+
+.estado-carga {
+  padding: 40px;
+  text-align: center;
+  color: var(--azul-claro);
+  font-weight: bold;
+}
+
+/* #endregion */

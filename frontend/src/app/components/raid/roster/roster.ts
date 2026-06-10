@@ -11,29 +11,54 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 })
 export class Roster implements OnInit {
 
+  // #region PROPIEDADES
   esAdmin: boolean = false;
   cargandoRol: boolean = true;
   procesando: boolean = false;
+  terminoBusqueda: string = '';
 
   rosterActual: any[] = [];
   todosPersonajes: any[] = [];
-  terminoBusqueda: string = '';
+  // #endregion
 
-  constructor(private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  // #region CONSTRUCTOR
+  constructor(
+    private http: HttpClient, 
+    private cdr: ChangeDetectorRef
+  ) {}
+  // #endregion
 
+  // #region CICLO DE VIDA
+  /**
+   * Ciclo de vida de inicialización.
+   * Inicia la comprobación de privilegios de usuario para habilitar 
+   * las funcionalidades administrativas.
+   */
   ngOnInit(): void {
     this.comprobarRol();
   }
+  // #endregion
 
+  // #region UTILIDADES
+  /**
+   * Genera las cabeceras HTTP de autorización estándar.
+   * @private
+   * @returns {HttpHeaders}
+   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
       'Accept': 'application/json'
     });
   }
+  // #endregion
 
-  // 1. COMPROBAR SEGURIDAD
-  comprobarRol() {
+  // #region CARGA Y GESTIÓN DE DATOS
+  /**
+   * Consulta el rol del usuario autenticado. 
+   * Si es administrador (0001 o 0002), dispara la carga de datos del roster.
+   */
+  comprobarRol(): void {
     this.http.get<any>('http://192.168.1.130:8000/api/user', { headers: this.getHeaders() })
       .subscribe({
         next: (user) => {
@@ -51,13 +76,18 @@ export class Roster implements OnInit {
       });
   }
 
-  // 2. CARGAR TODOS LOS DATOS
-  cargarDatos() {
+  /**
+   * Wrapper para ejecutar la carga de ambos sets de datos necesarios.
+   */
+  cargarDatos(): void {
     this.cargarRoster();
     this.cargarPersonajesParaBuscador();
   }
 
-  cargarRoster() {
+  /**
+   * Obtiene la lista actual de personajes inscritos en el roster de raid.
+   */
+  cargarRoster(): void {
     this.http.get<any[]>('http://192.168.1.130:8000/api/roster', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
@@ -68,7 +98,10 @@ export class Roster implements OnInit {
       });
   }
 
-  cargarPersonajesParaBuscador() {
+  /**
+   * Obtiene la lista global de personajes para poder buscarlos y añadirlos al roster.
+   */
+  cargarPersonajesParaBuscador(): void {
     this.http.get<any[]>('http://192.168.1.130:8000/api/aux-personajes', { headers: this.getHeaders() })
       .subscribe({
         next: (data) => {
@@ -78,9 +111,16 @@ export class Roster implements OnInit {
         error: () => this.cdr.detectChanges()
       });
   }
+  // #endregion
 
-  // 3. LÓGICA DEL BUSCADOR
-  get resultadosBuscador() {
+  // #region LÓGICA DE BÚSQUEDA
+  /**
+   * Getter que filtra los personajes disponibles para añadir al roster.
+   * Excluye a los que ya están presentes en `rosterActual` y filtra por nombre,
+   * clase o función según el término de búsqueda.
+   * @returns {any[]} Lista de personajes candidatos.
+   */
+  get resultadosBuscador(): any[] {
     if (!this.terminoBusqueda) return [];
 
     const codigosEnRoster = this.rosterActual.map(r => r.codigo);
@@ -92,9 +132,15 @@ export class Roster implements OnInit {
       p.funcion.toLowerCase().includes(this.terminoBusqueda.toLowerCase())
     );
   }
+  // #endregion
 
-  // 4. ACCIONES DEL ROSTER
-  agregarAlRoster(personaje: any) {
+  // #region ACCIONES DEL ROSTER
+  /**
+   * Añade un nuevo personaje al roster mediante una petición POST.
+   * Actualiza el roster local tras la operación.
+   * @param {any} personaje - Objeto del personaje a añadir.
+   */
+  agregarAlRoster(personaje: any): void {
     this.procesando = true;
     this.http.post('http://192.168.1.130:8000/api/roster/add', { codigoPersonaje: personaje.codigo }, { headers: this.getHeaders() })
       .subscribe({
@@ -111,8 +157,12 @@ export class Roster implements OnInit {
       });
   }
 
-  expulsarDelRoster(personaje: any) {
-    // SIN AVISO NI CONFIRMACIÓN
+  /**
+   * Elimina un personaje del roster mediante una petición DELETE.
+   * Actualiza el roster local tras la operación.
+   * @param {any} personaje - Objeto del personaje a expulsar.
+   */
+  expulsarDelRoster(personaje: any): void {
     this.procesando = true;
     this.http.delete(`http://192.168.1.130:8000/api/roster/remove/${personaje.codigo}`, { headers: this.getHeaders() })
       .subscribe({
@@ -127,4 +177,5 @@ export class Roster implements OnInit {
         }
       });
   }
+  // #endregion
 }
