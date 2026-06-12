@@ -46,10 +46,6 @@ export class Organizacion implements OnInit {
   // #endregion
 
   // #region CICLO DE VIDA
-  /**
-   * Inicializa la vista comprobando permisos, generando el calendario
-   * y cargando el roster actual.
-   */
   ngOnInit(): void {
     this.comprobarRol();
     this.generarCalendario();
@@ -58,10 +54,6 @@ export class Organizacion implements OnInit {
   // #endregion
 
   // #region SEGURIDAD Y ROLES
-  /**
-   * Genera las cabeceras HTTP necesarias para las peticiones autenticadas.
-   * @private
-   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -69,9 +61,6 @@ export class Organizacion implements OnInit {
     });
   }
 
-  /**
-   * Verifica el rol del usuario para determinar si tiene acceso de administrador.
-   */
   comprobarRol(): void {
     this.http.get<any>('http://192.168.1.130:8000/api/user', { headers: this.getHeaders() })
       .subscribe({
@@ -87,9 +76,6 @@ export class Organizacion implements OnInit {
   // #endregion
 
   // #region LÓGICA DEL ROSTER
-  /**
-   * Carga el roster actual desde el backend y recalcula los roles.
-   */
   cargarRoster(): void {
     this.http.get<any[]>('http://192.168.1.130:8000/api/roster', { headers: this.getHeaders() })
       .subscribe({
@@ -105,40 +91,19 @@ export class Organizacion implements OnInit {
       });
   }
 
-/**
-   * Calcula el total de tanques, healers y dps para la vista de organización.
-   * Se normalizan las cadenas (trim y toUpperCase/toLowerCase) para evitar 
-   * que los espacios en blanco o diferencias de mayúsculas rompan el conteo.
-   */
   calcularComposicion(): void {
-    this.totalTanques = this.rosterActual.filter(j => 
-      j.funcion && j.funcion.trim().toLowerCase() === 'tanque'
-    ).length;
-
-    this.totalHealers = this.rosterActual.filter(j => 
-      j.funcion && (j.funcion.trim().toLowerCase() === 'sanador' || j.funcion.trim().toLowerCase() === 'healer')
-    ).length;
-
-    this.totalDPS = this.rosterActual.filter(j => 
-      j.funcion && j.funcion.trim().toUpperCase() === 'DPS'
-    ).length;
+    this.totalTanques = this.rosterActual.filter(j => j.funcion === 'Tanque').length;
+    this.totalHealers = this.rosterActual.filter(j => j.funcion === 'Healer' || j.funcion === 'Sanador').length;
+    this.totalDPS = this.rosterActual.filter(j => j.funcion === 'DPS').length;
   }
   // #endregion
 
   // #region LÓGICA DEL CALENDARIO
-  /**
-   * Avanza o retrocede en el calendario.
-   * @param offset Número de meses a sumar o restar.
-   */
   cambiarMes(offset: number): void {
     this.fechaActual.setMonth(this.fechaActual.getMonth() + offset);
     this.generarCalendario();
   }
 
-  /**
-   * Genera la matriz de días para el calendario actual.
-   * Calcula los días vacíos iniciales y asigna los eventos correspondientes a cada día.
-   */
   generarCalendario(): void {
     this.calendarioDias = [];
     const anio = this.fechaActual.getFullYear();
@@ -152,12 +117,10 @@ export class Organizacion implements OnInit {
 
     const diasEnElMes = new Date(anio, mes + 1, 0).getDate();
 
-    // Rellenar días vacíos al inicio del mes
     for (let i = 0; i < primerDia; i++) {
       this.calendarioDias.push({ dia: null, evento: null });
     }
 
-    // Rellenar días del mes
     for (let i = 1; i <= diasEnElMes; i++) {
       const fechaStr = `${anio}-${(mes + 1).toString().padStart(2, '0')}-${i.toString().padStart(2, '0')}`;
       const raidDelDia = this.eventosRaid.find(r => r.fecha === fechaStr);
@@ -172,9 +135,6 @@ export class Organizacion implements OnInit {
     this.cdr.detectChanges();
   }
 
-  /**
-   * Comprueba si una fecha es el día actual.
-   */
   comprobarSiEsHoy(anio: number, mes: number, dia: number): boolean {
     const hoy = new Date();
     return hoy.getDate() === dia && hoy.getMonth() === mes && hoy.getFullYear() === anio;
@@ -182,9 +142,6 @@ export class Organizacion implements OnInit {
   // #endregion
 
   // #region MODALES 
-  /**
-   * Abre el modal de detalle para una raid específica.
-   */
   abrirModal(evento: any): void {
     if (evento) {
       this.raidSeleccionada = evento;
@@ -199,9 +156,6 @@ export class Organizacion implements OnInit {
     this.cdr.detectChanges();
   }
 
-  /**
-   * Elimina la raid seleccionada de la lista de eventos.
-   */
   eliminarRaid(): void {
     this.eventosRaid = this.eventosRaid.filter(r => r.id !== this.raidSeleccionada.id);
     this.cerrarModal();
@@ -222,9 +176,6 @@ export class Organizacion implements OnInit {
     this.cdr.detectChanges();
   }
 
-  /**
-   * Añade una nueva raid a la lista de eventos.
-   */
   guardarRaid(): void {
     if (!this.nuevaRaid.fecha) {
       alert('Debes seleccionar una fecha.');

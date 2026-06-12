@@ -1,6 +1,7 @@
 // #region IMPORTS
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ToastService } from '../../../services/toast';
 // #endregion
 
 @Component({
@@ -38,15 +39,12 @@ export class Loot implements OnInit {
   // #region CONSTRUCTOR
   constructor(
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private toast: ToastService
   ) { }
   // #endregion
 
   // #region CICLO DE VIDA
-  /**
-   * Inicializa la vista cargando las estructuras de datos, el historial
-   * y configurando la fecha actual para el registro de loot.
-   */
   ngOnInit(): void {
     this.comprobarRol();
     this.cargarJugadores();
@@ -59,16 +57,9 @@ export class Loot implements OnInit {
   // #endregion
 
   // #region GETTERS DE FILTRADO
-  /** Devuelve las temporadas asociadas a la expansión seleccionada. */
   get temporadasFiltradas(): any[] { return this.temporadas.filter(t => t.codigoExpa == this.filtro.expansion); }
-
-  /** Devuelve las raids asociadas a la temporada seleccionada. */
   get raidsFiltradas(): any[] { return this.raids.filter(r => r.codigoTemporada == this.filtro.temporada); }
-
-  /** Devuelve los jefes asociados a la raid seleccionada. */
   get bossesFiltrados(): any[] { return this.bosses.filter(b => b.codigoRaid == this.filtro.raid); }
-
-  /** Devuelve los ítems asociados al jefe seleccionado. */
   get itemsFiltrados(): any[] {
     return this.items
       .filter(i => i.codigoBoss == this.filtro.boss)
@@ -77,10 +68,6 @@ export class Loot implements OnInit {
   // #endregion
 
   // #region SERVICIOS Y SEGURIDAD
-  /**
-   * Genera las cabeceras HTTP de autorización estándar.
-   * @private
-   */
   private getHeaders(): HttpHeaders {
     return new HttpHeaders({
       'Authorization': `Bearer ${localStorage.getItem('token')}`,
@@ -88,9 +75,6 @@ export class Loot implements OnInit {
     });
   }
 
-  /**
-   * Comprueba si el usuario tiene privilegios de administrador.
-   */
   comprobarRol(): void {
     this.http.get<any>('http://192.168.1.130:8000/api/user', { headers: this.getHeaders() })
       .subscribe({
@@ -104,9 +88,6 @@ export class Loot implements OnInit {
   // #endregion
 
   // #region CARGA DE DATOS
-  /**
-   * Obtiene la estructura jerárquica de contenido (Expansiones, Temporadas, Raids, Bosses, Items).
-   */
   cargarEstructura(): void {
     this.http.get<any>('http://192.168.1.130:8000/api/loot/estructura', { headers: this.getHeaders() })
       .subscribe({
@@ -125,9 +106,6 @@ export class Loot implements OnInit {
       });
   }
 
-  /**
-   * Carga el catálogo de jugadores disponibles.
-   */
   cargarJugadores(): void {
     this.http.get<any[]>('http://192.168.1.130:8000/api/aux-personajes', { headers: this.getHeaders() })
       .subscribe({
@@ -139,9 +117,6 @@ export class Loot implements OnInit {
       });
   }
 
-  /**
-   * Obtiene el historial de registros de loot desde el backend.
-   */
   cargarHistorial(): void {
     this.cargando = true;
     this.http.get<any[]>('http://192.168.1.130:8000/api/loot', { headers: this.getHeaders() })
@@ -160,12 +135,9 @@ export class Loot implements OnInit {
   // #endregion
 
   // #region LÓGICA DE REGISTRO
-  /**
-   * Valida y registra un nuevo ítem de loot en la base de datos.
-   */
   registrarLoot(): void {
     if (!this.filtro.item || !this.nuevoLoot.codigoPersonaje) {
-      alert('Selecciona un ítem y un jugador.');
+      this.toast.showError('Selecciona un ítem y un jugador.');
       return;
     }
 
@@ -180,14 +152,14 @@ export class Loot implements OnInit {
     this.http.post('http://192.168.1.130:8000/api/loot/add', payload, { headers: this.getHeaders() })
       .subscribe({
         next: () => {
-          alert('Loot registrado correctamente');
+          this.toast.showSuccess('¡Botín asignado y registrado correctamente!');
           this.filtro.item = '';
           this.cargarHistorial();
           this.procesando = false;
           this.cdr.detectChanges();
         },
         error: () => {
-          alert('Error al registrar el loot.');
+          this.toast.showError('Error al registrar el botín en la base de datos.');
           this.procesando = false;
           this.cdr.detectChanges();
         }

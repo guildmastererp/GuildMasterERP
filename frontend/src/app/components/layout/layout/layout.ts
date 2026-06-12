@@ -77,12 +77,33 @@ export class Layout implements OnInit {
     ).subscribe((event: any) => {
       this.rutaActiva = event.urlAfterRedirects;
 
-      // Si navegamos a una ruta hija y la pestaña no existe, la creamos (ej. acceso directo por URL)
-      if (this.rutaActiva !== '/principal') {
+      // Limpiamos cualquier pestaña fantasma que intente colarse
+      this.pestanasAbiertas = this.pestanasAbiertas.filter(
+        p => p.ruta !== '/login' && p.ruta !== '/principal' && p.ruta !== '/'
+      );
+
+      // Solo intentamos abrir pestaña si es una ruta válida
+      if (this.rutaActiva !== '/principal' && this.rutaActiva !== '/login' && this.rutaActiva !== '/') {
         const existe = this.pestanasAbiertas.find(p => p.ruta === this.rutaActiva);
         if (!existe) {
-          this.abrirPestanaDesdeUrl(this.rutaActiva);
+          // Buscar el item en los menús para añadirlo automáticamente
+          let itemEncontrado = null;
+          for (const categoria of this.objectKeys(this.menus)) {
+            const item = this.menus[categoria].find((m: any) => m.ruta === this.rutaActiva);
+            if (item) {
+              itemEncontrado = item;
+              break;
+            }
+          }
+          if (itemEncontrado) {
+            this.pestanasAbiertas.push(itemEncontrado);
+          }
         }
+      }
+      
+      // Actualizamos el storage para mantenerlo limpio
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem('pestanasAbiertas', JSON.stringify(this.pestanasAbiertas));
       }
     });
 
@@ -126,17 +147,21 @@ export class Layout implements OnInit {
             }
           }
         },
-        error: (err) => console.error('Error al obtener el rol del usuario', err)
+        error: (err) => {
+          console.error('Error al obtener el rol del usuario', err);
+        }
       });
   }
   // #endregion
 
-  // #region NAVEGACIÓN Y PESTAÑAS
+  // #region NAVEGACIÓN
   abrirSeccion(item: any): void {
     const existe = this.pestanasAbiertas.find(p => p.ruta === item.ruta);
     if (!existe) {
       this.pestanasAbiertas.push(item);
-      this.guardarEstadoPestanas(); // Guardamos el estado
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        sessionStorage.setItem('pestanasAbiertas', JSON.stringify(this.pestanasAbiertas));
+      }
     }
     this.router.navigate([item.ruta]);
   }
@@ -150,7 +175,10 @@ export class Layout implements OnInit {
     event.preventDefault();
     
     this.pestanasAbiertas.splice(index, 1);
-    this.guardarEstadoPestanas(); // Guardamos el estado tras cerrar
+
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      sessionStorage.setItem('pestanasAbiertas', JSON.stringify(this.pestanasAbiertas));
+    }
 
     if (this.pestanasAbiertas.length === 0) {
       this.router.navigate(['/principal']);
@@ -159,69 +187,43 @@ export class Layout implements OnInit {
       this.router.navigate([ultimaPestana.ruta]);
     }
   }
-
-  /**
-   * Guarda el array de pestañas actuales en la memoria temporal del navegador.
-   * Esto sobrevive a los F5 (refrescar página).
-   */
-  private guardarEstadoPestanas(): void {
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      sessionStorage.setItem('pestanasAbiertas', JSON.stringify(this.pestanasAbiertas));
-    }
-  }
-
-  /**
-   * Crea una pestaña automáticamente si el usuario ingresa por URL directa
-   */
-  private abrirPestanaDesdeUrl(url: string): void {
-    let tabEncontrada = false;
-    for (const cat of this.objectKeys(this.menus)) {
-      const item = this.menus[cat].find((m: any) => url.includes(m.ruta));
-      if (item) {
-        this.pestanasAbiertas.push(item);
-        tabEncontrada = true;
-        break;
-      }
-    }
-    
-    // Fallback por si la ruta no está en el menú (ej. subrutas o edición)
-    if (!tabEncontrada) {
-      const partes = url.split('/');
-      const nombreAprox = partes[partes.length - 1];
-      this.pestanasAbiertas.push({
-        nombre: nombreAprox.charAt(0).toUpperCase() + nombreAprox.slice(1),
-        ruta: url,
-        icono: '/images/miniLogo.png'
-      });
-    }
-    this.guardarEstadoPestanas();
-  }
   // #endregion
 
   // #region SESIÓN Y UI
   entrarPantallaCompleta(): void {
     const elem = document.documentElement;
-    if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen().catch(err => {
+        console.warn('Error al intentar iniciar pantalla completa:', err);
+      });
+    }
   }
 
   salirPantallaCompleta(): void {
-    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(err => {
+        console.warn('Error al salir de pantalla completa:', err);
+      });
+    }
   }
 
-  abrirModalLogout(): void { this.mostrarModalLogout = true; }
-  cerrarModalLogout(): void { this.mostrarModalLogout = false; }
+  abrirModalLogout(): void {
+    this.mostrarModalLogout = true;
+  }
+
+  cerrarModalLogout(): void {
+    this.mostrarModalLogout = false;
+  }
 
   cerrarSesion(): void {
-    localStorage.removeItem('token');
+    this.mostrarModalLogout = false;
+    this.salirPantallaCompleta();
     
-    // Limpiamos las pestañas guardadas al salir
+    localStorage.removeItem('token');
     if (typeof window !== 'undefined' && window.sessionStorage) {
       sessionStorage.removeItem('pestanasAbiertas');
     }
-    
     this.pestanasAbiertas = [];
-    this.mostrarModalLogout = false;
-    this.salirPantallaCompleta();
     
     this.router.navigate(['/login']);
     this.toastService.showSuccess('Has cerrado sesión correctamente.');

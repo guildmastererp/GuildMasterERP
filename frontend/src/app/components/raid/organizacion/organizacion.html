@@ -79,7 +79,7 @@
           <div class="asistente-item" *ngFor="let jugador of rosterActual">
             
             <span class="icono-rol" *ngIf="jugador.funcion === 'Tanque'">🛡️</span>
-            <span class="icono-rol" *ngIf="jugador.funcion === 'Healer'">💚</span>
+            <span class="icono-rol" *ngIf="jugador.funcion === 'Healer' || jugador.funcion === 'Sanador'">💚</span>
             <span class="icono-rol" *ngIf="jugador.funcion === 'DPS'">⚔️</span>
             
             <div class="asistente-info">
